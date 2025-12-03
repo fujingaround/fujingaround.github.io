@@ -29,7 +29,7 @@
   
   /* --- SPOTLIGHT MODE OVERRIDES --- */
   body.spotlight-mode {
-      --bg: #050505; /* Deep dark background */
+      --bg: #050505; 
       --text: #ffffff;
   }
 
@@ -41,10 +41,11 @@
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     overflow-x: hidden;
     width: 100vw;
-    transition: background 0.5s ease, color 0.5s ease;
+    /* This flex setup is crucial for the footer positioning */
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    transition: background 0.5s ease, color 0.5s ease;
   }
 
   /* --- INTRO SCREEN --- */
@@ -74,7 +75,7 @@
     padding: 4rem 1rem 2rem;
     position: relative;
     flex-shrink: 0;
-    z-index: 5; /* Ensure header sits above the light background */
+    z-index: 10;
   }
   h1 {
     font-size: 3rem;
@@ -125,7 +126,8 @@
     padding: 40px;
     max-width: 1000px; 
     margin: 0 auto;
-    flex-grow: 1;
+    /* Pushes footer to bottom */
+    flex-grow: 1; 
   }
 
   .menu-item {
@@ -177,6 +179,7 @@
     text-align: center;
   }
 
+  /* --- PRINTS BUTTON --- */
   .menu-item.prints-btn {
     aspect-ratio: auto;
     height: auto;
@@ -214,18 +217,22 @@
     margin-bottom: 15px;
   }
 
-  /* --- FIXED FOOTER CONTAINER (Restored to Fixed) --- */
+  /* --- FOOTER (SCROLL TO SEE) --- */
   #footer-container {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    z-index: 9999; 
+    position: relative; /* Not fixed */
+    width: 100%;
+    /* Large top padding separates it from photos */
+    padding: 80px 40px 40px 40px; 
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: var(--text);
     opacity: 0.7;
     font-size: 0.8rem;
     line-height: 1.5;
-    pointer-events: none; 
+    text-align: left; 
+    /* This keeps it at the bottom of the page content */
+    margin-top: auto; 
+    box-sizing: border-box;
+    z-index: 10;
   }
   
   #gear-info { font-weight: 300; }
@@ -237,7 +244,7 @@
     padding: 20px;
     max-width: 1600px;
     margin: 0 auto;
-    flex-grow: 1;
+    flex-grow: 1; /* Expands to fill space */
   }
   .grid {
     column-count: 3;
@@ -281,7 +288,7 @@
     gap: 20px;
     width: 100%;
     position: relative;
-    z-index: 2;
+    z-index: 5;
   }
 
   .vertical-center-column {
@@ -313,63 +320,50 @@
     align-items: center;
   }
   
-  /* --- SEAMLESS LIGHT SOURCE --- */
-  /* Instead of a local beam, we create a global overlay for the entire room */
+  /* --- ROOM SCALE LIGHTING (No Cutoffs) --- */
+  
+  /* 1. The Room Cone (Global) */
   body.spotlight-mode::before {
       content: '';
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      /* Radial gradient starting from Top Center (50% 0%).
-         Starts with warm light, fades to transparent.
-         Covers the whole screen, so no cutoffs/lines.
-      */
+      /* Gradient originates from top center of SCREEN */
       background: radial-gradient(
-          circle at 50% 0%, 
-          rgba(255, 255, 245, 0.3) 0%, 
-          rgba(255, 255, 245, 0.1) 40%, 
+          ellipse at 50% 0%, 
+          rgba(255, 255, 245, 0.25) 0%, 
+          rgba(255, 255, 245, 0.05) 50%, 
           rgba(0,0,0,0) 80%
       );
       pointer-events: none;
-      z-index: 1; /* Sits above bg, below content */
+      z-index: 1;
       mix-blend-mode: screen;
   }
   
-  /* The "Halo" around the picture (Soft Glow) */
-  .framed-photo-wrapper::after {
+  /* 2. The Center Halo (Global) */
+  body.spotlight-mode::after {
       content: '';
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 140%; height: 140%;
-      /* Soft warm glow centered on image */
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      /* Soft glow centered on the viewport */
       background: radial-gradient(
-          circle, 
-          rgba(255, 255, 245, 0.2) 0%, 
-          rgba(255, 255, 240, 0.05) 60%, 
-          rgba(0,0,0,0) 80%
+          circle at 50% 50%, 
+          rgba(255, 255, 245, 0.15) 0%, 
+          rgba(255, 255, 240, 0.05) 40%, 
+          rgba(0,0,0,0) 70%
       );
-      opacity: 0;
       pointer-events: none;
-      transition: opacity 0.5s ease;
       z-index: 1;
+      mix-blend-mode: screen;
   }
-  body.spotlight-mode .framed-photo-wrapper::after { opacity: 1; }
   
-  /* FRAME LIGHTING PHYSICS */
+  /* 3. Shadow Physics on Frame */
   body.spotlight-mode .framed-photo {
       box-shadow: 
-        /* 1. Sharp Top Edge Rim Light (The lamp hitting the top of frame) */
-        0 -2px 3px rgba(255,255,255,0.9), 
-        /* 2. Soft Upper Glow */
-        0 -10px 20px rgba(255,255,255,0.1),
-        /* 3. Deep Drop Shadow (Cast downwards) */
-        0 60px 100px rgba(0,0,0,1),       
-        /* 4. Closer Ambient Shadow */
+        0 -2px 5px rgba(255,255,255,0.7), /* Top Rim */
+        0 80px 120px rgba(0,0,0,1),       /* Deep Shadow */
         0 30px 50px rgba(0,0,0,0.9) !important;
       
-      /* Moderate brightness boost to stand out */
       filter: brightness(1.2) contrast(1.1);
-      
       position: relative;
       z-index: 10;
   }
@@ -491,7 +485,7 @@
   }
 
 
-  /* --- LIGHT SWITCH CSS (FIXED) --- */
+  /* --- LIGHT SWITCH CSS --- */
   .light-switch-container {
       position: fixed;
       top: 50%;
@@ -557,7 +551,7 @@
     .menu-item h3 { font-size: 2.5rem; }
 
     #footer-container { 
-        bottom: 10px; left: 10px;
+        padding: 40px 20px;
         font-size: 0.65rem;
     }
     
@@ -595,11 +589,6 @@
       <h3>Prints</h3>
       <p>Visualize frames</p>
     </div>
-  </div>
-
-  <div id="footer-container">
-      <div id="gear-info">Fujifilm X-T3 with the Fujinon XF 18-55mm f/2.8-4</div>
-      <div id="copyright-info">© 2025, Alexander Smith, All rights reserved.</div>
   </div>
 
   <div id="gallery-view">
@@ -645,6 +634,11 @@
       <img id="lightbox-img" src="">
       <div class="watermark"><span>fujingaround</span></div>
     </div>
+  </div>
+
+  <div id="footer-container">
+      <div id="gear-info">Fujifilm X-T3 with the Fujinon XF 18-55mm f/2.8-4</div>
+      <div id="copyright-info">© 2025, Alexander Smith, All rights reserved.</div>
   </div>
 
   <div class="footer-controls">
@@ -761,7 +755,6 @@ function openTrip(index) {
   });
 
   menuView.style.display = "none";
-  footerContainer.style.display = "block"; // Keep fixed footer
   galleryView.style.display = "block";
   backBtn.style.display = "block"; 
   window.scrollTo(0, 0);
