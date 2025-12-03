@@ -383,7 +383,7 @@
   }
 
 
-  /* --- LIGHTING PHYSICS (SEAMLESS) --- */
+  /* --- LIGHTING PHYSICS (SEAMLESS & BRIGHTER BACKLIGHT) --- */
   
   .framed-photo-wrapper {
     position: relative;
@@ -395,13 +395,11 @@
     align-items: center;
   }
   
-  /* 1. The Light Cone (Fixed to VIEWPORT, not image) */
-  /* This prevents lines because it covers the whole screen evenly */
+  /* 1. The Light Cone (Fixed to VIEWPORT) */
   body.spotlight-mode::before {
       content: '';
       position: fixed;
       inset: 0;
-      /* Conical beam from top center */
       background: radial-gradient(
           circle at 50% -20%, 
           rgba(255, 255, 250, 0.15) 0%, 
@@ -415,20 +413,19 @@
       transition: opacity 0.8s ease;
   }
   
-  /* 2. The Wall Halo (Fixed to VIEWPORT Center) */
-  /* This creates the glow behind the artwork, but fixed to center of screen */
+  /* 2. The Wall Halo (Fixed to VIEWPORT Center) - INCREASED BRIGHTNESS */
   body.spotlight-mode::after {
       content: '';
       position: fixed;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       width: 100vw; height: 100vh;
-      /* Soft warm glow centered on screen */
+      /* Increased opacity values for brighter glow behind image */
       background: radial-gradient(
           circle at 50% 50%,
-          rgba(255, 255, 255, 0.12) 0%, 
-          rgba(255, 255, 255, 0.05) 25%, 
-          rgba(0,0,0,0) 60%
+          rgba(255, 255, 255, 0.25) 0%, 
+          rgba(255, 255, 255, 0.10) 30%, 
+          rgba(0,0,0,0) 65%
       );
       pointer-events: none;
       z-index: 1;
@@ -437,12 +434,12 @@
       transition: opacity 0.8s ease;
   }
   
-  /* 3. The Lit Frame (Pop without washing out) */
+  /* 3. The Lit Frame (Sharper Rim Light) */
   body.spotlight-mode .framed-photo {
       box-shadow: 
-        /* Top Rim Light (Brighter) */
-        0 -2px 4px rgba(255,255,255,0.9), 
-        /* Deep Drop Shadow (Cast Downwards) */
+        /* Top Rim Light (Brighter/Sharper) */
+        0 -2px 6px rgba(255,255,255,1.0), 
+        /* Deep Drop Shadow */
         0 60px 100px rgba(0,0,0,1),
         /* Ambient Occlusion */
         0 20px 40px rgba(0,0,0,0.9) !important;
