@@ -310,7 +310,7 @@
   .nav-arrow:hover { opacity: 1; transform: scale(1.1); }
   .nav-arrow-vert { font-size: 2.5rem; }
 
-  /* --- LIGHT SWITCH (FIXED RIGHT) --- */
+  /* --- LIGHT SWITCH (FIXED RIGHT DESKTOP) --- */
   .light-switch-container {
       position: fixed;
       top: 50%;
@@ -383,7 +383,7 @@
   }
 
 
-  /* --- LIGHTING PHYSICS (SEAMLESS & BRIGHTER BACKLIGHT) --- */
+  /* --- LIGHTING PHYSICS --- */
   
   .framed-photo-wrapper {
     position: relative;
@@ -413,14 +413,13 @@
       transition: opacity 0.8s ease;
   }
   
-  /* 2. The Wall Halo (Fixed to VIEWPORT Center) - INCREASED BRIGHTNESS */
+  /* 2. The Wall Halo (Fixed to VIEWPORT Center) - BRIGHTER */
   body.spotlight-mode::after {
       content: '';
       position: fixed;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       width: 100vw; height: 100vh;
-      /* Increased opacity values for brighter glow behind image */
       background: radial-gradient(
           circle at 50% 50%,
           rgba(255, 255, 255, 0.25) 0%, 
@@ -581,10 +580,11 @@
       
       /* Mobile: Switch at top right */
       .light-switch-container { 
-          top: 150px; 
-          right: 10px; 
-          transform: scale(0.8); 
+          top: 110px; /* Safely under header */
+          right: 5px; 
+          transform: scale(0.75); /* Smaller but visible */
       }
+      .click-me-text { font-size: 10px; }
   }
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
@@ -606,8 +606,6 @@
     .visualizer-main-wrapper { flex-wrap: wrap; }
     .nav-arrow-horiz { order: 2; }
     .vertical-center-column { order: 1; width: 100%; gap: 10px; }
-    
-    .light-switch-container { top: 100px; right: 10px; transform: scale(0.7); }
   }
 </style>
 </head>
@@ -717,7 +715,7 @@ const trips = [
       "MNE21.JPG", "MNE22.JPG", "MNE23.JPG", "MNE24.JPG", "MNE25.JPG",
       "MNE26.JPG", "MNE27.JPG", "MNE28.JPG", "MNE29.JPG", "MNE30.JPG",
       "MNE31.JPG", "MNE32.JPG", "MNE33.JPG", "MNE34.JPG", "MNE35.JPG",
-      "MNE36.JPG"
+      "MNE36.JPG", "MNE37.JPG"
     ]
   },
   {
