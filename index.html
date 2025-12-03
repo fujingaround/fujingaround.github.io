@@ -29,8 +29,18 @@
   
   /* --- SPOTLIGHT MODE OVERRIDES --- */
   body.spotlight-mode {
-      --bg: #050505; /* Deep matte black */
-      --text: #aaaaaa; /* Dimmed text */
+      --bg: #020202; /* Pitch black room */
+      --text: #555555; /* Dimmed text */
+  }
+
+  /* Hide arrows and distracting UI in spotlight mode */
+  body.spotlight-mode .nav-arrow,
+  body.spotlight-mode .buy-section,
+  body.spotlight-mode header,
+  body.spotlight-mode #footer-container {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
   }
 
   body {
@@ -41,7 +51,6 @@
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     overflow-x: hidden;
     width: 100vw;
-    /* Flex column ensures footer stays at bottom */
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -76,17 +85,14 @@
     position: relative;
     flex-shrink: 0;
     z-index: 10;
+    transition: opacity 0.5s;
   }
   h1 {
     font-size: 3rem;
     margin: 0 0 10px 0;
     letter-spacing: -0.05em;
     font-weight: 700;
-    transition: color 0.5s;
   }
-  /* In spotlight mode, dim the header so it doesn't distract */
-  body.spotlight-mode h1 { color: #333; }
-  
   .social-link {
     display: inline-block;
     color: var(--text);
@@ -97,12 +103,11 @@
     padding: 8px 16px;
     margin-top: 10px;
     text-transform: uppercase;
-    transition: background 0.2s, opacity 0.5s;
+    transition: background 0.2s;
   }
   .social-link:hover {
     background: var(--btn-hover);
   }
-  body.spotlight-mode .social-link { opacity: 0.2; border-color: #444; }
 
   /* --- BACK BUTTON --- */
   #back-btn {
@@ -117,10 +122,11 @@
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 1px;
-    transition: background 0.2s, opacity 0.5s;
+    transition: background 0.2s;
   }
-  #back-btn:hover { background: var(--btn-hover); }
-  body.spotlight-mode #back-btn { opacity: 0.3; border-color: #444; }
+  #back-btn:hover {
+    background: var(--btn-hover);
+  }
 
   /* --- MENU VIEW --- */
   #menu-view {
@@ -130,7 +136,7 @@
     padding: 40px;
     max-width: 1000px; 
     margin: 0 auto;
-    flex-grow: 1; /* Pushes footer down */
+    flex-grow: 1;
   }
 
   .menu-item {
@@ -221,18 +227,17 @@
   #footer-container {
     position: relative; 
     width: 100%;
-    /* Extra padding top ensures it feels separated */
-    padding: 100px 40px 40px 40px; 
+    padding: 80px 40px 40px 40px; 
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: var(--text);
     opacity: 0.7;
     font-size: 0.8rem;
     line-height: 1.5;
     text-align: left; 
-    /* This pushes it to the bottom */
     margin-top: auto; 
     box-sizing: border-box;
     z-index: 10;
+    transition: opacity 0.5s;
   }
   
   #gear-info { font-weight: 300; }
@@ -273,7 +278,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 60vh;
+    min-height: 70vh; /* Ensure tall enough for vertical centering */
     padding: 20px;
     position: relative;
     flex-grow: 1;
@@ -286,7 +291,7 @@
     gap: 20px;
     width: 100%;
     position: relative;
-    z-index: 5; /* Above the light beams */
+    z-index: 5;
   }
 
   .vertical-center-column {
@@ -301,16 +306,70 @@
     cursor: pointer;
     user-select: none;
     opacity: 0.4;
-    transition: opacity 0.2s, transform 0.2s;
+    transition: opacity 0.5s; /* Smooth fade out */
     padding: 10px;
     line-height: 1;
   }
   .nav-arrow:hover { opacity: 1; transform: scale(1.1); }
   .nav-arrow-vert { font-size: 2.5rem; }
 
+  /* --- LIGHT SWITCH (Positioned relative to the image) --- */
+  .light-switch-container {
+      position: absolute;
+      top: 50%;
+      right: -100px; /* Sits to the right of the frame */
+      transform: translateY(-50%);
+      z-index: 50; /* Above shadows */
+      display: block; 
+  }
+
+  .light-switch-plate {
+      width: 60px;
+      height: 100px;
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      box-shadow: 
+          inset 0 1px 3px rgba(255,255,255,0.8),
+          0 4px 8px rgba(0,0,0,0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid #999;
+  }
+
+  .light-switch-toggle {
+      width: 25px;
+      height: 50px;
+      background-color: #f0f0f0;
+      border: 1px solid #d0d0d0;
+      cursor: pointer;
+      box-shadow: 
+          inset 0 -6px 4px -4px rgba(0,0,0,0.3),
+          0 4px 4px rgba(0,0,0,0.1);
+      transition: all 0.2s ease-in-out;
+      transform: perspective(300px) rotateX(-20deg); 
+  }
+
+  body.spotlight-mode .light-switch-toggle {
+      transform: perspective(300px) rotateX(20deg);
+      background-color: #fafafa;
+      box-shadow: 
+          inset 0 6px 4px -4px rgba(255, 255, 220, 0.6),
+          0 -4px 4px rgba(0,0,0,0.1);
+  }
+  /* Give the switch itself a little glow so you can find it in the dark */
+  body.spotlight-mode .light-switch-plate {
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1); 
+      border-color: #444;
+      background-color: #333;
+  }
+
+
+  /* --- LIGHTING PHYSICS --- */
+  
   .framed-photo-wrapper {
     position: relative;
-    max-width: 75vw; 
+    max-width: 70vw; 
     max-height: 60vh;
     transition: all 0.5s ease;
     display: flex;
@@ -318,64 +377,39 @@
     align-items: center;
   }
   
-  /* --- LIGHTING PHYSICS (NO CUTOFFS) --- */
-  
-  /* 1. The Light Source (Fixed to Screen, Not Image) */
-  /* This prevents lines because it doesn't move with the image div */
+  /* 1. The Light Cone (Fixed to Screen Top) */
   body.spotlight-mode::before {
       content: '';
       position: fixed;
-      inset: 0;
-      /* A conical beam from the top-center of the screen */
+      top: 0; left: 0; right: 0; bottom: 0;
+      /* Soft conical gradient from top center */
       background: radial-gradient(
-          circle at 50% -20%, /* Starts above the screen */
-          rgba(255, 255, 250, 0.15) 0%, /* Very subtle warm center */
-          rgba(255, 255, 250, 0.02) 50%, /* Fades gently */
-          rgba(0,0,0,0) 80% /* Transparent at edges */
+          ellipse at 50% 0%, 
+          rgba(255, 255, 250, 0.15) 0%, 
+          rgba(255, 255, 250, 0.05) 40%, 
+          rgba(0,0,0,0) 80%
       );
       pointer-events: none;
       z-index: 1; 
-      opacity: 1;
-      transition: opacity 0.8s ease;
+      mix-blend-mode: screen;
   }
   
-  /* 2. The Wall Reflection (Behind Image) */
-  .framed-photo-wrapper::after {
-      content: '';
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 150%; height: 150%;
-      /* A soft glow BEHIND the frame to separate it from the darkness */
-      background: radial-gradient(
-          circle, 
-          rgba(255, 255, 255, 0.08) 0%, 
-          rgba(0,0,0,0) 70%
-      );
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.8s ease;
-      z-index: 1;
-  }
-  body.spotlight-mode .framed-photo-wrapper::after { opacity: 1; }
-  
-  /* 3. The Lit Frame (Pop without washing out) */
+  /* 2. The Lit Frame (Pop + Edge Light) */
   body.spotlight-mode .framed-photo {
       box-shadow: 
-        /* Top Rim Light (Sharp) */
-        0 -1px 1px rgba(255,255,255,0.6), 
+        /* Top Rim Light (Simulates light hitting top edge) */
+        0 -1px 4px rgba(255,255,255, 0.8), 
         /* Deep Drop Shadow (Cast Downwards) */
-        0 30px 60px rgba(0,0,0,0.8),
-        /* Ambient Occlusion */
-        0 10px 20px rgba(0,0,0,0.9) !important;
+        0 50px 80px rgba(0,0,0, 1),
+        /* Close Ambient Shadow */
+        0 20px 30px rgba(0,0,0, 0.8) !important;
       
-      /* Subtle boost, not blown out */
-      filter: brightness(1.05) contrast(1.02);
+      /* Keep brightness natural (1.0), just slightly more contrast */
+      filter: brightness(1.0) contrast(1.05);
       
       position: relative;
       z-index: 10;
   }
-
 
   .framed-photo {
     max-width: 100%;
@@ -393,7 +427,11 @@
     font-size: 0.9rem;
     opacity: 0.7;
     line-height: 1.6;
+    transition: opacity 0.5s;
   }
+  /* Hide text controls in spotlight mode */
+  body.spotlight-mode .visualizer-controls { opacity: 0; }
+  
   .visualizer-controls span {
     display: inline-block;
     margin: 0 10px;
@@ -411,6 +449,7 @@
     padding-top: 20px;
     width: 100%;
     max-width: 400px;
+    transition: opacity 0.5s;
   }
   .photo-id { font-size: 0.8rem; margin-bottom: 10px; display: block; font-weight: bold; }
   .buy-btn {
@@ -493,64 +532,17 @@
   }
 
 
-  /* --- LIGHT SWITCH CSS --- */
-  .light-switch-container {
-      position: fixed;
-      top: 50%;
-      right: 50px; 
-      transform: translateY(-50%);
-      z-index: 500;
-      display: none; 
-  }
-
-  .light-switch-plate {
-      width: 70px;
-      height: 120px;
-      background-color: #e0e0e0;
-      border-radius: 6px;
-      box-shadow: 
-          inset 0 1px 3px rgba(255,255,255,0.8),
-          inset 0 -2px 5px rgba(0,0,0,0.1),
-          0 4px 8px rgba(0,0,0,0.2);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border: 2px solid #c0c0c0;
-  }
-
-  .light-switch-toggle {
-      width: 30px;
-      height: 60px;
-      background-color: #f0f0f0;
-      border: 1px solid #d0d0d0;
-      position: relative;
-      cursor: pointer;
-      box-shadow: 
-          inset 0 -6px 4px -4px rgba(0,0,0,0.3),
-          0 4px 4px rgba(0,0,0,0.1);
-      transition: all 0.2s ease-in-out;
-      transform: perspective(300px) rotateX(-20deg); 
-  }
-
-  body.spotlight-mode .light-switch-toggle {
-      transform: perspective(300px) rotateX(20deg);
-      background-color: #fafafa;
-      box-shadow: 
-          inset 0 6px 4px -4px rgba(255, 255, 220, 0.6),
-          0 -4px 4px rgba(0,0,0,0.1);
-  }
-  
-  body.spotlight-mode .light-switch-plate {
-       box-shadow: 0 0 15px rgba(255, 255, 220, 0.3);
-  }
-
-
-
   /* --- MOBILE --- */
   @media (max-width: 900px) {
       .grid { column-count: 2; }
       #menu-view { grid-template-columns: 1fr; }
-      .light-switch-container { right: 10px; transform: translateY(-50%) scale(0.8); }
+      
+      /* Move switch below photo on mobile */
+      .light-switch-container { 
+          position: static; 
+          margin: 20px auto; 
+          transform: none; 
+      }
   }
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
@@ -572,8 +564,6 @@
     .visualizer-main-wrapper { flex-wrap: wrap; }
     .nav-arrow-horiz { order: 2; }
     .vertical-center-column { order: 1; width: 100%; gap: 10px; }
-    
-    .light-switch-container { top: 100px; right: 20px; transform: scale(0.7); }
   }
 </style>
 </head>
@@ -605,19 +595,21 @@
 
   <div id="prints-view">
     
-    <div class="light-switch-container" id="spotlight-switch">
-        <div class="light-switch-plate">
-            <div class="light-switch-toggle"></div>
-        </div>
-    </div>
-
     <div class="visualizer-main-wrapper">
       <div class="nav-arrow nav-arrow-horiz" onclick="changeImage(-1)">❮</div>
       <div class="vertical-center-column">
           <div class="nav-arrow nav-arrow-vert" onclick="changeFrame(1)">▲</div>
+          
           <div class="framed-photo-wrapper">
             <img id="visualizer-img" class="framed-photo frame-matte" src="" alt="Print Preview">
+            
+            <div class="light-switch-container" id="spotlight-switch">
+                <div class="light-switch-plate">
+                    <div class="light-switch-toggle"></div>
+                </div>
+            </div>
           </div>
+          
           <div class="nav-arrow nav-arrow-vert" onclick="changeFrame(-1)">▼</div>
       </div>
       <div class="nav-arrow nav-arrow-horiz" onclick="changeImage(1)">❯</div>
@@ -763,7 +755,6 @@ function openTrip(index) {
   });
 
   menuView.style.display = "none";
-  // Footer is managed by flow
   galleryView.style.display = "block";
   backBtn.style.display = "block"; 
   window.scrollTo(0, 0);
@@ -784,7 +775,6 @@ function openPrints() {
   printsView.style.display = "flex";
   backBtn.style.display = "block";
   
-  spotlightSwitch.style.display = "block"; 
   toggleDarkBtn.style.display = "none"; 
   
   if (visualizerImg.getAttribute("src") === "") {
@@ -798,7 +788,6 @@ function showMenu() {
   printsView.style.display = "none";
   backBtn.style.display = "none";
   
-  spotlightSwitch.style.display = "none"; 
   toggleDarkBtn.style.display = "block"; 
   
   menuView.style.display = "grid"; 
