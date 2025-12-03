@@ -36,7 +36,7 @@
     align-items: center;
     z-index: 1000;
     transition: opacity 1s ease;
-    cursor: pointer; /* Shows user they can click to enter */
+    cursor: pointer; 
   }
   #intro h1 {
     font-size: 12vw;
@@ -45,7 +45,7 @@
     color: #ffffff;
     background: none;
     padding: 2rem 4rem;
-    pointer-events: none; /* Let clicks pass through to container */
+    pointer-events: none; 
   }
 
   /* Header & Nav */
@@ -118,28 +118,34 @@
     font-weight: 300; 
   }
 
-  /* GALLERY VIEW (Grid) */
+  /* GALLERY VIEW (Masonry Layout) */
   #gallery-view {
     display: none; 
+    padding: 40px; 
+    box-sizing: border-box;
   }
 
   .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    gap: 30px; 
-    padding: 40px; 
+    /* MASONRY MAGIC: This creates columns instead of rows */
+    column-count: 3; 
+    column-gap: 30px; 
     width: 100%;
-    box-sizing: border-box;
   }
   
   .cell {
+    /* Prevents an image from being split between two columns */
+    break-inside: avoid; 
+    margin-bottom: 30px; /* Space below each image */
     position: relative;
     overflow: hidden;
+    display: inline-block; /* Helps with column layout */
+    width: 100%;
   }
   
   .cell img {
     width: 100%;
     display: block;
+    height: auto; /* Maintains original aspect ratio */
   }
 
   /* Dark mode toggle */
@@ -160,10 +166,14 @@
   }
 
   /* Mobile adjustments */
+  @media (max-width: 900px) {
+    .grid { column-count: 2; } /* 2 columns on tablets */
+  }
+
   @media (max-width: 600px) {
     h1 { font-size: 2.3rem; }
     h2 a { font-size: 1rem; }
-    .grid { grid-template-columns: 1fr; } 
+    .grid { column-count: 1; } /* 1 column on phones */
     .menu-item h3 { font-size: 1.5rem; }
   }
 </style>
@@ -214,43 +224,14 @@ const trips = [
     title: "Balkans, 2025",
     subtitle: "Montenegro & Bosnia",
     images: [
-      "MNE1.JPG",
-      "MNE2.JPG",
-      "MNE3.JPG",
-      "MNE4.JPG",
-      "MNE5.JPG",
-      "MNE6.JPG",
-      "MNE7.JPG",
-      "MNE8.JPG",
-      "MNE9.JPG",
-      "MNE10.JPG",
-      "MNE11.JPG",
-      "MNE12.JPG",
-      "MNE13.JPG",
-      "MNE14.JPG",
-      "MNE15.JPG",
-      "MNE16.JPG",
-      "MNE17.JPG",
-      "MNE18.JPG",
-      "MNE19.JPG",
-      "MNE20.JPG",
-      "MNE21.JPG",
-      "MNE22.JPG",
-      "MNE23.JPG",
-      "MNE24.JPG",
-      "MNE25.JPG",
-      "MNE26.JPG",
-      "MNE27.JPG",
-      "MNE28.JPG",
-      "MNE29.JPG",
-      "MNE30.JPG",
-      "MNE31.JPG",
-      "MNE32.JPG",
-      "MNE33.JPG",
-      "MNE34.JPG",
-      "MNE35.JPG",
-      "MNE36.JPG",
-      "MNE37.JPG"
+      "MNE1.jpg", "MNE2.jpg", "MNE3.jpg", "MNE4.jpg", "MNE5.jpg",
+      "MNE6.jpg", "MNE7.jpg", "MNE8.jpg", "MNE9.jpg", "MNE10.jpg",
+      "MNE11.jpg", "MNE12.jpg", "MNE13.jpg", "MNE14.jpg", "MNE15.jpg",
+      "MNE16.jpg", "MNE17.jpg", "MNE18.jpg", "MNE19.jpg", "MNE20.jpg",
+      "MNE21.jpg", "MNE22.jpg", "MNE23.jpg", "MNE24.jpg", "MNE25.jpg",
+      "MNE26.jpg", "MNE27.jpg", "MNE28.jpg", "MNE29.jpg", "MNE30.jpg",
+      "MNE31.jpg", "MNE32.jpg", "MNE33.jpg", "MNE34.jpg", "MNE35.jpg",
+      "MNE36.jpg", "MNE37.jpg"
     ]
   }
 ];
@@ -270,10 +251,10 @@ function dismissIntro() {
 }
 
 // Triggers to unlock the screen:
-window.addEventListener("scroll", dismissIntro);      // Standard scroll
-window.addEventListener("wheel", dismissIntro);       // Mouse wheel (even if no scrollbar)
-document.body.addEventListener("click", dismissIntro); // Click anywhere
-document.body.addEventListener("touchstart", dismissIntro); // Touch on mobile
+window.addEventListener("scroll", dismissIntro);      
+window.addEventListener("wheel", dismissIntro);       
+document.body.addEventListener("click", dismissIntro); 
+document.body.addEventListener("touchstart", dismissIntro);
 
 // ================================
 // App Logic (Menu vs Gallery)
@@ -285,13 +266,13 @@ const backBtn = document.getElementById("back-btn");
 
 // Initialize Menu
 function initMenu() {
-  menuView.innerHTML = ""; // Clear existing
+  menuView.innerHTML = ""; 
   trips.forEach((trip, index) => {
     const btn = document.createElement("div");
     btn.className = "menu-item";
     btn.innerHTML = `<h3>${trip.title}</h3><p>${trip.subtitle}</p>`;
     btn.onclick = (e) => {
-      e.stopPropagation(); // Prevent this click from triggering other things immediately
+      e.stopPropagation(); 
       openTrip(index);
     };
     menuView.appendChild(btn);
@@ -339,7 +320,7 @@ initMenu();
 // ================================
 const btn = document.getElementById("toggle-dark");
 btn.addEventListener("click", (e) => {
-  e.stopPropagation(); // Stop click from bubbling
+  e.stopPropagation(); 
   document.body.dataset.theme = document.body.dataset.theme === "dark" ? "light" : "dark";
 });
 </script>
