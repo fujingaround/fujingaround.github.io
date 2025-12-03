@@ -24,6 +24,14 @@
     --buy-btn-bg: #3cb371;
     --menu-item-overlay: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.9));
   }
+  
+  /* --- NEW: SPOTLIGHT MODE OVERRIDES --- */
+  /* When spotlight is active, force dark theme variables and smooth fade */
+  body.spotlight-mode {
+      --bg: #080808; /* Almost pure black for maximum contrast */
+      --text: #ffffff;
+  }
+
   body {
     margin: 0;
     padding: 0;
@@ -32,7 +40,8 @@
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     overflow-x: hidden;
     width: 100vw;
-    transition: background 0.3s, color 0.3s;
+    /* Increased transition time for smoother 0.5s fade */
+    transition: background 0.5s ease, color 0.5s ease;
   }
 
   /* --- INTRO SCREEN --- */
@@ -103,23 +112,21 @@
     background: var(--btn-hover);
   }
 
-  /* --- MENU VIEW (NEW GRID LAYOUT) --- */
+  /* --- MENU VIEW (GRID LAYOUT) --- */
   #menu-view {
     display: grid;
-    /* Auto-fill creates a 2x2 grid on standard screens, stacks on mobile */
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 30px;
     padding: 40px;
     max-width: 1200px;
-    margin: 0 auto 80px; /* Extra bottom margin for footer */
+    margin: 0 auto 80px;
   }
 
-  /* New Photo-Style Menu Items */
   .menu-item {
     width: 100%;
-    aspect-ratio: 3 / 2; /* Photo rectangle shape */
+    aspect-ratio: 3 / 2;
     display: flex;
-    align-items: flex-end; /* Align text to bottom */
+    align-items: flex-end;
     justify-content: flex-start;
     padding: 30px;
     border: none;
@@ -134,7 +141,6 @@
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
   }
 
-  /* Dark overlay so text pop */
   .menu-item::before {
     content: '';
     position: absolute;
@@ -149,7 +155,7 @@
   }
 
   .menu-item h3 {
-    position: relative; /* Stacks on top of overlay */
+    position: relative;
     color: #ffffff;
     font-size: 2rem;
     margin: 0;
@@ -159,9 +165,8 @@
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
 
-  /* Prints Button Special Style (keeps it distinct) */
   .menu-item.prints-btn {
-    aspect-ratio: auto; /* Reset aspect ratio */
+    aspect-ratio: auto;
     height: auto;
     min-height: 200px;
     background: var(--bg);
@@ -170,9 +175,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    grid-column: 1 / -1; /* Force it to span full width at bottom */
+    grid-column: 1 / -1;
   }
-  .menu-item.prints-btn::before { display: none; } /* No overlay on prints button */
+  .menu-item.prints-btn::before { display: none; }
   
   .menu-item.prints-btn h3 {
     color: var(--text);
@@ -241,7 +246,7 @@
     justify-content: center;
     min-height: 60vh;
     padding: 20px;
-    position: relative; /* For spotlight positioning */
+    position: relative;
   }
 
   .visualizer-main-wrapper {
@@ -251,7 +256,7 @@
     gap: 20px;
     width: 100%;
     position: relative;
-    z-index: 2; /* Ensure controls are above spotlight light */
+    z-index: 2;
   }
 
   .vertical-center-column {
@@ -277,25 +282,25 @@
     position: relative;
     max-width: 80vw;
     max-height: 60vh;
-    transition: all 0.5s ease; /* Slower transition for spotlight effect */
+    transition: all 0.5s ease;
     display: flex;
     justify-content: center;
     align-items: center;
   }
   
-  /* SPOTLIGHT MODE EFFECTS */
+  /* SPOTLIGHT MODE EFFECTS (UPDATED) */
   
-  /* 1. The Overhead Light Effect */
+  /* 1. The Overhead Light Effect (Stronger) */
   .framed-photo-wrapper::after {
       content: '';
       position: absolute;
-      top: -100%; /* Start way above */
+      top: -100%;
       left: 50%;
       transform: translateX(-50%);
       width: 150%;
       height: 150%;
-      /* A conical gradient to simulate a lamp */
-      background: radial-gradient(ellipse at bottom center, rgba(255, 255, 220, 0.4) 0%, rgba(255,255,255,0) 70%);
+      /* Increased opacity and brightness for a stronger light beam */
+      background: radial-gradient(ellipse at bottom center, rgba(255, 255, 245, 0.8) 0%, rgba(255,255,255,0) 60%);
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.5s ease;
@@ -306,13 +311,18 @@
       opacity: 1;
   }
   
-  /* 2. The Deep Shadow Effect */
-  /* We override the default frame shadows when in spotlight mode */
+  /* 2. The Deep Shadow AND Rim Light Effect */
   body.spotlight-mode .framed-photo {
-       /* Deep, downward-casting shadow */
-      box-shadow: 0 50px 80px rgba(0,0,0,0.7), 0 20px 30px rgba(0,0,0,0.5) !important;
-      /* Slight brighten effect on the frame itself from the light */
-      filter: brightness(1.05);
+       /* The first value (0 -2px 5px...) is a bright white "rim light" on the top edge.
+          The rest are deep, dark shadows cast downwards.
+       */
+      box-shadow: 
+        0 -3px 8px rgba(255,255,255,0.7), /* Bright top rim light */
+        0 60px 100px rgba(0,0,0,0.9),     /* Deep long shadow */
+        0 25px 40px rgba(0,0,0,0.8) !important; /* Closer soft shadow */
+      
+      /* Increased brightness to pop against dark bg */
+      filter: brightness(1.1) contrast(1.05);
   }
 
 
@@ -416,18 +426,18 @@
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 1px;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s, background 0.3s, color 0.3s;
   }
   
   .control-btn.spotlight-btn {
-      background: #d4af37; /* Gold color for spotlight btn */
+      background: #d4af37;
       color: #000;
-      display: none; /* Hidden by default, shown only in prints view */
+      display: none;
   }
-  /* Change appearance when active */
+  /* Change button appearance when active */
   body.spotlight-mode .control-btn.spotlight-btn {
       background: #fff;
-      box-shadow: 0 0 10px #d4af37;
+      box-shadow: 0 0 15px #d4af37;
   }
 
 
@@ -529,17 +539,17 @@
 const trips = [
   {
     title: "Summer 2024",
-    coverImage: "image1.jpeg", // <- Choose which image to display on menu
+    coverImage: "image1.jpeg", 
     images: ["image1.jpeg", "image2.jpg", "image3.jpg"]
   },
   {
     title: "Winter 2023",
-    coverImage: "image5.jpg", // <- Choose which image to display on menu
+    coverImage: "image5.jpg", 
     images: ["image4.jpg", "image5.jpg", "image6.jpg", "image7.jpg"]
   },
   {
     title: "Balkans, 2025",
-    coverImage: "MNE9.jpg", // <- Balkans trip set to MNE9.jpg
+    coverImage: "MNE9.JPG", 
     images: [
       "MNE1.JPG", "MNE2.JPG", "MNE3.JPG", "MNE4.JPG", "MNE5.JPG",
       "MNE6.JPG", "MNE7.JPG", "MNE8.JPG", "MNE9.JPG", "MNE10.JPG",
@@ -600,9 +610,7 @@ function initMenu() {
   trips.forEach((trip, index) => {
     const btn = document.createElement("div");
     btn.className = "menu-item";
-    // Use coverImage for background
     btn.style.backgroundImage = `url('${trip.coverImage}')`;
-    // Only title, no subtitle
     btn.innerHTML = `<h3>${trip.title}</h3>`;
     btn.onclick = (e) => {
       e.stopPropagation();
@@ -649,7 +657,7 @@ function openPrints() {
   galleryView.style.display = "none";
   printsView.style.display = "flex";
   backBtn.style.display = "block";
-  spotlightBtn.style.display = "block"; // Show spotlight btn
+  spotlightBtn.style.display = "block"; 
   
   if (visualizerImg.getAttribute("src") === "") {
     updateVisualizer();
@@ -661,12 +669,11 @@ function showMenu() {
   galleryView.style.display = "none";
   printsView.style.display = "none";
   backBtn.style.display = "none";
-  spotlightBtn.style.display = "none"; // Hide spotlight btn
-  menuView.style.display = "grid"; // Should be grid, not flex
+  spotlightBtn.style.display = "none"; 
+  menuView.style.display = "grid"; 
   gearInfo.style.display = "block";
   document.removeEventListener('keydown', handleKeyInput);
   
-  // Turn off spotlight when leaving prints view
   document.body.classList.remove('spotlight-mode');
   spotlightBtn.innerText = "Spotlight On";
 
