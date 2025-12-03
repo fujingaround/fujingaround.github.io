@@ -38,7 +38,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 2000; /* Higher than lightbox */
+    z-index: 2000; 
     transition: opacity 1s ease;
     cursor: pointer; 
   }
@@ -122,7 +122,7 @@
     font-weight: 300; 
   }
 
-  /* GALLERY VIEW (Masonry Layout) */
+  /* GALLERY VIEW */
   #gallery-view {
     display: none; 
     padding: 40px; 
@@ -135,7 +135,6 @@
     width: 100%;
   }
   
-  /* --- UPDATED CELL STYLES FOR FADE-IN --- */
   .cell {
     break-inside: avoid; 
     margin-bottom: 30px; 
@@ -143,32 +142,30 @@
     overflow: hidden;
     display: inline-block; 
     width: 100%;
-    background-color: var(--placeholder-bg); /* Gray background while loading */
-    cursor: zoom-in; /* Indicates clickable */
+    background-color: var(--placeholder-bg); 
+    cursor: zoom-in; 
+    min-height: 100px; /* Gives the grey box some height before image loads */
   }
   
   .cell img {
     width: 100%;
     display: block;
     height: auto;
-    opacity: 0; /* Start hidden */
-    transition: opacity 0.6s ease-out; /* Smooth fade */
+    opacity: 0; 
+    transition: opacity 0.6s ease-out; 
   }
 
-  /* JS adds this class when loaded */
   .cell img.loaded {
     opacity: 1;
   }
-  /* ------------------------------------ */
 
-
-  /* --- LIGHTBOX STYLES --- */
+  /* LIGHTBOX STYLES */
   #lightbox {
     position: fixed;
     inset: 0;
     background: var(--lightbox-bg);
-    backdrop-filter: blur(15px); /* The blur effect */
-    -webkit-backdrop-filter: blur(15px); /* Safari support */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -183,7 +180,6 @@
     pointer-events: auto;
   }
 
-  /* Wrapper for image and watermark */
   .lightbox-content {
     position: relative;
     max-width: 90vw;
@@ -197,29 +193,26 @@
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   }
 
-  /* The Watermark overlay */
   .watermark {
     position: absolute;
     inset: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    pointer-events: none; /* Let clicks pass through to close lightbox */
+    pointer-events: none; 
     overflow: hidden;
   }
 
   .watermark span {
     color: #ffffff;
-    font-size: 8vw; /* Large font size relative to viewport width */
+    font-size: 8vw; 
     font-weight: 900;
     text-transform: uppercase;
-    opacity: 0.3; /* 30% transparent */
-    transform: rotate(-30deg); /* Diagonal rotation */
+    opacity: 0.3; 
+    transform: rotate(-30deg); 
     user-select: none;
     white-space: nowrap;
   }
-  /* ----------------------- */
-
 
   /* Dark mode toggle */
   #toggle-dark {
@@ -238,10 +231,9 @@
     letter-spacing: 1px;
   }
 
-  /* Mobile adjustments */
   @media (max-width: 900px) {
     .grid { column-count: 2; } 
-    .watermark span { font-size: 12vw; } /* Larger watermark on mobile */
+    .watermark span { font-size: 12vw; } 
   }
 
   @media (max-width: 600px) {
@@ -284,8 +276,8 @@
 // ================================
 const trips = [
   {
-    title: "Work in Progress ",
-    subtitle: "bla bla bla",
+    title: "Summer 2024",
+    subtitle: "Tokyo & Kyoto",
     images: [
       "image1.jpeg",
       "image2.jpg",
@@ -293,8 +285,8 @@ const trips = [
     ]
   },
   {
-    title: "Work in Progress",
-    subtitle: "bla bla bla",
+    title: "Winter 2023",
+    subtitle: "New York City",
     images: [
       "image4.jpg",
       "image5.jpg",
@@ -347,7 +339,6 @@ const backBtn = document.getElementById("back-btn");
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightbox-img");
 
-// Initialize Menu
 function initMenu() {
   menuView.innerHTML = ""; 
   trips.forEach((trip, index) => {
@@ -362,7 +353,6 @@ function initMenu() {
   });
 }
 
-// Open a specific Trip (UPDATED FOR FADE-IN & LIGHTBOX)
 function openTrip(index) {
   const trip = trips[index];
   grid.innerHTML = "";
@@ -374,15 +364,25 @@ function openTrip(index) {
     const img = document.createElement("img");
     img.loading = "lazy"; 
     
-    // FADE-IN LOGIC
+    // *** THE FIX IS HERE ***
+    // 1. Define what happens when it loads
     img.onload = () => {
       img.classList.add('loaded');
     };
+    // 2. Also handle errors (hide the grey box if image is broken)
+    img.onerror = () => {
+      cell.style.display = 'none';
+    };
 
-    // LIGHTBOX CLICK LOGIC
-    cell.onclick = () => openLightbox(src);
-    
+    // 3. Set the source
     img.src = src;
+
+    // 4. CHECK IMMEDIATELY: Did it load instantly from cache?
+    if (img.complete) {
+       img.classList.add('loaded');
+    }
+
+    cell.onclick = () => openLightbox(src);
     cell.appendChild(img);
     grid.appendChild(cell);
   });
@@ -393,7 +393,6 @@ function openTrip(index) {
   window.scrollTo(0, 0);
 }
 
-// Go back to Menu
 function showMenu() {
   galleryView.style.display = "none";
   backBtn.style.display = "none";
@@ -401,27 +400,22 @@ function showMenu() {
   window.scrollTo(0, 0);
 }
 
-// LIGHTBOX FUNCTIONS
 function openLightbox(src) {
   lightboxImg.src = src;
   lightbox.classList.add('active');
-  document.body.style.overflow = 'hidden'; // Disable background scrolling
+  document.body.style.overflow = 'hidden'; 
 }
 
 function closeLightbox(event) {
-  // Only close if clicking the background wrapper, not the image itself
   if (event.target === lightbox || event.target.classList.contains('lightbox-content')) {
     lightbox.classList.remove('active');
-    document.body.style.overflow = ''; // Re-enable background scrolling
-    setTimeout(() => lightboxImg.src = "", 300); // Clear src after fade out
+    document.body.style.overflow = ''; 
+    setTimeout(() => lightboxImg.src = "", 300); 
   }
 }
 
-
-// Start app
 initMenu();
 
-// Dark mode toggle
 const btn = document.getElementById("toggle-dark");
 btn.addEventListener("click", (e) => {
   e.stopPropagation(); 
