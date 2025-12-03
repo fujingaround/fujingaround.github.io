@@ -29,7 +29,7 @@
   
   /* --- SPOTLIGHT MODE OVERRIDES --- */
   body.spotlight-mode {
-      --bg: #050505; /* Extremely dark for contrast */
+      --bg: #050505; 
       --text: #ffffff;
   }
 
@@ -42,6 +42,9 @@
     overflow-x: hidden;
     width: 100vw;
     transition: background 0.5s ease, color 0.5s ease;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
   }
 
   /* --- INTRO SCREEN --- */
@@ -70,6 +73,7 @@
     text-align: center;
     padding: 4rem 1rem 2rem;
     position: relative;
+    flex-shrink: 0;
   }
   h1 {
     font-size: 3rem;
@@ -112,14 +116,15 @@
     background: var(--btn-hover);
   }
 
-  /* --- MENU VIEW (GRID LAYOUT) --- */
+  /* --- MENU VIEW --- */
   #menu-view {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 30px;
     padding: 40px;
     max-width: 1000px; 
-    margin: 0 auto 100px; 
+    margin: 0 auto;
+    flex-grow: 1; /* Pushes footer down */
   }
 
   .menu-item {
@@ -171,7 +176,6 @@
     text-align: center;
   }
 
-  /* --- SMALLER CENTERED PRINTS BUTTON --- */
   .menu-item.prints-btn {
     aspect-ratio: auto;
     height: auto;
@@ -209,18 +213,21 @@
     margin-bottom: 15px;
   }
 
-  /* --- FIXED FOOTER CONTAINER (GLOBAL) --- */
+  /* --- SCROLLING FOOTER CONTAINER --- */
   #footer-container {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    z-index: 9999; /* Very high z-index to stay on top of everything */
+    /* No longer fixed position */
+    position: relative; 
+    width: 100%;
+    padding: 60px 40px 40px 40px; /* Top padding separates it from content */
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: var(--text);
     opacity: 0.7;
     font-size: 0.8rem;
     line-height: 1.5;
-    pointer-events: none; /* Allows clicking through if overlapping something clickable */
+    text-align: left; /* Keep left alignment */
+    margin-top: auto; /* Ensures it sits at bottom of flex container */
+    box-sizing: border-box;
+    z-index: 10;
   }
   
   #gear-info { font-weight: 300; }
@@ -232,6 +239,7 @@
     padding: 20px;
     max-width: 1600px;
     margin: 0 auto;
+    flex-grow: 1;
   }
   .grid {
     column-count: 3;
@@ -265,6 +273,7 @@
     min-height: 60vh;
     padding: 20px;
     position: relative;
+    flex-grow: 1;
   }
 
   .visualizer-main-wrapper {
@@ -306,57 +315,47 @@
     align-items: center;
   }
   
-  /* --- NEW SPOTLIGHT CONE --- */
-  /* This pseudo-element creates the visible beam from the top */
-  .framed-photo-wrapper::before {
-      content: '';
-      position: absolute;
-      /* Start high above the viewport */
-      top: -100vh; 
-      left: 50%;
-      transform: translateX(-50%);
-      /* Wide cone */
-      width: 100vw; 
-      height: 150vh; /* Long enough to reach the picture */
-      
-      /* A conical gradient masked to look like a beam */
-      background: radial-gradient(ellipse at 50% 100%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 60%);
-      /* Use clip path to shape it into a cone/trapezoid */
-      clip-path: polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%);
-      
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.5s ease;
-      z-index: 1;
-      mix-blend-mode: screen;
-  }
-
-  body.spotlight-mode .framed-photo-wrapper::before { opacity: 1; }
+  /* --- NEW "ROOM SCALE" SPOTLIGHT EFFECT --- */
   
-  /* This pseudo-element highlights the wall behind the picture (The Halo) */
+  /* This creates a giant light overlay on the entire screen, preventing cutoffs */
+  body.spotlight-mode::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      /* Giant cone originating from top center of SCREEN */
+      background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.15) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+      z-index: 1;
+      mix-blend-mode: overlay;
+  }
+  
+  /* This creates the brighter "Hit" on the image itself */
   .framed-photo-wrapper::after {
       content: '';
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      width: 140%; height: 140%;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(0,0,0,0) 70%);
+      width: 150%; 
+      height: 150%;
+      /* Brighter center, fading out softly */
+      background: radial-gradient(circle, rgba(255, 255, 240, 0.4) 0%, rgba(0,0,0,0) 65%);
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.5s ease;
-      z-index: 1;
+      z-index: 99; /* On top of image */
+      mix-blend-mode: soft-light;
   }
   body.spotlight-mode .framed-photo-wrapper::after { opacity: 1; }
-
-  /* SPOTLIGHT SHADOWS & HIGHLIGHTS ON FRAME */
+  
+  /* SPOTLIGHT SHADOWS & BRIGHTNESS */
   body.spotlight-mode .framed-photo {
       box-shadow: 
         0 -2px 10px rgba(255,255,255,0.5), /* Top rim light */
         0 80px 120px rgba(0,0,0,1),       /* Deep cast shadow */
         0 30px 50px rgba(0,0,0,0.9) !important;
       
-      /* Make the photo pop */
-      filter: brightness(1.2) contrast(1.1);
+      /* Significantly brighter to look lit up */
+      filter: brightness(1.3) contrast(1.1);
   }
 
 
@@ -541,11 +540,8 @@
     #menu-view { padding: 20px; }
     .menu-item h3 { font-size: 2.5rem; }
 
-    /* Keep footer fixed on mobile too if screen height permits, otherwise sticky might be better */
     #footer-container { 
-        bottom: 10px;
-        left: 10px;
-        font-size: 0.65rem;
+        padding: 40px 20px;
     }
     
     .footer-controls { bottom: 10px; right: 10px; }
@@ -582,11 +578,6 @@
       <h3>Prints</h3>
       <p>Visualize frames</p>
     </div>
-  </div>
-
-  <div id="footer-container">
-      <div id="gear-info">Fujifilm X-T3 with the Fujinon XF 18-55mm f/2.8-4</div>
-      <div id="copyright-info">© 2025, Alexander Smith, All rights reserved.</div>
   </div>
 
   <div id="gallery-view">
@@ -632,6 +623,11 @@
       <img id="lightbox-img" src="">
       <div class="watermark"><span>fujingaround</span></div>
     </div>
+  </div>
+
+  <div id="footer-container">
+      <div id="gear-info">Fujifilm X-T3 with the Fujinon XF 18-55mm f/2.8-4</div>
+      <div id="copyright-info">© 2025, Alexander Smith, All rights reserved.</div>
   </div>
 
   <div class="footer-controls">
@@ -748,7 +744,6 @@ function openTrip(index) {
   });
 
   menuView.style.display = "none";
-  // Footer container stays visible!
   galleryView.style.display = "block";
   backBtn.style.display = "block"; 
   window.scrollTo(0, 0);
@@ -765,7 +760,6 @@ const photoIdDisplay = document.getElementById("photo-id-display");
 
 function openPrints() {
   menuView.style.display = "none";
-  // Footer container stays visible!
   galleryView.style.display = "none";
   printsView.style.display = "flex";
   backBtn.style.display = "block";
@@ -788,7 +782,6 @@ function showMenu() {
   toggleDarkBtn.style.display = "block"; 
   
   menuView.style.display = "grid"; 
-  // Footer container stays visible!
   document.removeEventListener('keydown', handleKeyInput);
   
   document.body.classList.remove('spotlight-mode');
