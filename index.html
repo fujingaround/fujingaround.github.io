@@ -9,11 +9,13 @@
     --bg: #ffffff;
     --text: #000000;
     --accent: #000000;
+    --btn-hover: #f0f0f0;
   }
   [data-theme="dark"] {
     --bg: #0a0a0a;
     --text: #ffffff;
     --accent: #ffffff;
+    --btn-hover: #1a1a1a;
   }
   body {
     margin: 0;
@@ -41,13 +43,14 @@
     letter-spacing: 1vw;
     color: #ffffff;
     background: none;
-    mix-blend-mode: normal;
     padding: 2rem 4rem;
   }
 
+  /* Header & Nav */
   header {
     text-align: center;
-    padding: 3rem 1rem;
+    padding: 3rem 1rem 1rem;
+    position: relative;
   }
   h1 {
     font-size: 3rem;
@@ -60,46 +63,79 @@
     font-size: 1.2rem;
   }
 
-  /* Grid */
+  /* Navigation Controls */
+  #back-btn {
+    display: none; /* Hidden by default */
+    margin: 20px auto;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid var(--text);
+    color: var(--text);
+    font-size: 1rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  #back-btn:hover {
+    background: var(--btn-hover);
+  }
+
+  /* MENU VIEW (Trip Selection) */
+  #menu-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 40px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .menu-item {
+    width: 100%;
+    padding: 30px;
+    text-align: center;
+    border: 1px solid var(--text);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .menu-item:hover {
+    background: var(--btn-hover);
+  }
+  .menu-item h3 {
+    font-size: 2rem;
+    margin: 0;
+    text-transform: uppercase;
+  }
+  .menu-item p {
+    margin: 10px 0 0;
+    opacity: 0.7;
+  }
+
+  /* GALLERY VIEW (Grid) */
+  #gallery-view {
+    display: none; /* Hidden by default */
+  }
+
   .grid {
     display: grid;
-    /* CHANGED: minmax(400px, 1fr) ensures images are much larger.
-       This will typically result in 2 columns on a desktop screen. */
+    /* This line controls the image size (see explanation below code) */
     grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    gap: 30px; /* Increased gap since images are larger */
-    padding: 40px; /* More padding around the whole grid */
+    gap: 30px; 
+    padding: 40px; 
     width: 100%;
     box-sizing: border-box;
   }
   
-  /* --- FRAME STYLING --- */
   .cell {
     position: relative;
     overflow: hidden;
-    /* CHANGED: Removed border-radius for sharp corners */
-    /* This padding is the thickness of your colored frame */
-    padding: 8px; 
-    background: var(--bg); 
   }
   
   .cell img {
-    position: relative; 
     width: 100%;
     display: block;
-    /* Z-index 2 ensures the image sits ON TOP of the color */
-    z-index: 2; 
-    /* CHANGED: Removed border-radius for sharp corners */
+    /* Straight corners (no border-radius) */
   }
-  
-  .color-flow {
-    position: absolute;
-    inset: 0;
-    /* Z-index 1 ensures the color sits BEHIND the image */
-    z-index: 1; 
-    pointer-events: none;
-    transition: opacity 0.4s ease;
-  }
-  /* ---------------------------- */
 
   /* Dark mode toggle */
   #toggle-dark {
@@ -110,7 +146,7 @@
     background: var(--text);
     color: var(--bg);
     border: none;
-    border-radius: 6px;
+    border-radius: 0; /* Straight corners */
     cursor: pointer;
     z-index: 100;
   }
@@ -119,8 +155,8 @@
   @media (max-width: 600px) {
     h1 { font-size: 2.3rem; }
     h2 a { font-size: 1rem; }
-    /* On mobile, force 1 column */
     .grid { grid-template-columns: 1fr; } 
+    .menu-item h3 { font-size: 1.5rem; }
   }
 </style>
 </head>
@@ -131,15 +167,55 @@
   <header>
     <h1>FujingAround</h1>
     <h2><a href="https://www.instagram.com/fujingaround/" target="_blank"><img src="/mnt/data/0af027fc-d8ae-4248-8f5c-196ffbc25c54.png" alt="Instagram" style="width:32px;height:32px;"></a></h2>
+    <button id="back-btn" onclick="showMenu()">← Back to Menu</button>
   </header>
 
-  <div class="grid" id="grid"></div>
+  <div id="menu-view"></div>
+
+  <div id="gallery-view">
+    <div class="grid" id="grid"></div>
+  </div>
 
   <button id="toggle-dark">Dark Mode</button>
 
 <script>
 // ================================
-// Intro Scroll Unlock Animation
+// 1. CONFIGURE YOUR TRIPS HERE
+// ================================
+const trips = [
+  {
+    title: "Summer 2024",
+    subtitle: "Tokyo & Kyoto",
+    images: [
+      "image1.jpeg",
+      "image2.jpg",
+      "image3.jpg"
+    ]
+  },
+  {
+    title: "Winter 2023",
+    subtitle: "New York City",
+    images: [
+      "image4.jpg",
+      "image5.jpg",
+      "image6.jpg",
+      "image7.jpg"
+    ]
+  },
+  {
+    title: "Misc Collection",
+    subtitle: "Random shots",
+    images: [
+      "image8.jpg",
+      "image9.jpg",
+      "image10.jpg",
+      "image11.jpg"
+    ]
+  }
+];
+
+// ================================
+// Intro Animation
 // ================================
 let intro = document.getElementById("intro");
 let unlocked = false;
@@ -152,81 +228,60 @@ window.addEventListener("scroll", () => {
 });
 
 // ================================
-// Automatic grid expansion
+// App Logic (Menu vs Gallery)
 // ================================
+const menuView = document.getElementById("menu-view");
+const galleryView = document.getElementById("gallery-view");
 const grid = document.getElementById("grid");
-let loadedCount = 0;
+const backBtn = document.getElementById("back-btn");
 
-// *** IMAGES LIST ***
-const images = [
-  "image1.jpg",
-  "image2.jpg",
-  "image3.jpg",
-  "image4.jpg",
-  "image5.jpg",
-  "image6.jpg",
-  "image7.jpg",
-  "image8.jpg",
-  "image9.jpg",
-  "image10.jpg",
-  "image11.jpg"
-];
+// Initialize Menu
+function initMenu() {
+  menuView.innerHTML = ""; // Clear existing
+  trips.forEach((trip, index) => {
+    const btn = document.createElement("div");
+    btn.className = "menu-item";
+    btn.innerHTML = `<h3>${trip.title}</h3><p>${trip.subtitle}</p>`;
+    btn.onclick = () => openTrip(index);
+    menuView.appendChild(btn);
+  });
+}
 
-function loadImages() {
-  const batch = images.slice(loadedCount, loadedCount + 9);
-  batch.forEach(src => {
+// Open a specific Trip
+function openTrip(index) {
+  const trip = trips[index];
+  
+  // Clear previous grid
+  grid.innerHTML = "";
+  
+  // Load images for this trip
+  trip.images.forEach(src => {
     const cell = document.createElement("div");
     cell.className = "cell";
-
     const img = document.createElement("img");
     img.src = src;
-    img.crossOrigin = "anonymous";
-
-    const colorFlow = document.createElement("div");
-    colorFlow.className = "color-flow";
-    
-    cell.appendChild(colorFlow);
+    img.loading = "lazy"; // Good for performance
     cell.appendChild(img);
     grid.appendChild(cell);
-
-    img.onload = () => extractColors(img, colorFlow);
   });
-  loadedCount += 9;
+
+  // Switch Views
+  menuView.style.display = "none";
+  galleryView.style.display = "block";
+  backBtn.style.display = "block";
+  window.scrollTo(0, 0);
 }
 
-window.addEventListener("scroll", () => {
-  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
-    loadImages();
-  }
-});
-
-loadImages(); // initial
-
-// ================================
-// Color extraction to generate gradient
-// ================================
-function extractColors(img, overlay) {
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-  canvas.width = 50;
-  canvas.height = 50;
-  ctx.drawImage(img, 0, 0, 50, 50);
-
-  const data = ctx.getImageData(0, 0, 50, 50).data;
-  let colors = {};
-
-  for (let i = 0; i < data.length; i += 4) {
-    let r = data[i], g = data[i+1], b = data[i+2];
-    let key = `${r},${g},${b}`;
-    colors[key] = (colors[key] || 0) + 1;
-  }
-
-  const topColor = Object.entries(colors).sort((a,b)=>b[1]-a[1])[0][0];
-  const rgb = `rgb(${topColor})`;
-
-  // Sets the gradient frame behind the image
-  overlay.style.background = `linear-gradient(45deg, ${rgb}, var(--bg))`;
+// Go back to Menu
+function showMenu() {
+  galleryView.style.display = "none";
+  backBtn.style.display = "none";
+  menuView.style.display = "flex";
+  window.scrollTo(0, 0);
 }
+
+// Start app
+initMenu();
 
 // ================================
 // Dark mode toggle
