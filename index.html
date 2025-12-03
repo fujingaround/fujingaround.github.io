@@ -12,12 +12,15 @@
     --accent: #000000;
     --btn-hover: #f0f0f0;
     --lightbox-bg: rgba(0, 0, 0, 0.9);
+    --buy-btn-bg: #2e8b57; /* SeaGreen */
+    --buy-btn-text: #ffffff;
   }
   [data-theme="dark"] {
     --bg: #0a0a0a;
     --text: #ffffff;
     --accent: #ffffff;
     --btn-hover: #1a1a1a;
+    --buy-btn-bg: #3cb371; /* MediumSeaGreen */
   }
   body {
     margin: 0;
@@ -132,9 +135,9 @@
     font-weight: 400;
   }
 
-  /* --- PRINTS BUTTON SPECIAL STYLE --- */
+  /* --- PRINTS BUTTON --- */
   .menu-item.prints-btn {
-    border: 2px solid var(--text); /* Slightly thicker border to stand out */
+    border: 2px solid var(--text);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -219,7 +222,6 @@
   }
   .nav-arrow:hover { opacity: 1; }
 
-  /* Frame Container */
   .framed-photo-wrapper {
     position: relative;
     max-width: 80vw;
@@ -229,10 +231,10 @@
 
   .framed-photo {
     max-width: 100%;
-    max-height: 60vh;
+    max-height: 55vh;
     display: block;
     transition: transform 0.3s ease;
-    box-sizing: content-box; /* Important for frames */
+    box-sizing: content-box;
   }
 
   .visualizer-controls {
@@ -250,37 +252,54 @@
     border-radius: 4px;
     font-size: 0.8rem;
   }
+  
+  /* --- BUY SECTION --- */
+  .buy-section {
+    margin-top: 20px;
+    text-align: center;
+    border-top: 1px solid var(--text);
+    padding-top: 20px;
+    width: 100%;
+    max-width: 400px;
+  }
+  .photo-id {
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+    display: block;
+    font-weight: bold;
+  }
+  .buy-btn {
+    display: inline-block;
+    background-color: var(--buy-btn-bg);
+    color: var(--buy-btn-text);
+    padding: 12px 30px;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+  .buy-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+  }
+  .buy-note {
+    font-size: 0.7rem;
+    margin-top: 8px;
+    opacity: 0.6;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 
   /* --- FRAMES CSS --- */
-  /* 1. Classic Black */
-  .frame-black {
-    border: 15px solid #1a1a1a;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  }
-  /* 2. Museum Matte */
-  .frame-matte {
-    background-color: #fff;
-    padding: 40px; /* The matte width */
-    border: 2px solid #222; /* Outer thin frame */
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 10px 30px rgba(0,0,0,0.3);
-  }
-  /* 3. Wood */
-  .frame-wood {
-    border: 20px solid #5c4033;
-    outline: 2px solid #3e2b22;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-  }
-  /* 4. Modern White */
-  .frame-white {
-    border: 15px solid #f0f0f0;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-  }
-  /* 5. Gold */
-  .frame-gold {
-    border: 15px solid #d4af37;
-    border-image: linear-gradient(to bottom right, #fceabb, #f8b500) 1;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-  }
+  .frame-black { border: 15px solid #1a1a1a; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+  .frame-matte { background-color: #fff; padding: 40px; border: 2px solid #222; box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 10px 30px rgba(0,0,0,0.3); }
+  .frame-wood { border: 20px solid #5c4033; outline: 2px solid #3e2b22; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  .frame-white { border: 15px solid #f0f0f0; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+  .frame-gold { border: 15px solid #d4af37; border-image: linear-gradient(to bottom right, #fceabb, #f8b500) 1; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
 
 
   /* --- LIGHTBOX --- */
@@ -298,70 +317,22 @@
     pointer-events: none;
     transition: opacity 0.3s ease;
   }
-  #lightbox.active {
-    opacity: 1;
-    pointer-events: auto;
-  }
-  .lightbox-content {
-    position: relative;
-    max-width: 90vw;
-    max-height: 90vh;
-  }
-  #lightbox-img {
-    max-width: 100%;
-    max-height: 90vh;
-    display: block;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  }
-  .watermark {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    pointer-events: none;
-    overflow: hidden;
-  }
-  .watermark span {
-    color: #ffffff;
-    font-size: 8vw;
-    font-weight: 900;
-    text-transform: uppercase;
-    opacity: 0.3;
-    transform: rotate(-30deg);
-    user-select: none;
-    white-space: nowrap;
-  }
+  #lightbox.active { opacity: 1; pointer-events: auto; }
+  .lightbox-content { position: relative; max-width: 90vw; max-height: 90vh; }
+  #lightbox-img { max-width: 100%; max-height: 90vh; display: block; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+  .watermark { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; pointer-events: none; overflow: hidden; }
+  .watermark span { color: #ffffff; font-size: 8vw; font-weight: 900; text-transform: uppercase; opacity: 0.3; transform: rotate(-30deg); user-select: none; white-space: nowrap; }
 
-  /* --- DARK MODE TOGGLE --- */
-  #toggle-dark {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 10px 20px;
-    background: var(--text);
-    color: var(--bg);
-    border: none;
-    font-family: inherit;
-    font-size: 0.8rem;
-    cursor: pointer;
-    z-index: 100;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
+  /* --- TOGGLE --- */
+  #toggle-dark { position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: var(--text); color: var(--bg); border: none; font-family: inherit; font-size: 0.8rem; cursor: pointer; z-index: 100; text-transform: uppercase; letter-spacing: 1px; }
 
   /* --- MOBILE --- */
-  @media (max-width: 900px) {
-    .grid { column-count: 2; }
-  }
+  @media (max-width: 900px) { .grid { column-count: 2; } }
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
     .grid { column-count: 1; }
     .menu-item { padding: 30px; }
-    .menu-item h3 { font-size: 1.5rem; }
     #gear-info { position: static; text-align: center; margin-top: 40px; margin-bottom: 20px; }
-    
-    /* Adjust Visualizer for small screens */
     .frame-matte { padding: 20px; }
     .framed-photo { max-height: 40vh; }
     .nav-arrow { font-size: 2rem; padding: 10px; }
@@ -371,8 +342,10 @@
 
 <body>
 
+  <!-- INTRO -->
   <div id="intro"><h1>FujingAround</h1></div>
 
+  <!-- HEADER -->
   <header>
     <h1>FujingAround</h1>
     <a href="https://www.instagram.com/fujingaround/" target="_blank" class="social-link">Instagram</a>
@@ -380,6 +353,7 @@
     <button id="back-btn" onclick="showMenu()">← Back to Menu</button>
   </header>
 
+  <!-- MENUS -->
   <div id="menu-view">
     <div class="menu-item prints-btn" onclick="openPrints()">
       <svg class="icon-cart" viewBox="0 0 24 24">
@@ -390,12 +364,15 @@
     </div>
   </div>
 
+  <!-- GEAR INFO -->
   <div id="gear-info">Fujifilm X-T3 with the Fujinon XF 18-55mm f/2.8-4</div>
 
+  <!-- GALLERY VIEW -->
   <div id="gallery-view">
     <div class="grid" id="grid"></div>
   </div>
 
+  <!-- PRINTS VISUALIZER VIEW -->
   <div id="prints-view">
     <div class="visualizer-container">
       <div class="nav-arrow" onclick="changeImage(-1)">❮</div>
@@ -411,8 +388,19 @@
       <p><span>↑</span> Frames <span>↓</span></p>
       <p id="frame-name">Current Frame: Museum Matte</p>
     </div>
+
+    <!-- BUY SECTION -->
+    <div class="buy-section">
+      <span class="photo-id" id="photo-id-display">Reference ID: ...</span>
+      
+      <!-- REPLACE THE HREF BELOW WITH YOUR STRIPE LINK -->
+      <a href="https://buy.stripe.com/test_123" target="_blank" class="buy-btn">Order Print</a>
+      
+      <p class="buy-note">Note: Copy the Reference ID above and paste it during checkout.</p>
+    </div>
   </div>
 
+  <!-- LIGHTBOX -->
   <div id="lightbox" onclick="closeLightbox(event)">
     <div class="lightbox-content">
       <img id="lightbox-img" src="">
@@ -420,6 +408,7 @@
     </div>
   </div>
 
+  <!-- FOOTER CONTROLS -->
   <button id="toggle-dark">Dark Mode</button>
 
 <script>
@@ -428,15 +417,15 @@
 // ================================
 const trips = [
   {
-    title: "Summer 2024",
-    subtitle: "Tokyo & Kyoto",
+    title: "Work in Progress",
+    subtitle: "bla bla bla ",
     images: [
       "image1.jpeg", "image2.jpg", "image3.jpg"
     ]
   },
   {
-    title: "Winter 2023",
-    subtitle: "New York City",
+    title: "Work in Progress",
+    subtitle: "bla bla bla",
     images: [
       "image4.jpg", "image5.jpg", "image6.jpg", "image7.jpg"
     ]
@@ -452,15 +441,13 @@ const trips = [
       "MNE21.JPG", "MNE22.JPG", "MNE23.JPG", "MNE24.JPG", "MNE25.JPG",
       "MNE26.JPG", "MNE27.JPG", "MNE28.JPG", "MNE29.JPG", "MNE30.JPG",
       "MNE31.JPG", "MNE32.JPG", "MNE33.JPG", "MNE34.JPG", "MNE35.JPG",
-      "MNE36.JPG", "MNE37.JPG"
+      "MNE36.JPG"
     ]
   }
 ];
 
-// Combine all images for the Prints view
 const allImages = trips.flatMap(t => t.images);
 
-// Frame styles
 const frames = [
   { class: "frame-black", name: "Classic Black" },
   { class: "frame-matte", name: "Museum Matte" },
@@ -501,9 +488,7 @@ const lightboxImg = document.getElementById("lightbox-img");
 const gearInfo = document.getElementById("gear-info");
 
 function initMenu() {
-  // We are inserting items BEFORE the Prints button
   const printsBtn = document.querySelector('.prints-btn');
-  
   trips.forEach((trip, index) => {
     const btn = document.createElement("div");
     btn.className = "menu-item";
@@ -539,12 +524,13 @@ function openTrip(index) {
 }
 
 // ================================
-// PRINTS VISUALIZER LOGIC
+// PRINTS VISUALIZER & BUY LOGIC
 // ================================
 let currentImgIndex = 0;
-let currentFrameIndex = 1; // Start with Matte
+let currentFrameIndex = 1;
 const visualizerImg = document.getElementById("visualizer-img");
 const frameNameDisplay = document.getElementById("frame-name");
+const photoIdDisplay = document.getElementById("photo-id-display");
 
 function openPrints() {
   menuView.style.display = "none";
@@ -553,30 +539,24 @@ function openPrints() {
   printsView.style.display = "flex";
   backBtn.style.display = "block";
   
-  // Load first image if empty
   if (visualizerImg.getAttribute("src") === "") {
     updateVisualizer();
   }
-  
-  // Listen for keys
   document.addEventListener('keydown', handleKeyInput);
 }
 
 function showMenu() {
   galleryView.style.display = "none";
-  printsView.style.display = "none"; // Hide prints
+  printsView.style.display = "none";
   backBtn.style.display = "none";
   menuView.style.display = "flex";
   gearInfo.style.display = "block";
-  
-  // Remove key listener so it doesn't mess up menu nav
   document.removeEventListener('keydown', handleKeyInput);
   window.scrollTo(0, 0);
 }
 
 function handleKeyInput(e) {
   if (printsView.style.display !== "flex") return;
-  
   if (e.key === "ArrowRight") changeImage(1);
   if (e.key === "ArrowLeft") changeImage(-1);
   if (e.key === "ArrowUp") changeFrame(1);
@@ -585,7 +565,6 @@ function handleKeyInput(e) {
 
 function changeImage(direction) {
   currentImgIndex += direction;
-  // Wrap around
   if (currentImgIndex >= allImages.length) currentImgIndex = 0;
   if (currentImgIndex < 0) currentImgIndex = allImages.length - 1;
   updateVisualizer();
@@ -593,24 +572,22 @@ function changeImage(direction) {
 
 function changeFrame(direction) {
   currentFrameIndex += direction;
-  // Wrap around
   if (currentFrameIndex >= frames.length) currentFrameIndex = 0;
   if (currentFrameIndex < 0) currentFrameIndex = frames.length - 1;
   updateVisualizer();
 }
 
 function updateVisualizer() {
-  // Update Image
-  visualizerImg.src = allImages[currentImgIndex];
+  const currentSrc = allImages[currentImgIndex];
+  visualizerImg.src = currentSrc;
   
-  // Update Frame Class
-  // Remove all frame classes first
+  // Update Frame
   frames.forEach(f => visualizerImg.classList.remove(f.class));
-  // Add new frame class
   visualizerImg.classList.add(frames[currentFrameIndex].class);
   
-  // Update Text
+  // Update UI Text
   frameNameDisplay.innerText = `Current Frame: ${frames[currentFrameIndex].name}`;
+  photoIdDisplay.innerText = `Reference ID: ${currentSrc}`;
 }
 
 // ================================
