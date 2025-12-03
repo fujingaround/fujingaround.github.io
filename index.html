@@ -110,13 +110,14 @@
     background: var(--btn-hover);
   }
 
-  /* --- MENU VIEW (GRID LAYOUT) --- */
+  /* --- MENU VIEW (NEW 2-COLUMN GRID) --- */
   #menu-view {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    /* Forces 2 columns on desktop-sized screens */
+    grid-template-columns: repeat(2, 1fr);
     gap: 30px;
     padding: 40px;
-    max-width: 1200px;
+    max-width: 1000px; /* Slightly narrower max-width for better 2-col look */
     margin: 0 auto 80px;
   }
 
@@ -152,35 +153,34 @@
     box-shadow: 0 15px 30px rgba(0,0,0,0.2);
   }
 
+  /* UPDATED UNIFORM TYPOGRAPHY */
   .menu-item h3 {
     position: relative;
     color: #ffffff;
-    font-size: 2rem;
     margin: 0;
     text-transform: uppercase;
-    letter-spacing: -0.02em;
-    font-weight: 800;
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  }
-  
-  /* NEW: Specific style for Balkans title */
-  .menu-item.balkans-item h3 {
-      font-family: "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
-      font-weight: 300;
-      font-size: 3rem; /* Taller/Larger size */
-      letter-spacing: 0.02em;
+    /* New font styles applied everywhere */
+    font-family: "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 300;
+    font-size: 3rem;
+    letter-spacing: 0.02em;
   }
 
+  /* --- SMALLER CENTERED PRINTS BUTTON --- */
   .menu-item.prints-btn {
     aspect-ratio: auto;
     height: auto;
-    min-height: 200px;
+    min-height: 180px; /* Reduced height */
+    max-width: 300px; /* Make it smaller width */
+    margin: 0 auto; /* Center it in its grid cell */
     background: var(--bg);
     border: 2px solid var(--text);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    /* Span both columns so it's centered below the grid */
     grid-column: 1 / -1;
   }
   .menu-item.prints-btn::before { display: none; }
@@ -188,6 +188,9 @@
   .menu-item.prints-btn h3 {
     color: var(--text);
     text-shadow: none;
+    font-size: 2rem; /* Keep prints title slightly smaller */
+    font-weight: 800; /* Keep it bold */
+    letter-spacing: -0.02em;
   }
   .menu-item.prints-btn p {
     margin: 10px 0 0;
@@ -197,8 +200,8 @@
   }
 
   .icon-cart {
-    width: 40px;
-    height: 40px;
+    width: 35px; /* Slightly smaller icon */
+    height: 35px;
     fill: var(--text);
     margin-bottom: 15px;
   }
@@ -297,7 +300,7 @@
 
   .framed-photo-wrapper {
     position: relative;
-    max-width: 75vw; /* Slightly smaller to make room for switch */
+    max-width: 75vw; 
     max-height: 60vh;
     transition: all 0.5s ease;
     display: flex;
@@ -305,7 +308,7 @@
     align-items: center;
   }
   
-  /* SPOTLIGHT LIGHT BEAM */
+  /* UPDATED SPOTLIGHT "HALO" EFFECT */
   .framed-photo-wrapper::after {
       content: '';
       position: absolute;
@@ -314,7 +317,8 @@
       transform: translateX(-50%);
       width: 150%;
       height: 150%;
-      background: radial-gradient(ellipse at bottom center, rgba(255, 255, 245, 0.8) 0%, rgba(255,255,255,0) 60%);
+      /* Changed gradient center to hit more in the middle of the picture */
+      background: radial-gradient(ellipse at 50% 60%, rgba(255, 255, 245, 0.8) 0%, rgba(255,255,255,0) 60%);
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.5s ease;
@@ -407,8 +411,20 @@
   #lightbox.active { opacity: 1; pointer-events: auto; }
   .lightbox-content { position: relative; max-width: 90vw; max-height: 90vh; }
   #lightbox-img { max-width: 100%; max-height: 90vh; display: block; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+  
+  /* UPDATED WATERMARK FOR BETTER FIT */
   .watermark { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; pointer-events: none; overflow: hidden; }
-  .watermark span { color: #ffffff; font-size: 8vw; font-weight: 900; text-transform: uppercase; opacity: 0.3; transform: rotate(-30deg); user-select: none; white-space: nowrap; }
+  .watermark span { 
+      color: #ffffff; 
+      /* Use vmin so it scales based on the smaller dimension of the image */
+      font-size: 8vmin; 
+      font-weight: 900; 
+      text-transform: uppercase; 
+      opacity: 0.3; 
+      transform: rotate(-30deg); 
+      user-select: none; 
+      white-space: nowrap; 
+  }
 
   /* --- FOOTER CONTROLS --- */
   .footer-controls {
@@ -434,19 +450,18 @@
   }
   
   #toggle-dark {
-      /* Hidden in prints view via JS */
       display: block;
   }
 
 
-  /* --- NEW LIGHT SWITCH CSS --- */
+  /* --- LIGHT SWITCH CSS --- */
   .light-switch-container {
       position: fixed;
       top: 50%;
       right: 30px;
       transform: translateY(-50%);
       z-index: 500;
-      display: none; /* Hidden by default */
+      display: none; 
   }
 
   .light-switch-plate {
@@ -471,25 +486,21 @@
       border: 1px solid #d0d0d0;
       position: relative;
       cursor: pointer;
-      /* Default 'OFF' state (down) */
       box-shadow: 
-          inset 0 -6px 4px -4px rgba(0,0,0,0.3), /* shadow at bottom */
+          inset 0 -6px 4px -4px rgba(0,0,0,0.3),
           0 4px 4px rgba(0,0,0,0.1);
       transition: all 0.2s ease-in-out;
-      transform: perspective(300px) rotateX(-20deg); /* Tilted down */
+      transform: perspective(300px) rotateX(-20deg); 
   }
 
-  /* Switch ON state */
   body.spotlight-mode .light-switch-toggle {
-       /* Tilted up */
       transform: perspective(300px) rotateX(20deg);
       background-color: #fafafa;
       box-shadow: 
-          inset 0 6px 4px -4px rgba(255, 255, 220, 0.6), /* glow at top */
+          inset 0 6px 4px -4px rgba(255, 255, 220, 0.6),
           0 -4px 4px rgba(0,0,0,0.1);
   }
   
-  /* Add slight glow to plate when on */
   body.spotlight-mode .light-switch-plate {
        box-shadow: 0 0 15px rgba(255, 255, 220, 0.3);
   }
@@ -499,17 +510,16 @@
   /* --- MOBILE --- */
   @media (max-width: 900px) {
       .grid { column-count: 2; }
-      #menu-view { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
-      /* Move switch on smaller screens so it doesn't overlap photo */
+      /* Force 1 column on mobile menu */
+      #menu-view { grid-template-columns: 1fr; }
       .light-switch-container { right: 10px; transform: translateY(-50%) scale(0.8); }
   }
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
     .grid { column-count: 1; }
-    #menu-view { grid-template-columns: 1fr; padding: 20px; }
-    .menu-item h3 { font-size: 1.5rem; }
-    /* New styling for Balkans title on mobile */
-    .menu-item.balkans-item h3 { font-size: 2.2rem; }
+    #menu-view { padding: 20px; }
+    /* Adjusted font size for mobile titles */
+    .menu-item h3 { font-size: 2.5rem; }
 
     #footer-container { position: static; text-align: center; margin-top: 40px; margin-bottom: 60px; }
     .footer-controls { bottom: 10px; right: 10px; }
@@ -522,7 +532,6 @@
     .nav-arrow-horiz { order: 2; }
     .vertical-center-column { order: 1; width: 100%; }
     
-    /* Position switch at top right on mobile prints view */
     .light-switch-container { top: 100px; right: 20px; transform: scale(0.7); }
   }
 </style>
@@ -621,10 +630,9 @@ const trips = [
   },
   {
     title: "Balkans, 2025",
-    // Add special class for styling
-    customClass: "balkans-item",
-    coverImage: "MNE9.JPG", 
+    coverImage: "MNE9.JPG",  // UPDATED to .JPG
     images: [
+      // UPDATED all to .JPG
       "MNE1.JPG", "MNE2.JPG", "MNE3.JPG", "MNE4.JPG", "MNE5.JPG",
       "MNE6.JPG", "MNE7.JPG", "MNE8.JPG", "MNE9.JPG", "MNE10.JPG",
       "MNE11.JPG", "MNE12.JPG", "MNE13.JPG", "MNE14.JPG", "MNE15.JPG",
@@ -632,14 +640,19 @@ const trips = [
       "MNE21.JPG", "MNE22.JPG", "MNE23.JPG", "MNE24.JPG", "MNE25.JPG",
       "MNE26.JPG", "MNE27.JPG", "MNE28.JPG", "MNE29.JPG", "MNE30.JPG",
       "MNE31.JPG", "MNE32.JPG", "MNE33.JPG", "MNE34.JPG", "MNE35.JPG",
-      "MNE36.JPG"
+      "MNE36.JPG", "MNE37.JPG"
     ]
+  },
+  // NEW PLACEHOLDER TRIP for 2x2 grid
+  {
+    title: "Spring 2026",
+    coverImage: "image2.jpg", // Using an existing image as placeholder
+    images: ["image2.jpg"]
   }
 ];
 
 const allImages = trips.flatMap(t => t.images);
 
-// REMOVED Gold and Wood frames as requested
 const frames = [
   { class: "frame-black", name: "Classic Black" },
   { class: "frame-matte", name: "Museum Matte" },
@@ -685,10 +698,6 @@ function initMenu() {
   trips.forEach((trip, index) => {
     const btn = document.createElement("div");
     btn.className = "menu-item";
-    // Add custom class if it exists (for Balkans special styling)
-    if (trip.customClass) {
-        btn.classList.add(trip.customClass);
-    }
     btn.style.backgroundImage = `url('${trip.coverImage}')`;
     btn.innerHTML = `<h3>${trip.title}</h3>`;
     btn.onclick = (e) => {
@@ -737,8 +746,8 @@ function openPrints() {
   printsView.style.display = "flex";
   backBtn.style.display = "block";
   
-  spotlightSwitch.style.display = "block"; // Show new switch
-  toggleDarkBtn.style.display = "none"; // Hide dark mode btn
+  spotlightSwitch.style.display = "block"; 
+  toggleDarkBtn.style.display = "none"; 
   
   if (visualizerImg.getAttribute("src") === "") {
     updateVisualizer();
@@ -751,14 +760,13 @@ function showMenu() {
   printsView.style.display = "none";
   backBtn.style.display = "none";
   
-  spotlightSwitch.style.display = "none"; // Hide switch
-  toggleDarkBtn.style.display = "block"; // Show dark mode btn again
+  spotlightSwitch.style.display = "none"; 
+  toggleDarkBtn.style.display = "block"; 
   
   menuView.style.display = "grid"; 
   footerContainer.style.display = "block";
   document.removeEventListener('keydown', handleKeyInput);
   
-  // Reset spotlight state
   document.body.classList.remove('spotlight-mode');
 
   window.scrollTo(0, 0);
@@ -823,7 +831,6 @@ toggleDarkBtn.addEventListener("click", (e) => {
   document.body.dataset.theme = currentTheme === "dark" ? "light" : "dark";
 });
 
-// New Spotlight Switch Logic
 spotlightSwitch.addEventListener("click", (e) => {
     e.stopPropagation();
     document.body.classList.toggle('spotlight-mode');
