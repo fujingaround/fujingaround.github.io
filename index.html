@@ -64,27 +64,40 @@
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 10px;
+    gap: 15px; /* Space between the photo cards */
     padding: 20px;
     width: 100%;
     box-sizing: border-box;
   }
+  
+  /* --- FRAME STYLING --- */
   .cell {
     position: relative;
     overflow: hidden;
     border-radius: 8px;
+    /* This padding is the thickness of your colored frame */
+    padding: 6px; 
+    background: var(--bg); 
   }
+  
   .cell img {
+    position: relative; 
     width: 100%;
     display: block;
+    /* Z-index 2 ensures the image sits ON TOP of the color */
+    z-index: 2; 
+    border-radius: 4px; 
   }
+  
   .color-flow {
     position: absolute;
     inset: 0;
+    /* Z-index 1 ensures the color sits BEHIND the image */
+    z-index: 1; 
     pointer-events: none;
-    background: radial-gradient(circle, transparent 40%, var(--bg) 100%);
     transition: opacity 0.4s ease;
   }
+  /* ---------------------------- */
 
   /* Dark mode toggle */
   #toggle-dark {
@@ -97,6 +110,7 @@
     border: none;
     border-radius: 6px;
     cursor: pointer;
+    z-index: 100;
   }
 
   /* Mobile adjustments */
@@ -139,7 +153,7 @@ window.addEventListener("scroll", () => {
 const grid = document.getElementById("grid");
 let loadedCount = 0;
 
-// Add your images here
+// *** CHECK YOUR FILENAMES HERE ***
 const images = [
   "image1.jpg",
   "image2.jpg",
@@ -166,8 +180,11 @@ function loadImages() {
 
     const colorFlow = document.createElement("div");
     colorFlow.className = "color-flow";
-    cell.appendChild(img);
+    
+    // The color goes in, the image goes in.
+    // CSS handles the stacking order (z-index).
     cell.appendChild(colorFlow);
+    cell.appendChild(img);
     grid.appendChild(cell);
 
     img.onload = () => extractColors(img, colorFlow);
@@ -205,7 +222,8 @@ function extractColors(img, overlay) {
   const topColor = Object.entries(colors).sort((a,b)=>b[1]-a[1])[0][0];
   const rgb = `rgb(${topColor})`;
 
-  overlay.style.background = `radial-gradient(circle, ${rgb} 0%, var(--bg) 90%)`;
+  // This creates a soft gradient background BEHIND the image
+  overlay.style.background = `linear-gradient(45deg, ${rgb}, var(--bg))`;
 }
 
 // ================================
