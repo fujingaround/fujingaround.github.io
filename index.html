@@ -29,7 +29,7 @@
   
   /* --- SPOTLIGHT MODE OVERRIDES --- */
   body.spotlight-mode {
-      --bg: #050505; 
+      --bg: #050505; /* Deep dark background */
       --text: #ffffff;
   }
 
@@ -124,7 +124,7 @@
     padding: 40px;
     max-width: 1000px; 
     margin: 0 auto;
-    flex-grow: 1; /* Pushes footer down */
+    flex-grow: 1;
   }
 
   .menu-item {
@@ -215,17 +215,16 @@
 
   /* --- SCROLLING FOOTER CONTAINER --- */
   #footer-container {
-    /* No longer fixed position */
     position: relative; 
     width: 100%;
-    padding: 60px 40px 40px 40px; /* Top padding separates it from content */
+    padding: 60px 40px 40px 40px; 
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: var(--text);
     opacity: 0.7;
     font-size: 0.8rem;
     line-height: 1.5;
-    text-align: left; /* Keep left alignment */
-    margin-top: auto; /* Ensures it sits at bottom of flex container */
+    text-align: left; 
+    margin-top: auto;
     box-sizing: border-box;
     z-index: 10;
   }
@@ -315,47 +314,75 @@
     align-items: center;
   }
   
-  /* --- NEW "ROOM SCALE" SPOTLIGHT EFFECT --- */
+  /* --- NEW REALISTIC SPOTLIGHT EFFECT --- */
   
-  /* This creates a giant light overlay on the entire screen, preventing cutoffs */
-  body.spotlight-mode::before {
+  /* 1. The Cone from Above */
+  .framed-photo-wrapper::before {
       content: '';
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      /* Giant cone originating from top center of SCREEN */
-      background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.15) 0%, rgba(0,0,0,0) 70%);
+      position: absolute;
+      /* Start high above the image */
+      top: -80vh; 
+      left: 50%;
+      transform: translateX(-50%);
+      /* Wide and tall cone */
+      width: 120vw; 
+      height: 130vh;
+      
+      /* A vertical elliptical gradient creating the cone shape */
+      background: radial-gradient(
+          ellipse at 50% 0%, /* Center at top */
+          rgba(255, 255, 245, 0.25) 0%, /* Bright warm light at source */
+          rgba(255, 255, 245, 0.05) 50%, /* Fades down the cone */
+          rgba(0,0,0,0) 75% /* Fades to transparent well before edges */
+      );
+      
+      opacity: 0;
       pointer-events: none;
+      transition: opacity 0.5s ease;
       z-index: 1;
-      mix-blend-mode: overlay;
+      mix-blend-mode: screen; /* Blends nicely with dark bg */
   }
+  body.spotlight-mode .framed-photo-wrapper::before { opacity: 1; }
   
-  /* This creates the brighter "Hit" on the image itself */
+  /* 2. The Halo / Hit on the Wall */
   .framed-photo-wrapper::after {
       content: '';
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      width: 150%; 
-      height: 150%;
-      /* Brighter center, fading out softly */
-      background: radial-gradient(circle, rgba(255, 255, 240, 0.4) 0%, rgba(0,0,0,0) 65%);
+      /* Larger than frame for halo effect */
+      width: 140%; 
+      height: 140%;
+      /* Soft warm glow centered on image */
+      background: radial-gradient(
+          circle, 
+          rgba(255, 255, 245, 0.2) 0%, 
+          rgba(255, 255, 240, 0.05) 60%, 
+          rgba(0,0,0,0) 80%
+      );
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.5s ease;
-      z-index: 99; /* On top of image */
-      mix-blend-mode: soft-light;
+      z-index: 1;
   }
   body.spotlight-mode .framed-photo-wrapper::after { opacity: 1; }
   
-  /* SPOTLIGHT SHADOWS & BRIGHTNESS */
+  /* 3. Frame Edge Lighting & Deep Shadows */
   body.spotlight-mode .framed-photo {
+      /* Sharp white line on top edge for rim light.
+         Deep, dark shadows cast downwards.
+      */
       box-shadow: 
-        0 -2px 10px rgba(255,255,255,0.5), /* Top rim light */
-        0 80px 120px rgba(0,0,0,1),       /* Deep cast shadow */
-        0 30px 50px rgba(0,0,0,0.9) !important;
+        0 -1px 2px rgba(255,255,255,0.8), /* Sharp rim light */
+        0 -5px 15px rgba(255,255,230,0.2), /* Soft top glow */
+        0 60px 100px rgba(0,0,0,1),       /* Deep cast shadow */
+        0 25px 40px rgba(0,0,0,0.9) !important; /* Closer shadow */
       
-      /* Significantly brighter to look lit up */
-      filter: brightness(1.3) contrast(1.1);
+      /* Slight pop, but not too bright */
+      filter: brightness(1.05) contrast(1.05);
+      
+      position: relative;
+      z-index: 10; /* Ensure frame is above light effects */
   }
 
 
