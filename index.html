@@ -25,10 +25,9 @@
     --menu-item-overlay: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.9));
   }
   
-  /* --- NEW: SPOTLIGHT MODE OVERRIDES --- */
-  /* When spotlight is active, force dark theme variables and smooth fade */
+  /* --- SPOTLIGHT MODE OVERRIDES --- */
   body.spotlight-mode {
-      --bg: #080808; /* Almost pure black for maximum contrast */
+      --bg: #080808; 
       --text: #ffffff;
   }
 
@@ -40,7 +39,6 @@
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     overflow-x: hidden;
     width: 100vw;
-    /* Increased transition time for smoother 0.5s fade */
     transition: background 0.5s ease, color 0.5s ease;
   }
 
@@ -164,6 +162,14 @@
     font-weight: 800;
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
+  
+  /* NEW: Specific style for Balkans title */
+  .menu-item.balkans-item h3 {
+      font-family: "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-weight: 300;
+      font-size: 3rem; /* Taller/Larger size */
+      letter-spacing: 0.02em;
+  }
 
   .menu-item.prints-btn {
     aspect-ratio: auto;
@@ -197,15 +203,26 @@
     margin-bottom: 15px;
   }
 
-  /* --- GEAR FOOTER --- */
-  #gear-info {
+  /* --- FOOTER CONTAINER --- */
+  #footer-container {
     position: fixed;
     bottom: 20px;
     left: 20px;
-    font-weight: 300;
-    font-size: 0.85rem;
-    opacity: 0.7;
     z-index: 100;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: var(--text);
+    opacity: 0.7;
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+  
+  #gear-info {
+    font-weight: 300;
+  }
+  
+  #copyright-info {
+    font-weight: 300;
+    margin-top: 5px;
   }
 
   /* --- GALLERY VIEW --- */
@@ -280,7 +297,7 @@
 
   .framed-photo-wrapper {
     position: relative;
-    max-width: 80vw;
+    max-width: 75vw; /* Slightly smaller to make room for switch */
     max-height: 60vh;
     transition: all 0.5s ease;
     display: flex;
@@ -288,9 +305,7 @@
     align-items: center;
   }
   
-  /* SPOTLIGHT MODE EFFECTS (UPDATED) */
-  
-  /* 1. The Overhead Light Effect (Stronger) */
+  /* SPOTLIGHT LIGHT BEAM */
   .framed-photo-wrapper::after {
       content: '';
       position: absolute;
@@ -299,29 +314,20 @@
       transform: translateX(-50%);
       width: 150%;
       height: 150%;
-      /* Increased opacity and brightness for a stronger light beam */
       background: radial-gradient(ellipse at bottom center, rgba(255, 255, 245, 0.8) 0%, rgba(255,255,255,0) 60%);
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.5s ease;
       z-index: 1;
   }
-
-  body.spotlight-mode .framed-photo-wrapper::after {
-      opacity: 1;
-  }
+  body.spotlight-mode .framed-photo-wrapper::after { opacity: 1; }
   
-  /* 2. The Deep Shadow AND Rim Light Effect */
+  /* SPOTLIGHT SHADOWS */
   body.spotlight-mode .framed-photo {
-       /* The first value (0 -2px 5px...) is a bright white "rim light" on the top edge.
-          The rest are deep, dark shadows cast downwards.
-       */
       box-shadow: 
-        0 -3px 8px rgba(255,255,255,0.7), /* Bright top rim light */
-        0 60px 100px rgba(0,0,0,0.9),     /* Deep long shadow */
-        0 25px 40px rgba(0,0,0,0.8) !important; /* Closer soft shadow */
-      
-      /* Increased brightness to pop against dark bg */
+        0 -3px 8px rgba(255,255,255,0.7), 
+        0 60px 100px rgba(0,0,0,0.9),
+        0 25px 40px rgba(0,0,0,0.8) !important;
       filter: brightness(1.1) contrast(1.05);
   }
 
@@ -381,8 +387,6 @@
   /* --- FRAMES CSS --- */
   .frame-black { border: 15px solid #1a1a1a; box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
   .frame-matte { background-color: #fff; padding: 40px; border: 2px solid #222; box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.3); }
-  .frame-wood { border: 20px solid transparent; border-image: repeating-linear-gradient(45deg, #5c4033, #5c4033 5px, #4a3329 5px, #4a3329 10px, #3e2b22 10px, #3e2b22 12px) 20 round; box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
-  .frame-gold { border: 20px ridge #d4af37; box-shadow: 0 15px 30px rgba(0,0,0,0.4), inset 0 0 20px rgba(97, 78, 12, 0.5); }
   .frame-white { border: 15px solid #f8f8f8; outline: 1px solid #e0e0e0; box-shadow: 0 15px 30px rgba(0,0,0,0.15), inset 0 0 10px rgba(0,0,0,0.05); }
 
   /* --- LIGHTBOX --- */
@@ -406,7 +410,7 @@
   .watermark { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; pointer-events: none; overflow: hidden; }
   .watermark span { color: #ffffff; font-size: 8vw; font-weight: 900; text-transform: uppercase; opacity: 0.3; transform: rotate(-30deg); user-select: none; white-space: nowrap; }
 
-  /* --- FOOTER CONTROLS CONTAINER --- */
+  /* --- FOOTER CONTROLS --- */
   .footer-controls {
       position: fixed;
       bottom: 20px;
@@ -429,30 +433,86 @@
     transition: opacity 0.2s, background 0.3s, color 0.3s;
   }
   
-  .control-btn.spotlight-btn {
-      background: #d4af37;
-      color: #000;
-      display: none;
+  #toggle-dark {
+      /* Hidden in prints view via JS */
+      display: block;
   }
-  /* Change button appearance when active */
-  body.spotlight-mode .control-btn.spotlight-btn {
-      background: #fff;
-      box-shadow: 0 0 15px #d4af37;
+
+
+  /* --- NEW LIGHT SWITCH CSS --- */
+  .light-switch-container {
+      position: fixed;
+      top: 50%;
+      right: 30px;
+      transform: translateY(-50%);
+      z-index: 500;
+      display: none; /* Hidden by default */
   }
+
+  .light-switch-plate {
+      width: 70px;
+      height: 120px;
+      background-color: #e0e0e0;
+      border-radius: 6px;
+      box-shadow: 
+          inset 0 1px 3px rgba(255,255,255,0.8),
+          inset 0 -2px 5px rgba(0,0,0,0.1),
+          0 4px 8px rgba(0,0,0,0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid #c0c0c0;
+  }
+
+  .light-switch-toggle {
+      width: 30px;
+      height: 60px;
+      background-color: #f0f0f0;
+      border: 1px solid #d0d0d0;
+      position: relative;
+      cursor: pointer;
+      /* Default 'OFF' state (down) */
+      box-shadow: 
+          inset 0 -6px 4px -4px rgba(0,0,0,0.3), /* shadow at bottom */
+          0 4px 4px rgba(0,0,0,0.1);
+      transition: all 0.2s ease-in-out;
+      transform: perspective(300px) rotateX(-20deg); /* Tilted down */
+  }
+
+  /* Switch ON state */
+  body.spotlight-mode .light-switch-toggle {
+       /* Tilted up */
+      transform: perspective(300px) rotateX(20deg);
+      background-color: #fafafa;
+      box-shadow: 
+          inset 0 6px 4px -4px rgba(255, 255, 220, 0.6), /* glow at top */
+          0 -4px 4px rgba(0,0,0,0.1);
+  }
+  
+  /* Add slight glow to plate when on */
+  body.spotlight-mode .light-switch-plate {
+       box-shadow: 0 0 15px rgba(255, 255, 220, 0.3);
+  }
+
 
 
   /* --- MOBILE --- */
   @media (max-width: 900px) {
       .grid { column-count: 2; }
       #menu-view { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+      /* Move switch on smaller screens so it doesn't overlap photo */
+      .light-switch-container { right: 10px; transform: translateY(-50%) scale(0.8); }
   }
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
     .grid { column-count: 1; }
     #menu-view { grid-template-columns: 1fr; padding: 20px; }
     .menu-item h3 { font-size: 1.5rem; }
-    #gear-info { position: static; text-align: center; margin-top: 40px; margin-bottom: 60px; }
-    .footer-controls { bottom: 10px; right: 10px; flex-direction: column-reverse; gap: 5px; }
+    /* New styling for Balkans title on mobile */
+    .menu-item.balkans-item h3 { font-size: 2.2rem; }
+
+    #footer-container { position: static; text-align: center; margin-top: 40px; margin-bottom: 60px; }
+    .footer-controls { bottom: 10px; right: 10px; }
     .control-btn { padding: 8px 12px; font-size: 0.7rem; }
 
     .frame-matte { padding: 20px; }
@@ -461,6 +521,9 @@
     .visualizer-main-wrapper { flex-wrap: wrap; }
     .nav-arrow-horiz { order: 2; }
     .vertical-center-column { order: 1; width: 100%; }
+    
+    /* Position switch at top right on mobile prints view */
+    .light-switch-container { top: 100px; right: 20px; transform: scale(0.7); }
   }
 </style>
 </head>
@@ -486,13 +549,23 @@
     </div>
   </div>
 
-  <div id="gear-info">Fujifilm X-T3 with the Fujinon XF 18-55mm f/2.8-4</div>
+  <div id="footer-container">
+      <div id="gear-info">Fujifilm X-T3 with the Fujinon XF 18-55mm f/2.8-4</div>
+      <div id="copyright-info">© 2025, Alexander Smith, All rights reserved.</div>
+  </div>
 
   <div id="gallery-view">
     <div class="grid" id="grid"></div>
   </div>
 
   <div id="prints-view">
+    
+    <div class="light-switch-container" id="spotlight-switch">
+        <div class="light-switch-plate">
+            <div class="light-switch-toggle"></div>
+        </div>
+    </div>
+
     <div class="visualizer-main-wrapper">
       <div class="nav-arrow nav-arrow-horiz" onclick="changeImage(-1)">❮</div>
       <div class="vertical-center-column">
@@ -527,14 +600,13 @@
   </div>
 
   <div class="footer-controls">
-      <button id="spotlight-btn" class="control-btn spotlight-btn">Spotlight On</button>
       <button id="toggle-dark" class="control-btn">Dark Mode</button>
   </div>
 
 
 <script>
 // ================================
-// CONFIGURATION - UPDATE COVER IMAGES HERE
+// CONFIGURATION
 // ================================
 const trips = [
   {
@@ -549,6 +621,8 @@ const trips = [
   },
   {
     title: "Balkans, 2025",
+    // Add special class for styling
+    customClass: "balkans-item",
     coverImage: "MNE9.JPG", 
     images: [
       "MNE1.JPG", "MNE2.JPG", "MNE3.JPG", "MNE4.JPG", "MNE5.JPG",
@@ -565,11 +639,10 @@ const trips = [
 
 const allImages = trips.flatMap(t => t.images);
 
+// REMOVED Gold and Wood frames as requested
 const frames = [
   { class: "frame-black", name: "Classic Black" },
   { class: "frame-matte", name: "Museum Matte" },
-  { class: "frame-wood", name: "Walnut Wood" },
-  { class: "frame-gold", name: "Vintage Gold" },
   { class: "frame-white", name: "Modern White" }
 ];
 
@@ -602,14 +675,20 @@ const grid = document.getElementById("grid");
 const backBtn = document.getElementById("back-btn");
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightbox-img");
-const gearInfo = document.getElementById("gear-info");
-const spotlightBtn = document.getElementById("spotlight-btn");
+const footerContainer = document.getElementById("footer-container");
+const spotlightSwitch = document.getElementById("spotlight-switch");
+const toggleDarkBtn = document.getElementById("toggle-dark");
+
 
 function initMenu() {
   const printsBtn = document.querySelector('.prints-btn');
   trips.forEach((trip, index) => {
     const btn = document.createElement("div");
     btn.className = "menu-item";
+    // Add custom class if it exists (for Balkans special styling)
+    if (trip.customClass) {
+        btn.classList.add(trip.customClass);
+    }
     btn.style.backgroundImage = `url('${trip.coverImage}')`;
     btn.innerHTML = `<h3>${trip.title}</h3>`;
     btn.onclick = (e) => {
@@ -636,7 +715,7 @@ function openTrip(index) {
   });
 
   menuView.style.display = "none";
-  gearInfo.style.display = "none"; 
+  footerContainer.style.display = "none"; 
   galleryView.style.display = "block";
   backBtn.style.display = "block"; 
   window.scrollTo(0, 0);
@@ -653,11 +732,13 @@ const photoIdDisplay = document.getElementById("photo-id-display");
 
 function openPrints() {
   menuView.style.display = "none";
-  gearInfo.style.display = "none";
+  footerContainer.style.display = "none";
   galleryView.style.display = "none";
   printsView.style.display = "flex";
   backBtn.style.display = "block";
-  spotlightBtn.style.display = "block"; 
+  
+  spotlightSwitch.style.display = "block"; // Show new switch
+  toggleDarkBtn.style.display = "none"; // Hide dark mode btn
   
   if (visualizerImg.getAttribute("src") === "") {
     updateVisualizer();
@@ -669,13 +750,16 @@ function showMenu() {
   galleryView.style.display = "none";
   printsView.style.display = "none";
   backBtn.style.display = "none";
-  spotlightBtn.style.display = "none"; 
+  
+  spotlightSwitch.style.display = "none"; // Hide switch
+  toggleDarkBtn.style.display = "block"; // Show dark mode btn again
+  
   menuView.style.display = "grid"; 
-  gearInfo.style.display = "block";
+  footerContainer.style.display = "block";
   document.removeEventListener('keydown', handleKeyInput);
   
+  // Reset spotlight state
   document.body.classList.remove('spotlight-mode');
-  spotlightBtn.innerText = "Spotlight On";
 
   window.scrollTo(0, 0);
 }
@@ -731,23 +815,18 @@ function closeLightbox(event) {
 }
 
 // ================================
-// FOOTER CONTROLS (Dark Mode & Spotlight)
+// FOOTER CONTROLS
 // ================================
-const toggleBtn = document.getElementById("toggle-dark");
-toggleBtn.addEventListener("click", (e) => {
+toggleDarkBtn.addEventListener("click", (e) => {
   e.stopPropagation();
   const currentTheme = document.body.dataset.theme;
   document.body.dataset.theme = currentTheme === "dark" ? "light" : "dark";
 });
 
-spotlightBtn.addEventListener("click", (e) => {
+// New Spotlight Switch Logic
+spotlightSwitch.addEventListener("click", (e) => {
     e.stopPropagation();
     document.body.classList.toggle('spotlight-mode');
-    if (document.body.classList.contains('spotlight-mode')) {
-        spotlightBtn.innerText = "Spotlight Off";
-    } else {
-        spotlightBtn.innerText = "Spotlight On";
-    }
 });
 
 // Start
