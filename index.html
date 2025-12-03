@@ -22,7 +22,6 @@
     padding: 0;
     background: var(--bg);
     color: var(--text);
-    /* CHANGED: Font is now Helvetica */
     font-family: Helvetica, Arial, sans-serif; 
     overflow-x: hidden;
   }
@@ -37,14 +36,16 @@
     align-items: center;
     z-index: 1000;
     transition: opacity 1s ease;
+    cursor: pointer; /* Shows user they can click to enter */
   }
   #intro h1 {
     font-size: 12vw;
-    font-weight: 900; /* Helvetica looks great with heavy weights */
-    letter-spacing: -0.05em; /* Tight tracking looks modern in Helvetica */
+    font-weight: 900; 
+    letter-spacing: -0.05em; 
     color: #ffffff;
     background: none;
     padding: 2rem 4rem;
+    pointer-events: none; /* Let clicks pass through to container */
   }
 
   /* Header & Nav */
@@ -56,7 +57,7 @@
   h1 {
     font-size: 3rem;
     margin: 0;
-    letter-spacing: -0.05em; /* Tight tracking for header too */
+    letter-spacing: -0.05em;
     font-weight: bold;
     color: var(--text);
   }
@@ -68,7 +69,7 @@
 
   /* Navigation Controls */
   #back-btn {
-    display: none; /* Hidden by default */
+    display: none; 
     margin: 20px auto;
     padding: 10px 20px;
     background: transparent;
@@ -114,17 +115,16 @@
   .menu-item p {
     margin: 10px 0 0;
     opacity: 0.7;
-    font-weight: 300; /* Thinner font for subtitle */
+    font-weight: 300; 
   }
 
   /* GALLERY VIEW (Grid) */
   #gallery-view {
-    display: none; /* Hidden by default */
+    display: none; 
   }
 
   .grid {
     display: grid;
-    /* Controls image size: 400px = large images (approx 2 per row) */
     grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
     gap: 30px; 
     padding: 40px; 
@@ -223,17 +223,24 @@ const trips = [
 ];
 
 // ================================
-// Intro Animation
+// Intro Animation (FIXED FOR ULTRAWIDE)
 // ================================
 let intro = document.getElementById("intro");
 let unlocked = false;
-window.addEventListener("scroll", () => {
+
+function dismissIntro() {
   if (!unlocked) {
     intro.style.opacity = "0";
     setTimeout(() => intro.style.display = "none", 1000);
     unlocked = true;
   }
-});
+}
+
+// Triggers to unlock the screen:
+window.addEventListener("scroll", dismissIntro);      // Standard scroll
+window.addEventListener("wheel", dismissIntro);       // Mouse wheel (even if no scrollbar)
+document.body.addEventListener("click", dismissIntro); // Click anywhere
+document.body.addEventListener("touchstart", dismissIntro); // Touch on mobile
 
 // ================================
 // App Logic (Menu vs Gallery)
@@ -250,7 +257,10 @@ function initMenu() {
     const btn = document.createElement("div");
     btn.className = "menu-item";
     btn.innerHTML = `<h3>${trip.title}</h3><p>${trip.subtitle}</p>`;
-    btn.onclick = () => openTrip(index);
+    btn.onclick = (e) => {
+      e.stopPropagation(); // Prevent this click from triggering other things immediately
+      openTrip(index);
+    };
     menuView.appendChild(btn);
   });
 }
@@ -268,7 +278,7 @@ function openTrip(index) {
     cell.className = "cell";
     const img = document.createElement("img");
     img.src = src;
-    img.loading = "lazy"; // Good for performance
+    img.loading = "lazy"; 
     cell.appendChild(img);
     grid.appendChild(cell);
   });
@@ -295,7 +305,8 @@ initMenu();
 // Dark mode toggle
 // ================================
 const btn = document.getElementById("toggle-dark");
-btn.addEventListener("click", () => {
+btn.addEventListener("click", (e) => {
+  e.stopPropagation(); // Stop click from bubbling
   document.body.dataset.theme = document.body.dataset.theme === "dark" ? "light" : "dark";
 });
 </script>
