@@ -194,7 +194,7 @@
     opacity: 0.9;
   }
 
-  /* --- PRINTS VISUALIZER VIEW --- */
+  /* --- PRINTS VISUALIZER VIEW (UPDATED) --- */
   #prints-view {
     display: none;
     flex-direction: column;
@@ -204,29 +204,43 @@
     padding: 20px;
   }
 
-  .visualizer-container {
+  /* New layout for vertical arrows */
+  .visualizer-main-wrapper {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 20px;
     width: 100%;
-    justify-content: center;
+  }
+
+  .vertical-center-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
   }
 
   .nav-arrow {
     font-size: 3rem;
     cursor: pointer;
     user-select: none;
-    opacity: 0.5;
-    transition: opacity 0.2s;
-    padding: 20px;
+    opacity: 0.4;
+    transition: opacity 0.2s, transform 0.2s;
+    padding: 10px;
+    line-height: 1;
   }
-  .nav-arrow:hover { opacity: 1; }
+  .nav-arrow:hover { opacity: 1; transform: scale(1.1); }
+  .nav-arrow-vert { font-size: 2.5rem; } /* Slightly smaller vertical arrows */
 
   .framed-photo-wrapper {
     position: relative;
+    /* Adjusted max-height to make room for new arrows */
     max-width: 80vw;
-    max-height: 70vh;
+    max-height: 60vh; 
     transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .framed-photo {
@@ -294,12 +308,49 @@
     margin-right: auto;
   }
 
-  /* --- FRAMES CSS --- */
-  .frame-black { border: 15px solid #1a1a1a; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-  .frame-matte { background-color: #fff; padding: 40px; border: 2px solid #222; box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 10px 30px rgba(0,0,0,0.3); }
-  .frame-wood { border: 20px solid #5c4033; outline: 2px solid #3e2b22; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
-  .frame-white { border: 15px solid #f0f0f0; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-  .frame-gold { border: 15px solid #d4af37; border-image: linear-gradient(to bottom right, #fceabb, #f8b500) 1; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  /* --- FRAMES CSS (UPDATED TEXTURES) --- */
+  
+  /* 1. Classic Black (Unchanged) */
+  .frame-black { 
+      border: 15px solid #1a1a1a; 
+      box-shadow: 0 15px 30px rgba(0,0,0,0.4); 
+  }
+
+  /* 2. Museum Matte (Unchanged structure) */
+  .frame-matte { 
+      background-color: #fff; 
+      padding: 40px; 
+      border: 2px solid #222; 
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.3); 
+  }
+
+  /* 3. Walnut Wood (New Texture using gradients) */
+  .frame-wood { 
+      border: 20px solid transparent; /* Transparent border to show image behind */
+      /* Repeating gradient simulates wood grain */
+      border-image: repeating-linear-gradient(45deg, 
+        #5c4033, #5c4033 5px, 
+        #4a3329 5px, #4a3329 10px, 
+        #3e2b22 10px, #3e2b22 12px) 20 round;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+  }
+
+  /* 4. Vintage Gold (New 3D Ridge style) */
+  .frame-gold { 
+      /* Ridge style creates a 3D metallic look */
+      border: 20px ridge #d4af37; 
+      /* Deeper shadows for antique look */
+      box-shadow: 0 15px 30px rgba(0,0,0,0.4), inset 0 0 20px rgba(97, 78, 12, 0.5);
+  }
+
+  /* 5. Modern White (Pop-out effect) */
+  .frame-white { 
+      border: 15px solid #f8f8f8; 
+      /* Thin outline to define edge against white bg */
+      outline: 1px solid #e0e0e0;
+      /* Deeper, softer shadow for pop-out effect */
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15), inset 0 0 10px rgba(0,0,0,0.05);
+  }
 
 
   /* --- LIGHTBOX --- */
@@ -336,16 +387,18 @@
     .frame-matte { padding: 20px; }
     .framed-photo { max-height: 40vh; }
     .nav-arrow { font-size: 2rem; padding: 10px; }
+    /* Stack arrows on very small screens */
+    .visualizer-main-wrapper { flex-wrap: wrap; }
+    .nav-arrow-horiz { order: 2; }
+    .vertical-center-column { order: 1; width: 100%; }
   }
 </style>
 </head>
 
 <body>
 
-  <!-- INTRO -->
   <div id="intro"><h1>FujingAround</h1></div>
 
-  <!-- HEADER -->
   <header>
     <h1>FujingAround</h1>
     <a href="https://www.instagram.com/fujingaround/" target="_blank" class="social-link">Instagram</a>
@@ -353,7 +406,6 @@
     <button id="back-btn" onclick="showMenu()">← Back to Menu</button>
   </header>
 
-  <!-- MENUS -->
   <div id="menu-view">
     <div class="menu-item prints-btn" onclick="openPrints()">
       <svg class="icon-cart" viewBox="0 0 24 24">
@@ -364,43 +416,43 @@
     </div>
   </div>
 
-  <!-- GEAR INFO -->
   <div id="gear-info">Fujifilm X-T3 with the Fujinon XF 18-55mm f/2.8-4</div>
 
-  <!-- GALLERY VIEW -->
   <div id="gallery-view">
     <div class="grid" id="grid"></div>
   </div>
 
-  <!-- PRINTS VISUALIZER VIEW -->
   <div id="prints-view">
-    <div class="visualizer-container">
-      <div class="nav-arrow" onclick="changeImage(-1)">❮</div>
-      <div class="framed-photo-wrapper">
-        <img id="visualizer-img" class="framed-photo frame-matte" src="" alt="Print Preview">
+    <div class="visualizer-main-wrapper">
+      <div class="nav-arrow nav-arrow-horiz" onclick="changeImage(-1)">❮</div>
+      
+      <div class="vertical-center-column">
+          <div class="nav-arrow nav-arrow-vert" onclick="changeFrame(1)">▲</div>
+          
+          <div class="framed-photo-wrapper">
+            <img id="visualizer-img" class="framed-photo frame-matte" src="" alt="Print Preview">
+          </div>
+          
+          <div class="nav-arrow nav-arrow-vert" onclick="changeFrame(-1)">▼</div>
       </div>
-      <div class="nav-arrow" onclick="changeImage(1)">❯</div>
+
+      <div class="nav-arrow nav-arrow-horiz" onclick="changeImage(1)">❯</div>
     </div>
     
     <div class="visualizer-controls">
-      <p><strong>Use Arrow Keys</strong></p>
+      <p><strong>Use Arrow Keys or Click Arrows</strong></p>
       <p><span>←</span> Photos <span>→</span></p>
       <p><span>↑</span> Frames <span>↓</span></p>
       <p id="frame-name">Current Frame: Museum Matte</p>
     </div>
 
-    <!-- BUY SECTION -->
     <div class="buy-section">
       <span class="photo-id" id="photo-id-display">Reference ID: ...</span>
-      
-      <!-- REPLACE THE HREF BELOW WITH YOUR STRIPE LINK -->
       <a href="https://buy.stripe.com/test_123" target="_blank" class="buy-btn">Order Print</a>
-      
       <p class="buy-note">Note: Copy the Reference ID above and paste it during checkout.</p>
     </div>
   </div>
 
-  <!-- LIGHTBOX -->
   <div id="lightbox" onclick="closeLightbox(event)">
     <div class="lightbox-content">
       <img id="lightbox-img" src="">
@@ -408,7 +460,6 @@
     </div>
   </div>
 
-  <!-- FOOTER CONTROLS -->
   <button id="toggle-dark">Dark Mode</button>
 
 <script>
@@ -417,15 +468,15 @@
 // ================================
 const trips = [
   {
-    title: "Work in Progress",
-    subtitle: "bla bla bla ",
+    title: "Summer 2024",
+    subtitle: "Tokyo & Kyoto",
     images: [
       "image1.jpeg", "image2.jpg", "image3.jpg"
     ]
   },
   {
-    title: "Work in Progress",
-    subtitle: "bla bla bla",
+    title: "Winter 2023",
+    subtitle: "New York City",
     images: [
       "image4.jpg", "image5.jpg", "image6.jpg", "image7.jpg"
     ]
@@ -434,14 +485,14 @@ const trips = [
     title: "Balkans, 2025",
     subtitle: "Montenegro & Bosnia",
     images: [
-      "MNE1.JPG", "MNE2.JPG", "MNE3.JPG", "MNE4.JPG", "MNE5.JPG",
-      "MNE6.JPG", "MNE7.JPG", "MNE8.JPG", "MNE9.JPG", "MNE10.JPG",
-      "MNE11.JPG", "MNE12.JPG", "MNE13.JPG", "MNE14.JPG", "MNE15.JPG",
-      "MNE16.JPG", "MNE17.JPG", "MNE18.JPG", "MNE19.JPG", "MNE20.JPG",
-      "MNE21.JPG", "MNE22.JPG", "MNE23.JPG", "MNE24.JPG", "MNE25.JPG",
-      "MNE26.JPG", "MNE27.JPG", "MNE28.JPG", "MNE29.JPG", "MNE30.JPG",
-      "MNE31.JPG", "MNE32.JPG", "MNE33.JPG", "MNE34.JPG", "MNE35.JPG",
-      "MNE36.JPG"
+      "MNE1.jpg", "MNE2.jpg", "MNE3.jpg", "MNE4.jpg", "MNE5.jpg",
+      "MNE6.jpg", "MNE7.jpg", "MNE8.jpg", "MNE9.jpg", "MNE10.jpg",
+      "MNE11.jpg", "MNE12.jpg", "MNE13.jpg", "MNE14.jpg", "MNE15.jpg",
+      "MNE16.jpg", "MNE17.jpg", "MNE18.jpg", "MNE19.jpg", "MNE20.jpg",
+      "MNE21.jpg", "MNE22.jpg", "MNE23.jpg", "MNE24.jpg", "MNE25.jpg",
+      "MNE26.jpg", "MNE27.jpg", "MNE28.jpg", "MNE29.jpg", "MNE30.jpg",
+      "MNE31.jpg", "MNE32.jpg", "MNE33.jpg", "MNE34.jpg", "MNE35.jpg",
+      "MNE36.jpg", "MNE37.jpg"
     ]
   }
 ];
@@ -557,6 +608,12 @@ function showMenu() {
 
 function handleKeyInput(e) {
   if (printsView.style.display !== "flex") return;
+  
+  // Prevent default scrolling for up/down arrows
+  if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      e.preventDefault();
+  }
+
   if (e.key === "ArrowRight") changeImage(1);
   if (e.key === "ArrowLeft") changeImage(-1);
   if (e.key === "ArrowUp") changeFrame(1);
