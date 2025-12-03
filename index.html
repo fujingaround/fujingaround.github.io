@@ -12,15 +12,17 @@
     --accent: #000000;
     --btn-hover: #f0f0f0;
     --lightbox-bg: rgba(0, 0, 0, 0.9);
-    --buy-btn-bg: #2e8b57; /* SeaGreen */
+    --buy-btn-bg: #2e8b57;
     --buy-btn-text: #ffffff;
+    --menu-item-overlay: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.7));
   }
   [data-theme="dark"] {
     --bg: #0a0a0a;
     --text: #ffffff;
     --accent: #ffffff;
     --btn-hover: #1a1a1a;
-    --buy-btn-bg: #3cb371; /* MediumSeaGreen */
+    --buy-btn-bg: #3cb371;
+    --menu-item-overlay: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.9));
   }
   body {
     margin: 0;
@@ -30,6 +32,7 @@
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     overflow-x: hidden;
     width: 100vw;
+    transition: background 0.3s, color 0.3s;
   }
 
   /* --- INTRO SCREEN --- */
@@ -100,52 +103,91 @@
     background: var(--btn-hover);
   }
 
-  /* --- MENU VIEW --- */
+  /* --- MENU VIEW (NEW GRID LAYOUT) --- */
   #menu-view {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    padding: 40px 20px 100px;
-    max-width: 800px;
-    margin: 0 auto;
+    display: grid;
+    /* Auto-fill creates a 2x2 grid on standard screens, stacks on mobile */
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 30px;
+    padding: 40px;
+    max-width: 1200px;
+    margin: 0 auto 80px; /* Extra bottom margin for footer */
   }
+
+  /* New Photo-Style Menu Items */
   .menu-item {
     width: 100%;
-    padding: 40px;
-    text-align: center;
-    border: 1px solid var(--text);
+    aspect-ratio: 3 / 2; /* Photo rectangle shape */
+    display: flex;
+    align-items: flex-end; /* Align text to bottom */
+    justify-content: flex-start;
+    padding: 30px;
+    border: none;
     cursor: pointer;
     box-sizing: border-box;
-    transition: transform 0.2s ease, background 0.2s;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-size: cover;
+    background-position: center;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
   }
+
+  /* Dark overlay so text pop */
+  .menu-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--menu-item-overlay);
+    transition: opacity 0.3s;
+  }
+
   .menu-item:hover {
-    background: var(--btn-hover);
-    transform: scale(1.01);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
   }
+
   .menu-item h3 {
+    position: relative; /* Stacks on top of overlay */
+    color: #ffffff;
     font-size: 2rem;
     margin: 0;
     text-transform: uppercase;
     letter-spacing: -0.02em;
-  }
-  .menu-item p {
-    margin: 10px 0 0;
-    opacity: 0.6;
-    font-weight: 400;
+    font-weight: 800;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
 
-  /* --- PRINTS BUTTON --- */
+  /* Prints Button Special Style (keeps it distinct) */
   .menu-item.prints-btn {
+    aspect-ratio: auto; /* Reset aspect ratio */
+    height: auto;
+    min-height: 200px;
+    background: var(--bg);
     border: 2px solid var(--text);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    grid-column: 1 / -1; /* Force it to span full width at bottom */
   }
+  .menu-item.prints-btn::before { display: none; } /* No overlay on prints button */
+  
+  .menu-item.prints-btn h3 {
+    color: var(--text);
+    text-shadow: none;
+  }
+  .menu-item.prints-btn p {
+    margin: 10px 0 0;
+    opacity: 0.6;
+    font-weight: 400;
+    color: var(--text);
+  }
+
   .icon-cart {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     fill: var(--text);
     margin-bottom: 15px;
   }
@@ -155,13 +197,10 @@
     position: fixed;
     bottom: 20px;
     left: 20px;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: 300;
     font-size: 0.85rem;
-    color: var(--text);
     opacity: 0.7;
     z-index: 100;
-    transition: opacity 0.3s;
   }
 
   /* --- GALLERY VIEW --- */
@@ -194,7 +233,7 @@
     opacity: 0.9;
   }
 
-  /* --- PRINTS VISUALIZER VIEW (UPDATED) --- */
+  /* --- PRINTS VISUALIZER VIEW --- */
   #prints-view {
     display: none;
     flex-direction: column;
@@ -202,15 +241,17 @@
     justify-content: center;
     min-height: 60vh;
     padding: 20px;
+    position: relative; /* For spotlight positioning */
   }
 
-  /* New layout for vertical arrows */
   .visualizer-main-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 20px;
     width: 100%;
+    position: relative;
+    z-index: 2; /* Ensure controls are above spotlight light */
   }
 
   .vertical-center-column {
@@ -230,25 +271,59 @@
     line-height: 1;
   }
   .nav-arrow:hover { opacity: 1; transform: scale(1.1); }
-  .nav-arrow-vert { font-size: 2.5rem; } /* Slightly smaller vertical arrows */
+  .nav-arrow-vert { font-size: 2.5rem; }
 
   .framed-photo-wrapper {
     position: relative;
-    /* Adjusted max-height to make room for new arrows */
     max-width: 80vw;
-    max-height: 60vh; 
-    transition: all 0.3s ease;
+    max-height: 60vh;
+    transition: all 0.5s ease; /* Slower transition for spotlight effect */
     display: flex;
     justify-content: center;
     align-items: center;
   }
+  
+  /* SPOTLIGHT MODE EFFECTS */
+  
+  /* 1. The Overhead Light Effect */
+  .framed-photo-wrapper::after {
+      content: '';
+      position: absolute;
+      top: -100%; /* Start way above */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150%;
+      height: 150%;
+      /* A conical gradient to simulate a lamp */
+      background: radial-gradient(ellipse at bottom center, rgba(255, 255, 220, 0.4) 0%, rgba(255,255,255,0) 70%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+      z-index: 1;
+  }
+
+  body.spotlight-mode .framed-photo-wrapper::after {
+      opacity: 1;
+  }
+  
+  /* 2. The Deep Shadow Effect */
+  /* We override the default frame shadows when in spotlight mode */
+  body.spotlight-mode .framed-photo {
+       /* Deep, downward-casting shadow */
+      box-shadow: 0 50px 80px rgba(0,0,0,0.7), 0 20px 30px rgba(0,0,0,0.5) !important;
+      /* Slight brighten effect on the frame itself from the light */
+      filter: brightness(1.05);
+  }
+
 
   .framed-photo {
     max-width: 100%;
     max-height: 55vh;
     display: block;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.5s ease, filter 0.5s ease;
     box-sizing: content-box;
+    position: relative;
+    z-index: 2;
   }
 
   .visualizer-controls {
@@ -276,12 +351,7 @@
     width: 100%;
     max-width: 400px;
   }
-  .photo-id {
-    font-size: 0.8rem;
-    margin-bottom: 10px;
-    display: block;
-    font-weight: bold;
-  }
+  .photo-id { font-size: 0.8rem; margin-bottom: 10px; display: block; font-weight: bold; }
   .buy-btn {
     display: inline-block;
     background-color: var(--buy-btn-bg);
@@ -295,44 +365,15 @@
     transition: background 0.2s, transform 0.2s;
     cursor: pointer;
   }
-  .buy-btn:hover {
-    filter: brightness(1.1);
-    transform: translateY(-2px);
-  }
-  .buy-note {
-    font-size: 0.7rem;
-    margin-top: 8px;
-    opacity: 0.6;
-    max-width: 300px;
-    margin-left: auto;
-    margin-right: auto;
-  }
+  .buy-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+  .buy-note { font-size: 0.7rem; margin-top: 8px; opacity: 0.6; max-width: 300px; margin-left: auto; margin-right: auto; }
 
-  /* --- FRAMES CSS (UPDATED TEXTURES) --- */
-  
-  /* 1. Classic Black (Unchanged) */
-  .frame-black { 
-      border: 15px solid #1a1a1a; 
-      box-shadow: 0 15px 30px rgba(0,0,0,0.4); 
-  }
-
-  /* 2. Museum Matte (Unchanged structure) */
-  .frame-matte { 
-      background-color: #fff; 
-      padding: 40px; 
-      border: 2px solid #222; 
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.3); 
-  }
-
-  /* 3. Modern White (Pop-out effect) */
-  .frame-white { 
-      border: 15px solid #f8f8f8; 
-      /* Thin outline to define edge against white bg */
-      outline: 1px solid #e0e0e0;
-      /* Deeper, softer shadow for pop-out effect */
-      box-shadow: 0 15px 30px rgba(0,0,0,0.15), inset 0 0 10px rgba(0,0,0,0.05);
-  }
-
+  /* --- FRAMES CSS --- */
+  .frame-black { border: 15px solid #1a1a1a; box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
+  .frame-matte { background-color: #fff; padding: 40px; border: 2px solid #222; box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.3); }
+  .frame-wood { border: 20px solid transparent; border-image: repeating-linear-gradient(45deg, #5c4033, #5c4033 5px, #4a3329 5px, #4a3329 10px, #3e2b22 10px, #3e2b22 12px) 20 round; box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
+  .frame-gold { border: 20px ridge #d4af37; box-shadow: 0 15px 30px rgba(0,0,0,0.4), inset 0 0 20px rgba(97, 78, 12, 0.5); }
+  .frame-white { border: 15px solid #f8f8f8; outline: 1px solid #e0e0e0; box-shadow: 0 15px 30px rgba(0,0,0,0.15), inset 0 0 10px rgba(0,0,0,0.05); }
 
   /* --- LIGHTBOX --- */
   #lightbox {
@@ -355,20 +396,58 @@
   .watermark { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; pointer-events: none; overflow: hidden; }
   .watermark span { color: #ffffff; font-size: 8vw; font-weight: 900; text-transform: uppercase; opacity: 0.3; transform: rotate(-30deg); user-select: none; white-space: nowrap; }
 
-  /* --- TOGGLE --- */
-  #toggle-dark { position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: var(--text); color: var(--bg); border: none; font-family: inherit; font-size: 0.8rem; cursor: pointer; z-index: 100; text-transform: uppercase; letter-spacing: 1px; }
+  /* --- FOOTER CONTROLS CONTAINER --- */
+  .footer-controls {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+  }
+
+  .control-btn {
+    padding: 10px 20px;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: opacity 0.2s;
+  }
+  
+  .control-btn.spotlight-btn {
+      background: #d4af37; /* Gold color for spotlight btn */
+      color: #000;
+      display: none; /* Hidden by default, shown only in prints view */
+  }
+  /* Change appearance when active */
+  body.spotlight-mode .control-btn.spotlight-btn {
+      background: #fff;
+      box-shadow: 0 0 10px #d4af37;
+  }
+
 
   /* --- MOBILE --- */
-  @media (max-width: 900px) { .grid { column-count: 2; } }
+  @media (max-width: 900px) {
+      .grid { column-count: 2; }
+      #menu-view { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+  }
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
     .grid { column-count: 1; }
-    .menu-item { padding: 30px; }
-    #gear-info { position: static; text-align: center; margin-top: 40px; margin-bottom: 20px; }
+    #menu-view { grid-template-columns: 1fr; padding: 20px; }
+    .menu-item h3 { font-size: 1.5rem; }
+    #gear-info { position: static; text-align: center; margin-top: 40px; margin-bottom: 60px; }
+    .footer-controls { bottom: 10px; right: 10px; flex-direction: column-reverse; gap: 5px; }
+    .control-btn { padding: 8px 12px; font-size: 0.7rem; }
+
     .frame-matte { padding: 20px; }
     .framed-photo { max-height: 40vh; }
     .nav-arrow { font-size: 2rem; padding: 10px; }
-    /* Stack arrows on very small screens */
     .visualizer-main-wrapper { flex-wrap: wrap; }
     .nav-arrow-horiz { order: 2; }
     .vertical-center-column { order: 1; width: 100%; }
@@ -406,17 +485,13 @@
   <div id="prints-view">
     <div class="visualizer-main-wrapper">
       <div class="nav-arrow nav-arrow-horiz" onclick="changeImage(-1)">❮</div>
-      
       <div class="vertical-center-column">
           <div class="nav-arrow nav-arrow-vert" onclick="changeFrame(1)">▲</div>
-          
           <div class="framed-photo-wrapper">
             <img id="visualizer-img" class="framed-photo frame-matte" src="" alt="Print Preview">
           </div>
-          
           <div class="nav-arrow nav-arrow-vert" onclick="changeFrame(-1)">▼</div>
       </div>
-
       <div class="nav-arrow nav-arrow-horiz" onclick="changeImage(1)">❯</div>
     </div>
     
@@ -429,7 +504,7 @@
 
     <div class="buy-section">
       <span class="photo-id" id="photo-id-display">Reference ID: ...</span>
-      <a href="https://buy.stripe.com/4gM8wI5iw6mz44h0mRfnO00" target="_blank" class="buy-btn">Order Print</a>
+      <a href="https://buy.stripe.com/test_123" target="_blank" class="buy-btn">Order Print</a>
       <p class="buy-note">Note: Copy the Reference ID above and paste it during checkout.</p>
     </div>
   </div>
@@ -441,39 +516,39 @@
     </div>
   </div>
 
-  <button id="toggle-dark">Dark Mode</button>
+  <div class="footer-controls">
+      <button id="spotlight-btn" class="control-btn spotlight-btn">Spotlight On</button>
+      <button id="toggle-dark" class="control-btn">Dark Mode</button>
+  </div>
+
 
 <script>
 // ================================
-// CONFIGURATION
+// CONFIGURATION - UPDATE COVER IMAGES HERE
 // ================================
 const trips = [
   {
-    title: "Work in Progress",
-    subtitle: "bla bla bla",
-    images: [
-      "image1.jpeg", "image2.jpg", "image3.jpg"
-    ]
+    title: "Summer 2024",
+    coverImage: "image1.jpeg", // <- Choose which image to display on menu
+    images: ["image1.jpeg", "image2.jpg", "image3.jpg"]
   },
   {
-    title: "Work in Progress",
-    subtitle: "bla bla bla",
-    images: [
-      "image4.jpg", "image5.jpg", "image6.jpg", "image7.jpg"
-    ]
+    title: "Winter 2023",
+    coverImage: "image5.jpg", // <- Choose which image to display on menu
+    images: ["image4.jpg", "image5.jpg", "image6.jpg", "image7.jpg"]
   },
   {
     title: "Balkans, 2025",
-    subtitle: "Montenegro & Bosnia",
+    coverImage: "MNE9.jpg", // <- Balkans trip set to MNE9.jpg
     images: [
-      "MNE1.JPG", "MNE2.JPG", "MNE3.JPG", "MNE4.JPG", "MNE5.JPG",
-      "MNE6.JPG", "MNE7.JPG", "MNE8.JPG", "MNE9.JPG", "MNE10.JPG",
-      "MNE11.JPG", "MNE12.JPG", "MNE13.JPG", "MNE14.JPG", "MNE15.JPG",
-      "MNE16.JPG", "MNE17.JPG", "MNE18.JPG", "MNE19.JPG", "MNE20.JPG",
-      "MNE21.JPG", "MNE22.JPG", "MNE23.JPG", "MNE24.JPG", "MNE25.JPG",
-      "MNE26.JPG", "MNE27.JPG", "MNE28.JPG", "MNE29.JPG", "MNE30.JPG",
-      "MNE31.JPG", "MNE32.JPG", "MNE33.JPG", "MNE34.JPG", "MNE35.JPG",
-      "MNE36.JPG"
+      "MNE1.jpg", "MNE2.jpg", "MNE3.jpg", "MNE4.jpg", "MNE5.jpg",
+      "MNE6.jpg", "MNE7.jpg", "MNE8.jpg", "MNE9.jpg", "MNE10.jpg",
+      "MNE11.jpg", "MNE12.jpg", "MNE13.jpg", "MNE14.jpg", "MNE15.jpg",
+      "MNE16.jpg", "MNE17.jpg", "MNE18.jpg", "MNE19.jpg", "MNE20.jpg",
+      "MNE21.jpg", "MNE22.jpg", "MNE23.jpg", "MNE24.jpg", "MNE25.jpg",
+      "MNE26.jpg", "MNE27.jpg", "MNE28.jpg", "MNE29.jpg", "MNE30.jpg",
+      "MNE31.jpg", "MNE32.jpg", "MNE33.jpg", "MNE34.jpg", "MNE35.jpg",
+      "MNE36.jpg", "MNE37.jpg"
     ]
   }
 ];
@@ -518,13 +593,17 @@ const backBtn = document.getElementById("back-btn");
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightbox-img");
 const gearInfo = document.getElementById("gear-info");
+const spotlightBtn = document.getElementById("spotlight-btn");
 
 function initMenu() {
   const printsBtn = document.querySelector('.prints-btn');
   trips.forEach((trip, index) => {
     const btn = document.createElement("div");
     btn.className = "menu-item";
-    btn.innerHTML = `<h3>${trip.title}</h3><p>${trip.subtitle}</p>`;
+    // Use coverImage for background
+    btn.style.backgroundImage = `url('${trip.coverImage}')`;
+    // Only title, no subtitle
+    btn.innerHTML = `<h3>${trip.title}</h3>`;
     btn.onclick = (e) => {
       e.stopPropagation();
       openTrip(index);
@@ -570,6 +649,7 @@ function openPrints() {
   galleryView.style.display = "none";
   printsView.style.display = "flex";
   backBtn.style.display = "block";
+  spotlightBtn.style.display = "block"; // Show spotlight btn
   
   if (visualizerImg.getAttribute("src") === "") {
     updateVisualizer();
@@ -581,19 +661,21 @@ function showMenu() {
   galleryView.style.display = "none";
   printsView.style.display = "none";
   backBtn.style.display = "none";
-  menuView.style.display = "flex";
+  spotlightBtn.style.display = "none"; // Hide spotlight btn
+  menuView.style.display = "grid"; // Should be grid, not flex
   gearInfo.style.display = "block";
   document.removeEventListener('keydown', handleKeyInput);
+  
+  // Turn off spotlight when leaving prints view
+  document.body.classList.remove('spotlight-mode');
+  spotlightBtn.innerText = "Spotlight On";
+
   window.scrollTo(0, 0);
 }
 
 function handleKeyInput(e) {
   if (printsView.style.display !== "flex") return;
-  
-  // Prevent default scrolling for up/down arrows
-  if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-      e.preventDefault();
-  }
+  if (e.key === "ArrowUp" || e.key === "ArrowDown") e.preventDefault();
 
   if (e.key === "ArrowRight") changeImage(1);
   if (e.key === "ArrowLeft") changeImage(-1);
@@ -618,12 +700,8 @@ function changeFrame(direction) {
 function updateVisualizer() {
   const currentSrc = allImages[currentImgIndex];
   visualizerImg.src = currentSrc;
-  
-  // Update Frame
   frames.forEach(f => visualizerImg.classList.remove(f.class));
   visualizerImg.classList.add(frames[currentFrameIndex].class);
-  
-  // Update UI Text
   frameNameDisplay.innerText = `Current Frame: ${frames[currentFrameIndex].name}`;
   photoIdDisplay.innerText = `Reference ID: ${currentSrc}`;
 }
@@ -646,13 +724,23 @@ function closeLightbox(event) {
 }
 
 // ================================
-// DARK MODE
+// FOOTER CONTROLS (Dark Mode & Spotlight)
 // ================================
 const toggleBtn = document.getElementById("toggle-dark");
 toggleBtn.addEventListener("click", (e) => {
   e.stopPropagation();
   const currentTheme = document.body.dataset.theme;
   document.body.dataset.theme = currentTheme === "dark" ? "light" : "dark";
+});
+
+spotlightBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    document.body.classList.toggle('spotlight-mode');
+    if (document.body.classList.contains('spotlight-mode')) {
+        spotlightBtn.innerText = "Spotlight Off";
+    } else {
+        spotlightBtn.innerText = "Spotlight On";
+    }
 });
 
 // Start
