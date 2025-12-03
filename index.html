@@ -74,6 +74,34 @@
     overflow-x: hidden;
   }
 
+  /* Intro screen */<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FujingAround</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #000000;
+    --accent: #000000;
+    --btn-hover: #f0f0f0;
+  }
+  [data-theme="dark"] {
+    --bg: #0a0a0a;
+    --text: #ffffff;
+    --accent: #ffffff;
+    --btn-hover: #1a1a1a;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Helvetica, Arial, sans-serif; 
+    overflow-x: hidden;
+  }
+
   /* Intro screen */
   #intro {
     position: fixed;
@@ -82,7 +110,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 2000; 
+    z-index: 1000;
     transition: opacity 1s ease;
     cursor: pointer; 
   }
@@ -128,13 +156,12 @@
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 1px;
-    transition: background 0.2s;
   }
   #back-btn:hover {
     background: var(--btn-hover);
   }
 
-  /* MENU VIEW - RESTORED FORMATTING */
+  /* MENU VIEW (Trip Selection) */
   #menu-view {
     display: flex;
     flex-direction: column;
@@ -150,11 +177,10 @@
     text-align: center;
     border: 1px solid var(--text);
     cursor: pointer;
-    transition: background 0.2s ease, transform 0.2s ease;
+    transition: background 0.2s;
   }
   .menu-item:hover {
     background: var(--btn-hover);
-    transform: scale(1.01);
   }
   .menu-item h3 {
     font-size: 2rem;
@@ -176,89 +202,26 @@
   }
 
   .grid {
+    /* MASONRY MAGIC: This creates columns instead of rows */
     column-count: 3; 
     column-gap: 30px; 
     width: 100%;
   }
   
-  /* --- CELL STYLES --- */
   .cell {
+    /* Prevents an image from being split between two columns */
     break-inside: avoid; 
-    margin-bottom: 30px; 
+    margin-bottom: 30px; /* Space below each image */
     position: relative;
     overflow: hidden;
-    display: inline-block; 
+    display: inline-block; /* Helps with column layout */
     width: 100%;
-    cursor: zoom-in; 
-    /* Removed background color to prevent "grey box" bug */
   }
   
   .cell img {
     width: 100%;
     display: block;
-    height: auto;
-    /* Removed "opacity: 0" so images are ALWAYS visible */
-    transition: transform 0.3s ease;
-  }
-  
-  .cell:hover img {
-    transform: scale(1.02); /* Slight zoom on hover */
-  }
-
-  /* --- LIGHTBOX STYLES --- */
-  #lightbox {
-    position: fixed;
-    inset: 0;
-    background: var(--lightbox-bg);
-    backdrop-filter: blur(15px); 
-    -webkit-backdrop-filter: blur(15px); 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1500;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-    padding: 20px;
-  }
-  #lightbox.active {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .lightbox-content {
-    position: relative;
-    max-width: 90vw;
-    max-height: 90vh;
-  }
-
-  #lightbox-img {
-    max-width: 100%;
-    max-height: 90vh;
-    display: block;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  }
-
-  /* Watermark */
-  .watermark {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    pointer-events: none; 
-    overflow: hidden;
-  }
-
-  .watermark span {
-    color: #ffffff;
-    font-size: 8vw; 
-    font-weight: 900;
-    text-transform: uppercase;
-    opacity: 0.3; 
-    transform: rotate(-30deg); 
-    user-select: none;
-    white-space: nowrap;
+    height: auto; /* Maintains original aspect ratio */
   }
 
   /* Dark mode toggle */
@@ -280,16 +243,14 @@
 
   /* Mobile adjustments */
   @media (max-width: 900px) {
-    .grid { column-count: 2; } 
-    .watermark span { font-size: 12vw; } 
+    .grid { column-count: 2; } /* 2 columns on tablets */
   }
 
   @media (max-width: 600px) {
     h1 { font-size: 2.3rem; }
     h2 a { font-size: 1rem; }
-    .grid { column-count: 1; } 
+    .grid { column-count: 1; } /* 1 column on phones */
     .menu-item h3 { font-size: 1.5rem; }
-    #lightbox { padding: 10px; }
   }
 </style>
 </head>
@@ -307,13 +268,6 @@
 
   <div id="gallery-view">
     <div class="grid" id="grid"></div>
-  </div>
-
-  <div id="lightbox" onclick="closeLightbox(event)">
-    <div class="lightbox-content">
-      <img id="lightbox-img" src="">
-      <div class="watermark"><span>fujingaround</span></div>
-    </div>
   </div>
 
   <button id="toggle-dark">Dark Mode</button>
@@ -359,7 +313,7 @@ const trips = [
 ];
 
 // ================================
-// Intro Animation
+// Intro Animation (FIXED FOR ULTRAWIDE)
 // ================================
 let intro = document.getElementById("intro");
 let unlocked = false;
@@ -372,21 +326,21 @@ function dismissIntro() {
   }
 }
 
+// Triggers to unlock the screen:
 window.addEventListener("scroll", dismissIntro);      
 window.addEventListener("wheel", dismissIntro);       
 document.body.addEventListener("click", dismissIntro); 
 document.body.addEventListener("touchstart", dismissIntro);
 
 // ================================
-// App Logic
+// App Logic (Menu vs Gallery)
 // ================================
 const menuView = document.getElementById("menu-view");
 const galleryView = document.getElementById("gallery-view");
 const grid = document.getElementById("grid");
 const backBtn = document.getElementById("back-btn");
-const lightbox = document.getElementById("lightbox");
-const lightboxImg = document.getElementById("lightbox-img");
 
+// Initialize Menu
 function initMenu() {
   menuView.innerHTML = ""; 
   trips.forEach((trip, index) => {
@@ -401,31 +355,32 @@ function initMenu() {
   });
 }
 
+// Open a specific Trip
 function openTrip(index) {
   const trip = trips[index];
+  
+  // Clear previous grid
   grid.innerHTML = "";
   
+  // Load images for this trip
   trip.images.forEach(src => {
     const cell = document.createElement("div");
     cell.className = "cell";
-    
     const img = document.createElement("img");
-    img.loading = "lazy"; 
     img.src = src;
-
-    // Lightbox click
-    cell.onclick = () => openLightbox(src);
-    
+    img.loading = "lazy"; 
     cell.appendChild(img);
     grid.appendChild(cell);
   });
 
+  // Switch Views
   menuView.style.display = "none";
   galleryView.style.display = "block";
   backBtn.style.display = "block";
   window.scrollTo(0, 0);
 }
 
+// Go back to Menu
 function showMenu() {
   galleryView.style.display = "none";
   backBtn.style.display = "none";
@@ -433,24 +388,12 @@ function showMenu() {
   window.scrollTo(0, 0);
 }
 
-// Lightbox logic
-function openLightbox(src) {
-  lightboxImg.src = src;
-  lightbox.classList.add('active');
-  document.body.style.overflow = 'hidden'; 
-}
-
-function closeLightbox(event) {
-  if (event.target === lightbox || event.target.classList.contains('lightbox-content')) {
-    lightbox.classList.remove('active');
-    document.body.style.overflow = ''; 
-    setTimeout(() => lightboxImg.src = "", 300); 
-  }
-}
-
+// Start app
 initMenu();
 
-// Dark mode
+// ================================
+// Dark mode toggle
+// ================================
 const btn = document.getElementById("toggle-dark");
 btn.addEventListener("click", (e) => {
   e.stopPropagation(); 
