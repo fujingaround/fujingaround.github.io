@@ -22,7 +22,8 @@
     padding: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: Arial, sans-serif;
+    /* CHANGED: Font is now Helvetica */
+    font-family: Helvetica, Arial, sans-serif; 
     overflow-x: hidden;
   }
 
@@ -39,8 +40,8 @@
   }
   #intro h1 {
     font-size: 12vw;
-    font-weight: 900;
-    letter-spacing: 1vw;
+    font-weight: 900; /* Helvetica looks great with heavy weights */
+    letter-spacing: -0.05em; /* Tight tracking looks modern in Helvetica */
     color: #ffffff;
     background: none;
     padding: 2rem 4rem;
@@ -55,6 +56,8 @@
   h1 {
     font-size: 3rem;
     margin: 0;
+    letter-spacing: -0.05em; /* Tight tracking for header too */
+    font-weight: bold;
     color: var(--text);
   }
   h2 a {
@@ -71,7 +74,8 @@
     background: transparent;
     border: 1px solid var(--text);
     color: var(--text);
-    font-size: 1rem;
+    font-size: 0.9rem;
+    font-family: Helvetica, Arial, sans-serif;
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -105,10 +109,12 @@
     font-size: 2rem;
     margin: 0;
     text-transform: uppercase;
+    letter-spacing: -0.02em;
   }
   .menu-item p {
     margin: 10px 0 0;
     opacity: 0.7;
+    font-weight: 300; /* Thinner font for subtitle */
   }
 
   /* GALLERY VIEW (Grid) */
@@ -118,7 +124,7 @@
 
   .grid {
     display: grid;
-    /* This line controls the image size (see explanation below code) */
+    /* Controls image size: 400px = large images (approx 2 per row) */
     grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
     gap: 30px; 
     padding: 40px; 
@@ -134,7 +140,6 @@
   .cell img {
     width: 100%;
     display: block;
-    /* Straight corners (no border-radius) */
   }
 
   /* Dark mode toggle */
@@ -146,9 +151,12 @@
     background: var(--text);
     color: var(--bg);
     border: none;
-    border-radius: 0; /* Straight corners */
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.8rem;
     cursor: pointer;
     z-index: 100;
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
 
   /* Mobile adjustments */
