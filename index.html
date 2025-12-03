@@ -74,6 +74,7 @@
     padding: 4rem 1rem 2rem;
     position: relative;
     flex-shrink: 0;
+    z-index: 5; /* Ensure header sits above the light background */
   }
   h1 {
     font-size: 3rem;
@@ -213,20 +214,18 @@
     margin-bottom: 15px;
   }
 
-  /* --- SCROLLING FOOTER CONTAINER --- */
+  /* --- FIXED FOOTER CONTAINER (Restored to Fixed) --- */
   #footer-container {
-    position: relative; 
-    width: 100%;
-    padding: 60px 40px 40px 40px; 
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 9999; 
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: var(--text);
     opacity: 0.7;
     font-size: 0.8rem;
     line-height: 1.5;
-    text-align: left; 
-    margin-top: auto;
-    box-sizing: border-box;
-    z-index: 10;
+    pointer-events: none; 
   }
   
   #gear-info { font-weight: 300; }
@@ -314,45 +313,34 @@
     align-items: center;
   }
   
-  /* --- NEW REALISTIC SPOTLIGHT EFFECT --- */
-  
-  /* 1. The Cone from Above */
-  .framed-photo-wrapper::before {
+  /* --- SEAMLESS LIGHT SOURCE --- */
+  /* Instead of a local beam, we create a global overlay for the entire room */
+  body.spotlight-mode::before {
       content: '';
-      position: absolute;
-      /* Start high above the image */
-      top: -80vh; 
-      left: 50%;
-      transform: translateX(-50%);
-      /* Wide and tall cone */
-      width: 120vw; 
-      height: 130vh;
-      
-      /* A vertical elliptical gradient creating the cone shape */
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      /* Radial gradient starting from Top Center (50% 0%).
+         Starts with warm light, fades to transparent.
+         Covers the whole screen, so no cutoffs/lines.
+      */
       background: radial-gradient(
-          ellipse at 50% 0%, /* Center at top */
-          rgba(255, 255, 245, 0.25) 0%, /* Bright warm light at source */
-          rgba(255, 255, 245, 0.05) 50%, /* Fades down the cone */
-          rgba(0,0,0,0) 75% /* Fades to transparent well before edges */
+          circle at 50% 0%, 
+          rgba(255, 255, 245, 0.3) 0%, 
+          rgba(255, 255, 245, 0.1) 40%, 
+          rgba(0,0,0,0) 80%
       );
-      
-      opacity: 0;
       pointer-events: none;
-      transition: opacity 0.5s ease;
-      z-index: 1;
-      mix-blend-mode: screen; /* Blends nicely with dark bg */
+      z-index: 1; /* Sits above bg, below content */
+      mix-blend-mode: screen;
   }
-  body.spotlight-mode .framed-photo-wrapper::before { opacity: 1; }
   
-  /* 2. The Halo / Hit on the Wall */
+  /* The "Halo" around the picture (Soft Glow) */
   .framed-photo-wrapper::after {
       content: '';
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      /* Larger than frame for halo effect */
-      width: 140%; 
-      height: 140%;
+      width: 140%; height: 140%;
       /* Soft warm glow centered on image */
       background: radial-gradient(
           circle, 
@@ -367,22 +355,23 @@
   }
   body.spotlight-mode .framed-photo-wrapper::after { opacity: 1; }
   
-  /* 3. Frame Edge Lighting & Deep Shadows */
+  /* FRAME LIGHTING PHYSICS */
   body.spotlight-mode .framed-photo {
-      /* Sharp white line on top edge for rim light.
-         Deep, dark shadows cast downwards.
-      */
       box-shadow: 
-        0 -1px 2px rgba(255,255,255,0.8), /* Sharp rim light */
-        0 -5px 15px rgba(255,255,230,0.2), /* Soft top glow */
-        0 60px 100px rgba(0,0,0,1),       /* Deep cast shadow */
-        0 25px 40px rgba(0,0,0,0.9) !important; /* Closer shadow */
+        /* 1. Sharp Top Edge Rim Light (The lamp hitting the top of frame) */
+        0 -2px 3px rgba(255,255,255,0.9), 
+        /* 2. Soft Upper Glow */
+        0 -10px 20px rgba(255,255,255,0.1),
+        /* 3. Deep Drop Shadow (Cast downwards) */
+        0 60px 100px rgba(0,0,0,1),       
+        /* 4. Closer Ambient Shadow */
+        0 30px 50px rgba(0,0,0,0.9) !important;
       
-      /* Slight pop, but not too bright */
-      filter: brightness(1.05) contrast(1.05);
+      /* Moderate brightness boost to stand out */
+      filter: brightness(1.2) contrast(1.1);
       
       position: relative;
-      z-index: 10; /* Ensure frame is above light effects */
+      z-index: 10;
   }
 
 
@@ -568,7 +557,8 @@
     .menu-item h3 { font-size: 2.5rem; }
 
     #footer-container { 
-        padding: 40px 20px;
+        bottom: 10px; left: 10px;
+        font-size: 0.65rem;
     }
     
     .footer-controls { bottom: 10px; right: 10px; }
@@ -605,6 +595,11 @@
       <h3>Prints</h3>
       <p>Visualize frames</p>
     </div>
+  </div>
+
+  <div id="footer-container">
+      <div id="gear-info">Fujifilm X-T3 with the Fujinon XF 18-55mm f/2.8-4</div>
+      <div id="copyright-info">© 2025, Alexander Smith, All rights reserved.</div>
   </div>
 
   <div id="gallery-view">
@@ -650,11 +645,6 @@
       <img id="lightbox-img" src="">
       <div class="watermark"><span>fujingaround</span></div>
     </div>
-  </div>
-
-  <div id="footer-container">
-      <div id="gear-info">Fujifilm X-T3 with the Fujinon XF 18-55mm f/2.8-4</div>
-      <div id="copyright-info">© 2025, Alexander Smith, All rights reserved.</div>
   </div>
 
   <div class="footer-controls">
@@ -771,6 +761,7 @@ function openTrip(index) {
   });
 
   menuView.style.display = "none";
+  footerContainer.style.display = "block"; // Keep fixed footer
   galleryView.style.display = "block";
   backBtn.style.display = "block"; 
   window.scrollTo(0, 0);
