@@ -63,9 +63,11 @@
   /* Grid */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 15px; /* Space between the photo cards */
-    padding: 20px;
+    /* CHANGED: minmax(400px, 1fr) ensures images are much larger.
+       This will typically result in 2 columns on a desktop screen. */
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 30px; /* Increased gap since images are larger */
+    padding: 40px; /* More padding around the whole grid */
     width: 100%;
     box-sizing: border-box;
   }
@@ -74,9 +76,9 @@
   .cell {
     position: relative;
     overflow: hidden;
-    border-radius: 8px;
+    /* CHANGED: Removed border-radius for sharp corners */
     /* This padding is the thickness of your colored frame */
-    padding: 6px; 
+    padding: 8px; 
     background: var(--bg); 
   }
   
@@ -86,7 +88,7 @@
     display: block;
     /* Z-index 2 ensures the image sits ON TOP of the color */
     z-index: 2; 
-    border-radius: 4px; 
+    /* CHANGED: Removed border-radius for sharp corners */
   }
   
   .color-flow {
@@ -117,6 +119,8 @@
   @media (max-width: 600px) {
     h1 { font-size: 2.3rem; }
     h2 a { font-size: 1rem; }
+    /* On mobile, force 1 column */
+    .grid { grid-template-columns: 1fr; } 
   }
 </style>
 </head>
@@ -153,9 +157,9 @@ window.addEventListener("scroll", () => {
 const grid = document.getElementById("grid");
 let loadedCount = 0;
 
-// *** CHECK YOUR FILENAMES HERE ***
+// *** IMAGES LIST ***
 const images = [
-  "image1.jpg",
+  "image1.jpeg",
   "image2.jpg",
   "image3.jpg",
   "image4.jpg",
@@ -181,8 +185,6 @@ function loadImages() {
     const colorFlow = document.createElement("div");
     colorFlow.className = "color-flow";
     
-    // The color goes in, the image goes in.
-    // CSS handles the stacking order (z-index).
     cell.appendChild(colorFlow);
     cell.appendChild(img);
     grid.appendChild(cell);
@@ -222,7 +224,7 @@ function extractColors(img, overlay) {
   const topColor = Object.entries(colors).sort((a,b)=>b[1]-a[1])[0][0];
   const rgb = `rgb(${topColor})`;
 
-  // This creates a soft gradient background BEHIND the image
+  // Sets the gradient frame behind the image
   overlay.style.background = `linear-gradient(45deg, ${rgb}, var(--bg))`;
 }
 
