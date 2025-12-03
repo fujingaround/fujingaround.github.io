@@ -33,7 +33,7 @@
       --text: #cccccc; 
   }
 
-  /* Hide arrows in spotlight mode to clear the view */
+  /* Hide arrows in spotlight mode */
   body.spotlight-mode .nav-arrow {
       opacity: 0;
       pointer-events: none;
@@ -81,7 +81,7 @@
     padding: 4rem 1rem 2rem;
     position: relative;
     flex-shrink: 0;
-    z-index: 20; /* High z-index to sit ABOVE the spotlight fog */
+    z-index: 20; 
     transition: opacity 0.5s;
   }
   h1 {
@@ -233,7 +233,7 @@
     text-align: left; 
     margin-top: auto; 
     box-sizing: border-box;
-    z-index: 20; /* Above lighting */
+    z-index: 10;
     transition: opacity 0.5s;
   }
   
@@ -277,7 +277,7 @@
     justify-content: center;
     min-height: 60vh;
     padding: 20px;
-    position: relative;
+    position: relative; /* Essential for absolute positioning of switch */
     flex-grow: 1;
   }
 
@@ -310,11 +310,12 @@
   .nav-arrow:hover { opacity: 1; transform: scale(1.1); }
   .nav-arrow-vert { font-size: 2.5rem; }
 
-  /* --- LIGHT SWITCH (FIXED RIGHT DESKTOP) --- */
+  /* --- LIGHT SWITCH (ABSOLUTE POSITIONED) --- */
+  /* Used to be 'fixed', now 'absolute' to stay with the prints view container */
   .light-switch-container {
-      position: fixed;
+      position: absolute; 
       top: 50%;
-      right: 40px; /* Fixed to screen right */
+      right: 5%; /* Relative to the right side of #prints-view */
       transform: translateY(-50%);
       z-index: 1000; 
       display: flex; 
@@ -413,7 +414,7 @@
       transition: opacity 0.8s ease;
   }
   
-  /* 2. The Wall Halo (Fixed to VIEWPORT Center) - BRIGHTER */
+  /* 2. The Wall Halo (Fixed to VIEWPORT Center) */
   body.spotlight-mode::after {
       content: '';
       position: fixed;
@@ -433,19 +434,14 @@
       transition: opacity 0.8s ease;
   }
   
-  /* 3. The Lit Frame (Sharper Rim Light) */
+  /* 3. The Lit Frame (Pop) */
   body.spotlight-mode .framed-photo {
       box-shadow: 
-        /* Top Rim Light (Brighter/Sharper) */
         0 -2px 6px rgba(255,255,255,1.0), 
-        /* Deep Drop Shadow */
-        0 60px 100px rgba(0,0,0,1),
-        /* Ambient Occlusion */
+        0 60px 100px rgba(0,0,0,1),       
         0 20px 40px rgba(0,0,0,0.9) !important;
       
-      /* Subtle contrast boost only */
       filter: contrast(1.05);
-      
       position: relative;
       z-index: 10;
   }
@@ -578,13 +574,15 @@
       .grid { column-count: 2; }
       #menu-view { grid-template-columns: 1fr; }
       
-      /* Mobile: Switch at top right */
+      /* Mobile: Switch at top right, absolute positioning */
       .light-switch-container { 
-          top: 110px; /* Safely under header */
-          right: 5px; 
-          transform: scale(0.75); /* Smaller but visible */
+          top: 20px; /* Near top of prints container */
+          right: 10px; 
+          transform: scale(0.75);
+          /* Since parent #prints-view is relative, absolute keeps it with content */
+          /* But since we want it top right of the section, this works. */
+          /* If content pushes down, top:20px keeps it at top of container */
       }
-      .click-me-text { font-size: 10px; }
   }
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
@@ -606,6 +604,9 @@
     .visualizer-main-wrapper { flex-wrap: wrap; }
     .nav-arrow-horiz { order: 2; }
     .vertical-center-column { order: 1; width: 100%; gap: 10px; }
+    
+    /* Ensure mobile switch is clearly positioned */
+    .light-switch-container { top: 10px; right: 10px; transform: scale(0.7); }
   }
 </style>
 </head>
