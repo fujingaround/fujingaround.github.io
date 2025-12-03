@@ -14,9 +14,8 @@
     --lightbox-bg: rgba(0, 0, 0, 0.9);
     --buy-btn-bg: #2e8b57;
     --buy-btn-text: #ffffff;
-    /* Lighter overlay so pictures stand out more */
     --menu-item-overlay: rgba(0, 0, 0, 0.2); 
-    --menu-border: 1px solid transparent; /* Default no border in light mode */
+    --menu-border: 1px solid transparent; 
   }
   [data-theme="dark"] {
     --bg: #0a0a0a;
@@ -25,12 +24,12 @@
     --btn-hover: #1a1a1a;
     --buy-btn-bg: #3cb371;
     --menu-item-overlay: rgba(0, 0, 0, 0.4);
-    --menu-border: 1px solid #ffffff; /* White border in dark mode */
+    --menu-border: 1px solid #ffffff; 
   }
   
   /* --- SPOTLIGHT MODE OVERRIDES --- */
   body.spotlight-mode {
-      --bg: #080808; 
+      --bg: #050505; /* Extremely dark for contrast */
       --text: #ffffff;
   }
 
@@ -120,21 +119,17 @@
     gap: 30px;
     padding: 40px;
     max-width: 1000px; 
-    margin: 0 auto 100px; /* Large bottom margin so it doesn't hit fixed footer */
+    margin: 0 auto 100px; 
   }
 
   .menu-item {
     width: 100%;
     aspect-ratio: 3 / 2;
     display: flex;
-    /* Centering text in middle of picture */
     align-items: center; 
     justify-content: center;
     padding: 30px;
-    
-    /* Dynamic border for dark mode */
     border: var(--menu-border); 
-    
     cursor: pointer;
     box-sizing: border-box;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -159,7 +154,6 @@
     box-shadow: 0 15px 30px rgba(0,0,0,0.2);
   }
   
-  /* Hover effect: Brighten image by fading overlay */
   .menu-item:hover::before {
       opacity: 0.1;
   }
@@ -169,7 +163,7 @@
     color: #ffffff;
     margin: 0;
     text-transform: uppercase;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.5); /* Stronger shadow for readability */
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5); 
     font-family: "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: 300;
     font-size: 3rem;
@@ -185,7 +179,7 @@
     max-width: 300px;
     margin: 0 auto;
     background: var(--bg);
-    border: 2px solid var(--text); /* Always solid border for prints */
+    border: 2px solid var(--text); 
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -215,18 +209,18 @@
     margin-bottom: 15px;
   }
 
-  /* --- FIXED FOOTER CONTAINER --- */
+  /* --- FIXED FOOTER CONTAINER (GLOBAL) --- */
   #footer-container {
     position: fixed;
     bottom: 20px;
     left: 20px;
-    z-index: 999; /* High z-index to stay on top */
+    z-index: 9999; /* Very high z-index to stay on top of everything */
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: var(--text);
     opacity: 0.7;
     font-size: 0.8rem;
     line-height: 1.5;
-    pointer-events: none; /* Let clicks pass through if needed, though usually fine */
+    pointer-events: none; /* Allows clicking through if overlapping something clickable */
   }
   
   #gear-info { font-weight: 300; }
@@ -287,7 +281,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 30px; /* INCREASED GAP for arrows */
+    gap: 30px; 
   }
 
   .nav-arrow {
@@ -312,32 +306,57 @@
     align-items: center;
   }
   
-  /* UPDATED SPOTLIGHT HALO EFFECT (Direct Hit) */
-  .framed-photo-wrapper::after {
+  /* --- NEW SPOTLIGHT CONE --- */
+  /* This pseudo-element creates the visible beam from the top */
+  .framed-photo-wrapper::before {
       content: '';
       position: absolute;
-      top: 50%;     /* Center vertically */
-      left: 50%;    /* Center horizontally */
-      transform: translate(-50%, -50%); /* Perfect centering */
-      width: 120%;  /* Slightly larger than frame */
-      height: 120%;
-      /* Radial gradient centered exactly on the image */
-      background: radial-gradient(circle, rgba(255, 255, 245, 0.9) 0%, rgba(255, 255, 255, 0) 70%);
+      /* Start high above the viewport */
+      top: -100vh; 
+      left: 50%;
+      transform: translateX(-50%);
+      /* Wide cone */
+      width: 100vw; 
+      height: 150vh; /* Long enough to reach the picture */
+      
+      /* A conical gradient masked to look like a beam */
+      background: radial-gradient(ellipse at 50% 100%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 60%);
+      /* Use clip path to shape it into a cone/trapezoid */
+      clip-path: polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%);
+      
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.5s ease;
       z-index: 1;
-      mix-blend-mode: overlay; /* Helps it blend better with art */
+      mix-blend-mode: screen;
+  }
+
+  body.spotlight-mode .framed-photo-wrapper::before { opacity: 1; }
+  
+  /* This pseudo-element highlights the wall behind the picture (The Halo) */
+  .framed-photo-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 140%; height: 140%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(0,0,0,0) 70%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+      z-index: 1;
   }
   body.spotlight-mode .framed-photo-wrapper::after { opacity: 1; }
-  
-  /* SPOTLIGHT SHADOWS */
+
+  /* SPOTLIGHT SHADOWS & HIGHLIGHTS ON FRAME */
   body.spotlight-mode .framed-photo {
       box-shadow: 
-        0 -3px 8px rgba(255,255,255,0.7), 
-        0 60px 100px rgba(0,0,0,0.9),
-        0 25px 40px rgba(0,0,0,0.8) !important;
-      filter: brightness(1.15) contrast(1.1);
+        0 -2px 10px rgba(255,255,255,0.5), /* Top rim light */
+        0 80px 120px rgba(0,0,0,1),       /* Deep cast shadow */
+        0 30px 50px rgba(0,0,0,0.9) !important;
+      
+      /* Make the photo pop */
+      filter: brightness(1.2) contrast(1.1);
   }
 
 
@@ -420,7 +439,7 @@
   .watermark { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; pointer-events: none; overflow: hidden; }
   .watermark span { 
       color: #ffffff; 
-      font-size: 8vmin; /* Dynamic size so it fits vertical images */
+      font-size: 8vmin; 
       font-weight: 900; 
       text-transform: uppercase; 
       opacity: 0.3; 
@@ -457,11 +476,11 @@
   }
 
 
-  /* --- LIGHT SWITCH CSS (FIXED POSITION) --- */
+  /* --- LIGHT SWITCH CSS (FIXED) --- */
   .light-switch-container {
       position: fixed;
       top: 50%;
-      right: 50px; /* Fixed distance from right edge */
+      right: 50px; 
       transform: translateY(-50%);
       z-index: 500;
       display: none; 
@@ -522,11 +541,11 @@
     #menu-view { padding: 20px; }
     .menu-item h3 { font-size: 2.5rem; }
 
+    /* Keep footer fixed on mobile too if screen height permits, otherwise sticky might be better */
     #footer-container { 
-        position: static; 
-        text-align: center; 
-        margin-top: 40px; 
-        margin-bottom: 60px; 
+        bottom: 10px;
+        left: 10px;
+        font-size: 0.65rem;
     }
     
     .footer-controls { bottom: 10px; right: 10px; }
@@ -729,7 +748,7 @@ function openTrip(index) {
   });
 
   menuView.style.display = "none";
-  footerContainer.style.display = "none"; 
+  // Footer container stays visible!
   galleryView.style.display = "block";
   backBtn.style.display = "block"; 
   window.scrollTo(0, 0);
@@ -746,7 +765,7 @@ const photoIdDisplay = document.getElementById("photo-id-display");
 
 function openPrints() {
   menuView.style.display = "none";
-  footerContainer.style.display = "none";
+  // Footer container stays visible!
   galleryView.style.display = "none";
   printsView.style.display = "flex";
   backBtn.style.display = "block";
@@ -769,7 +788,7 @@ function showMenu() {
   toggleDarkBtn.style.display = "block"; 
   
   menuView.style.display = "grid"; 
-  footerContainer.style.display = "block";
+  // Footer container stays visible!
   document.removeEventListener('keydown', handleKeyInput);
   
   document.body.classList.remove('spotlight-mode');
