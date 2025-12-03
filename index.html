@@ -44,30 +44,7 @@
   }
   #intro h1 {
     font-size: 12vw;
-    font-weight: 900; 
-    letter-spacing: -0.05em; 
-    color: #ffffff;
-    background: none;
-    padding: 2rem 4rem;
-    pointer-events: none; 
-  }
-
-  /* Header & Nav */
-  header {
-    text-align: center;
-    padding: 3rem 1rem 1rem;
-    position: relative;
-  }
-  h1 {
-    font-size: 3rem;
-    margin: 0;
-    letter-spacing: -0.05em;
-    font-weight: bold;
-    color: var(--text);
-  }
-  h2 a {
-    color: var(--accent);
-    text-decoration: none;<!DOCTYPE html>
+    font-weight: 900; <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -77,11 +54,15 @@
   :root {
     --bg: #ffffff;
     --text: #000000;
+    --accent: #000000;
+    --btn-hover: #f0f0f0;
     --lightbox-bg: rgba(0, 0, 0, 0.85);
   }
   [data-theme="dark"] {
     --bg: #0a0a0a;
     --text: #ffffff;
+    --accent: #ffffff;
+    --btn-hover: #1a1a1a;
     --lightbox-bg: rgba(0, 0, 0, 0.9);
   }
   body {
@@ -108,20 +89,33 @@
   #intro h1 {
     font-size: 12vw;
     font-weight: 900; 
+    letter-spacing: -0.05em; 
     color: #ffffff;
     background: none;
+    padding: 2rem 4rem;
     pointer-events: none; 
   }
 
-  /* Header */
+  /* Header & Nav */
   header {
     text-align: center;
     padding: 3rem 1rem 1rem;
+    position: relative;
   }
-  h1 { font-size: 3rem; margin: 0; font-weight: bold; }
-  h2 a { color: var(--text); text-decoration: none; font-size: 1.2rem; }
+  h1 {
+    font-size: 3rem;
+    margin: 0;
+    letter-spacing: -0.05em;
+    font-weight: bold;
+    color: var(--text);
+  }
+  h2 a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 1.2rem;
+  }
 
-  /* Back Button */
+  /* Navigation Controls */
   #back-btn {
     display: none; 
     margin: 20px auto;
@@ -129,11 +123,18 @@
     background: transparent;
     border: 1px solid var(--text);
     color: var(--text);
+    font-size: 0.9rem;
+    font-family: Helvetica, Arial, sans-serif;
     cursor: pointer;
     text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background 0.2s;
+  }
+  #back-btn:hover {
+    background: var(--btn-hover);
   }
 
-  /* Menu */
+  /* MENU VIEW - RESTORED FORMATTING */
   #menu-view {
     display: flex;
     flex-direction: column;
@@ -149,11 +150,30 @@
     text-align: center;
     border: 1px solid var(--text);
     cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
   }
-  .menu-item:hover { background: #f0f0f0; }
+  .menu-item:hover {
+    background: var(--btn-hover);
+    transform: scale(1.01);
+  }
+  .menu-item h3 {
+    font-size: 2rem;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+  }
+  .menu-item p {
+    margin: 10px 0 0;
+    opacity: 0.7;
+    font-weight: 300; 
+  }
 
-  /* Gallery */
-  #gallery-view { display: none; padding: 40px; }
+  /* GALLERY VIEW (Masonry Layout) */
+  #gallery-view {
+    display: none; 
+    padding: 40px; 
+    box-sizing: border-box;
+  }
 
   .grid {
     column-count: 3; 
@@ -161,53 +181,116 @@
     width: 100%;
   }
   
+  /* --- CELL STYLES --- */
   .cell {
     break-inside: avoid; 
     margin-bottom: 30px; 
     position: relative;
+    overflow: hidden;
     display: inline-block; 
     width: 100%;
     cursor: zoom-in; 
-    /* REMOVED: Background color and fixed height */
+    /* Removed background color to prevent "grey box" bug */
   }
   
   .cell img {
     width: 100%;
     display: block;
     height: auto;
-    /* REMOVED: Opacity 0 (Images will show immediately now) */
+    /* Removed "opacity: 0" so images are ALWAYS visible */
+    transition: transform 0.3s ease;
+  }
+  
+  .cell:hover img {
+    transform: scale(1.02); /* Slight zoom on hover */
   }
 
-  /* Lightbox */
+  /* --- LIGHTBOX STYLES --- */
   #lightbox {
     position: fixed;
     inset: 0;
     background: var(--lightbox-bg);
+    backdrop-filter: blur(15px); 
+    -webkit-backdrop-filter: blur(15px); 
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1500;
-    display: none; /* Hidden by default using simple display */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    padding: 20px;
   }
-  #lightbox.active { display: flex; }
+  #lightbox.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
 
-  .lightbox-content { position: relative; max-width: 90vw; max-height: 90vh; }
-  #lightbox-img { max-width: 100%; max-height: 90vh; display: block; }
-  
-  .watermark {
-    position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; pointer-events: none; 
+  .lightbox-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
   }
+
+  #lightbox-img {
+    max-width: 100%;
+    max-height: 90vh;
+    display: block;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+
+  /* Watermark */
+  .watermark {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none; 
+    overflow: hidden;
+  }
+
   .watermark span {
-    color: #ffffff; font-size: 8vw; font-weight: 900; text-transform: uppercase; opacity: 0.3; transform: rotate(-30deg);
+    color: #ffffff;
+    font-size: 8vw; 
+    font-weight: 900;
+    text-transform: uppercase;
+    opacity: 0.3; 
+    transform: rotate(-30deg); 
+    user-select: none;
+    white-space: nowrap;
   }
 
   /* Dark mode toggle */
   #toggle-dark {
-    position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: var(--text); color: var(--bg); border: none; cursor: pointer; z-index: 100;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    z-index: 100;
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
 
-  @media (max-width: 900px) { .grid { column-count: 2; } }
-  @media (max-width: 600px) { .grid { column-count: 1; } }
+  /* Mobile adjustments */
+  @media (max-width: 900px) {
+    .grid { column-count: 2; } 
+    .watermark span { font-size: 12vw; } 
+  }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 2.3rem; }
+    h2 a { font-size: 1rem; }
+    .grid { column-count: 1; } 
+    .menu-item h3 { font-size: 1.5rem; }
+    #lightbox { padding: 10px; }
+  }
 </style>
 </head>
 
@@ -221,7 +304,10 @@
   </header>
 
   <div id="menu-view"></div>
-  <div id="gallery-view"><div class="grid" id="grid"></div></div>
+
+  <div id="gallery-view">
+    <div class="grid" id="grid"></div>
+  </div>
 
   <div id="lightbox" onclick="closeLightbox(event)">
     <div class="lightbox-content">
@@ -234,19 +320,31 @@
 
 <script>
 // ================================
-// CHECK YOUR FILE NAMES HERE CAREFULLY
+// 1. CONFIGURE YOUR TRIPS HERE
 // ================================
 const trips = [
   {
-    title: "Summer 2024", subtitle: "Tokyo & Kyoto",
-    images: ["image1.jpeg", "image2.jpg", "image3.jpg"]
+    title: "Summer 2024",
+    subtitle: "Tokyo & Kyoto",
+    images: [
+      "image1.jpeg",
+      "image2.jpg",
+      "image3.jpg"
+    ]
   },
   {
-    title: "Winter 2023", subtitle: "New York City",
-    images: ["image4.jpg", "image5.jpg", "image6.jpg", "image7.jpg"]
+    title: "Winter 2023",
+    subtitle: "New York City",
+    images: [
+      "image4.jpg",
+      "image5.jpg",
+      "image6.jpg",
+      "image7.jpg"
+    ]
   },
   {
-    title: "Balkans, 2025", subtitle: "Montenegro & Bosnia",
+    title: "Balkans, 2025",
+    subtitle: "Montenegro & Bosnia",
     images: [
       "MNE1.jpg", "MNE2.jpg", "MNE3.jpg", "MNE4.jpg", "MNE5.jpg",
       "MNE6.jpg", "MNE7.jpg", "MNE8.jpg", "MNE9.jpg", "MNE10.jpg",
@@ -260,17 +358,28 @@ const trips = [
   }
 ];
 
-// Intro
+// ================================
+// Intro Animation
+// ================================
 let intro = document.getElementById("intro");
 let unlocked = false;
+
 function dismissIntro() {
-  if (!unlocked) { intro.style.opacity = "0"; setTimeout(() => intro.style.display = "none", 1000); unlocked = true; }
+  if (!unlocked) {
+    intro.style.opacity = "0";
+    setTimeout(() => intro.style.display = "none", 1000);
+    unlocked = true;
+  }
 }
+
 window.addEventListener("scroll", dismissIntro);      
 window.addEventListener("wheel", dismissIntro);       
 document.body.addEventListener("click", dismissIntro); 
+document.body.addEventListener("touchstart", dismissIntro);
 
+// ================================
 // App Logic
+// ================================
 const menuView = document.getElementById("menu-view");
 const galleryView = document.getElementById("gallery-view");
 const grid = document.getElementById("grid");
@@ -284,7 +393,10 @@ function initMenu() {
     const btn = document.createElement("div");
     btn.className = "menu-item";
     btn.innerHTML = `<h3>${trip.title}</h3><p>${trip.subtitle}</p>`;
-    btn.onclick = (e) => { e.stopPropagation(); openTrip(index); };
+    btn.onclick = (e) => {
+      e.stopPropagation(); 
+      openTrip(index);
+    };
     menuView.appendChild(btn);
   });
 }
@@ -296,13 +408,14 @@ function openTrip(index) {
   trip.images.forEach(src => {
     const cell = document.createElement("div");
     cell.className = "cell";
+    
     const img = document.createElement("img");
-    
-    // SIMPLE LOADING (No Fades, No Hiding)
+    img.loading = "lazy"; 
     img.src = src;
-    img.loading = "lazy";
-    
+
+    // Lightbox click
     cell.onclick = () => openLightbox(src);
+    
     cell.appendChild(img);
     grid.appendChild(cell);
   });
@@ -320,6 +433,7 @@ function showMenu() {
   window.scrollTo(0, 0);
 }
 
+// Lightbox logic
 function openLightbox(src) {
   lightboxImg.src = src;
   lightbox.classList.add('active');
@@ -336,6 +450,7 @@ function closeLightbox(event) {
 
 initMenu();
 
+// Dark mode
 const btn = document.getElementById("toggle-dark");
 btn.addEventListener("click", (e) => {
   e.stopPropagation(); 
