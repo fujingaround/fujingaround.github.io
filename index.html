@@ -24,7 +24,7 @@
     padding: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: Helvetica, Arial, sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     overflow-x: hidden;
     width: 100vw;
   }
@@ -62,7 +62,6 @@
     letter-spacing: -0.05em;
     font-weight: 700;
   }
-  /* Instagram Link Styling */
   .social-link {
     display: inline-block;
     color: var(--text);
@@ -81,14 +80,14 @@
 
   /* --- BACK BUTTON --- */
   #back-btn {
-    display: none; /* Hidden by default */
+    display: none;
     margin: 20px auto;
     padding: 10px 20px;
     background: transparent;
     border: 1px solid var(--text);
     color: var(--text);
     font-size: 0.9rem;
-    font-family: Helvetica, Arial, sans-serif;
+    font-family: inherit;
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -104,7 +103,7 @@
     flex-direction: column;
     align-items: center;
     gap: 20px;
-    padding: 40px 20px;
+    padding: 40px 20px 100px;
     max-width: 800px;
     margin: 0 auto;
   }
@@ -131,6 +130,35 @@
     margin: 10px 0 0;
     opacity: 0.6;
     font-weight: 400;
+  }
+
+  /* --- PRINTS BUTTON SPECIAL STYLE --- */
+  .menu-item.prints-btn {
+    border: 2px solid var(--text); /* Slightly thicker border to stand out */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .icon-cart {
+    width: 30px;
+    height: 30px;
+    fill: var(--text);
+    margin-bottom: 15px;
+  }
+
+  /* --- GEAR FOOTER --- */
+  #gear-info {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 300;
+    font-size: 0.85rem;
+    color: var(--text);
+    opacity: 0.7;
+    z-index: 100;
+    transition: opacity 0.3s;
   }
 
   /* --- GALLERY VIEW --- */
@@ -162,6 +190,98 @@
   .cell:hover img {
     opacity: 0.9;
   }
+
+  /* --- PRINTS VISUALIZER VIEW --- */
+  #prints-view {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: 20px;
+  }
+
+  .visualizer-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nav-arrow {
+    font-size: 3rem;
+    cursor: pointer;
+    user-select: none;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+    padding: 20px;
+  }
+  .nav-arrow:hover { opacity: 1; }
+
+  /* Frame Container */
+  .framed-photo-wrapper {
+    position: relative;
+    max-width: 80vw;
+    max-height: 70vh;
+    transition: all 0.3s ease;
+  }
+
+  .framed-photo {
+    max-width: 100%;
+    max-height: 60vh;
+    display: block;
+    transition: transform 0.3s ease;
+    box-sizing: content-box; /* Important for frames */
+  }
+
+  .visualizer-controls {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    line-height: 1.6;
+  }
+  .visualizer-controls span {
+    display: inline-block;
+    margin: 0 10px;
+    border: 1px solid var(--text);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+
+  /* --- FRAMES CSS --- */
+  /* 1. Classic Black */
+  .frame-black {
+    border: 15px solid #1a1a1a;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+  /* 2. Museum Matte */
+  .frame-matte {
+    background-color: #fff;
+    padding: 40px; /* The matte width */
+    border: 2px solid #222; /* Outer thin frame */
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 10px 30px rgba(0,0,0,0.3);
+  }
+  /* 3. Wood */
+  .frame-wood {
+    border: 20px solid #5c4033;
+    outline: 2px solid #3e2b22;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  }
+  /* 4. Modern White */
+  .frame-white {
+    border: 15px solid #f0f0f0;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  }
+  /* 5. Gold */
+  .frame-gold {
+    border: 15px solid #d4af37;
+    border-image: linear-gradient(to bottom right, #fceabb, #f8b500) 1;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  }
+
 
   /* --- LIGHTBOX --- */
   #lightbox {
@@ -222,7 +342,7 @@
     background: var(--text);
     color: var(--bg);
     border: none;
-    font-family: Helvetica, Arial, sans-serif;
+    font-family: inherit;
     font-size: 0.8rem;
     cursor: pointer;
     z-index: 100;
@@ -239,6 +359,12 @@
     .grid { column-count: 1; }
     .menu-item { padding: 30px; }
     .menu-item h3 { font-size: 1.5rem; }
+    #gear-info { position: static; text-align: center; margin-top: 40px; margin-bottom: 20px; }
+    
+    /* Adjust Visualizer for small screens */
+    .frame-matte { padding: 20px; }
+    .framed-photo { max-height: 40vh; }
+    .nav-arrow { font-size: 2rem; padding: 10px; }
   }
 </style>
 </head>
@@ -254,10 +380,37 @@
     <button id="back-btn" onclick="showMenu()">← Back to Menu</button>
   </header>
 
-  <div id="menu-view"></div>
+  <div id="menu-view">
+    <div class="menu-item prints-btn" onclick="openPrints()">
+      <svg class="icon-cart" viewBox="0 0 24 24">
+        <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+      </svg>
+      <h3>Prints</h3>
+      <p>Visualize frames</p>
+    </div>
+  </div>
+
+  <div id="gear-info">Fujifilm X-T3 with the Fujinon XF 18-55mm f/2.8-4</div>
 
   <div id="gallery-view">
     <div class="grid" id="grid"></div>
+  </div>
+
+  <div id="prints-view">
+    <div class="visualizer-container">
+      <div class="nav-arrow" onclick="changeImage(-1)">❮</div>
+      <div class="framed-photo-wrapper">
+        <img id="visualizer-img" class="framed-photo frame-matte" src="" alt="Print Preview">
+      </div>
+      <div class="nav-arrow" onclick="changeImage(1)">❯</div>
+    </div>
+    
+    <div class="visualizer-controls">
+      <p><strong>Use Arrow Keys</strong></p>
+      <p><span>←</span> Photos <span>→</span></p>
+      <p><span>↑</span> Frames <span>↓</span></p>
+      <p id="frame-name">Current Frame: Museum Matte</p>
+    </div>
   </div>
 
   <div id="lightbox" onclick="closeLightbox(event)">
@@ -304,6 +457,18 @@ const trips = [
   }
 ];
 
+// Combine all images for the Prints view
+const allImages = trips.flatMap(t => t.images);
+
+// Frame styles
+const frames = [
+  { class: "frame-black", name: "Classic Black" },
+  { class: "frame-matte", name: "Museum Matte" },
+  { class: "frame-wood", name: "Walnut Wood" },
+  { class: "frame-gold", name: "Vintage Gold" },
+  { class: "frame-white", name: "Modern White" }
+];
+
 // ================================
 // INTRO ANIMATION
 // ================================
@@ -328,13 +493,17 @@ document.body.addEventListener("touchstart", dismissIntro);
 // ================================
 const menuView = document.getElementById("menu-view");
 const galleryView = document.getElementById("gallery-view");
+const printsView = document.getElementById("prints-view");
 const grid = document.getElementById("grid");
 const backBtn = document.getElementById("back-btn");
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightbox-img");
+const gearInfo = document.getElementById("gear-info");
 
 function initMenu() {
-  menuView.innerHTML = "";
+  // We are inserting items BEFORE the Prints button
+  const printsBtn = document.querySelector('.prints-btn');
+  
   trips.forEach((trip, index) => {
     const btn = document.createElement("div");
     btn.className = "menu-item";
@@ -343,7 +512,7 @@ function initMenu() {
       e.stopPropagation();
       openTrip(index);
     };
-    menuView.appendChild(btn);
+    menuView.insertBefore(btn, printsBtn);
   });
 }
 
@@ -354,29 +523,94 @@ function openTrip(index) {
   trip.images.forEach(src => {
     const cell = document.createElement("div");
     cell.className = "cell";
-    
     const img = document.createElement("img");
     img.src = src;
     img.loading = "lazy";
-    
-    // Lightbox Trigger
     cell.onclick = () => openLightbox(src);
-    
     cell.appendChild(img);
     grid.appendChild(cell);
   });
 
   menuView.style.display = "none";
+  gearInfo.style.display = "none"; 
   galleryView.style.display = "block";
-  backBtn.style.display = "block"; // Changed to block to ensure visibility
+  backBtn.style.display = "block"; 
   window.scrollTo(0, 0);
+}
+
+// ================================
+// PRINTS VISUALIZER LOGIC
+// ================================
+let currentImgIndex = 0;
+let currentFrameIndex = 1; // Start with Matte
+const visualizerImg = document.getElementById("visualizer-img");
+const frameNameDisplay = document.getElementById("frame-name");
+
+function openPrints() {
+  menuView.style.display = "none";
+  gearInfo.style.display = "none";
+  galleryView.style.display = "none";
+  printsView.style.display = "flex";
+  backBtn.style.display = "block";
+  
+  // Load first image if empty
+  if (visualizerImg.getAttribute("src") === "") {
+    updateVisualizer();
+  }
+  
+  // Listen for keys
+  document.addEventListener('keydown', handleKeyInput);
 }
 
 function showMenu() {
   galleryView.style.display = "none";
+  printsView.style.display = "none"; // Hide prints
   backBtn.style.display = "none";
   menuView.style.display = "flex";
+  gearInfo.style.display = "block";
+  
+  // Remove key listener so it doesn't mess up menu nav
+  document.removeEventListener('keydown', handleKeyInput);
   window.scrollTo(0, 0);
+}
+
+function handleKeyInput(e) {
+  if (printsView.style.display !== "flex") return;
+  
+  if (e.key === "ArrowRight") changeImage(1);
+  if (e.key === "ArrowLeft") changeImage(-1);
+  if (e.key === "ArrowUp") changeFrame(1);
+  if (e.key === "ArrowDown") changeFrame(-1);
+}
+
+function changeImage(direction) {
+  currentImgIndex += direction;
+  // Wrap around
+  if (currentImgIndex >= allImages.length) currentImgIndex = 0;
+  if (currentImgIndex < 0) currentImgIndex = allImages.length - 1;
+  updateVisualizer();
+}
+
+function changeFrame(direction) {
+  currentFrameIndex += direction;
+  // Wrap around
+  if (currentFrameIndex >= frames.length) currentFrameIndex = 0;
+  if (currentFrameIndex < 0) currentFrameIndex = frames.length - 1;
+  updateVisualizer();
+}
+
+function updateVisualizer() {
+  // Update Image
+  visualizerImg.src = allImages[currentImgIndex];
+  
+  // Update Frame Class
+  // Remove all frame classes first
+  frames.forEach(f => visualizerImg.classList.remove(f.class));
+  // Add new frame class
+  visualizerImg.classList.add(frames[currentFrameIndex].class);
+  
+  // Update Text
+  frameNameDisplay.innerText = `Current Frame: ${frames[currentFrameIndex].name}`;
 }
 
 // ================================
