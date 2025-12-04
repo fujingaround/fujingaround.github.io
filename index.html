@@ -245,7 +245,7 @@
   #gear-info { font-weight: 300; }
   #copyright-info { font-weight: 300; margin-top: 5px; }
 
-  /* --- GALLERY VIEW --- */
+  /* --- GALLERY VIEW & LOADING ANIMATION --- */
   #gallery-view {
     display: none;
     padding: 20px;
@@ -294,20 +294,20 @@
   }
   .cell img.fade-in { opacity: 1; }
 
-  /* --- PALETTES VIEW (UNIFORM MOSAIC) --- */
+  /* --- PALETTES VIEW --- */
   #palettes-view {
       display: none; 
       padding: 40px;
       margin: 0 auto;
       width: 100%;
-      /* DENSE GRID: 50px chips with 5px gap */
+      max-width: 1200px;
+      display: grid;
       grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-      gap: 5px; /* Equal spacing between EVERY chip */
+      gap: 5px; 
       flex-grow: 1;
       align-content: start;
   }
   
-  /* Individual Chip */
   .color-chip {
       width: 100%;
       aspect-ratio: 1 / 1;
@@ -315,13 +315,11 @@
       cursor: pointer;
       border-radius: 2px;
       opacity: 0;
-      transform: scale(0); /* Start tiny */
-      /* Smooth return after swimming */
+      transform: scale(0); 
       transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s; 
       will-change: transform;
   }
   
-  /* Pop-In Animation (Slower) */
   @keyframes popChip {
       to { opacity: 1; transform: scale(1); }
   }
@@ -329,11 +327,10 @@
       animation: popChip 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   }
 
-  /* Swimming State (Applied by JS) */
   .color-chip.swimming {
       z-index: 100;
       box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Faster response when swimming */
+      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   #palette-loader {
@@ -511,7 +508,7 @@
     align-items: center;
   }
   
-  /* 1. The Light Cone (Fixed to VIEWPORT) */
+  /* 1. The Light Cone */
   body.spotlight-mode::before {
       content: '';
       position: fixed;
@@ -529,7 +526,7 @@
       transition: opacity 0.8s ease;
   }
   
-  /* 2. The Wall Halo (Fixed to VIEWPORT Center) */
+  /* 2. The Wall Halo */
   body.spotlight-mode::after {
       content: '';
       position: fixed;
@@ -549,7 +546,7 @@
       transition: opacity 0.8s ease;
   }
   
-  /* 3. The Lit Frame (Pop) */
+  /* 3. The Lit Frame */
   body.spotlight-mode .framed-photo {
       box-shadow: 
         0 -2px 6px rgba(255,255,255,1.0), 
@@ -569,7 +566,7 @@
     box-sizing: content-box;
     position: relative;
     z-index: 2;
-    pointer-events: none; /* No drag */
+    pointer-events: none; 
   }
 
   .visualizer-controls {
@@ -684,6 +681,7 @@
   @media (max-width: 900px) {
       .grid { column-count: 2; }
       #menu-view { grid-template-columns: 1fr; }
+      #palettes-view { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
       
       /* Mobile: Switch at Top Left, ABSOLUTE */
       .light-switch-container { 
@@ -948,7 +946,7 @@ function openTrip(index) {
 }
 
 // ================================
-// PALETTES LOGIC (Swim + Scatter)
+// PALETTES LOGIC (Swim + Scatter + FailSafe)
 // ================================
 let generatedChips = [];
 
@@ -956,20 +954,17 @@ function openPalettes() {
     menuView.style.display = "none";
     galleryView.style.display = "none";
     printsView.style.display = "none";
-    palettesView.style.display = "grid"; // Must be grid for layout
+    palettesView.style.display = "grid"; 
     backBtn.style.display = "block";
     
     if (generatedChips.length === 0) {
         paletteLoader.style.display = "block";
         generatePalettes();
     } else {
-        // Re-animate existing chips
         animateScatter();
     }
     
-    // Add Mouse Move Listener for "Swim" effect
     document.addEventListener('mousemove', handleSwimEffect);
-    
     window.scrollTo(0, 0);
 }
 
@@ -978,31 +973,31 @@ function generatePalettes() {
     
     allImages.forEach((src, groupIndex) => {
         const img = new Image();
-        img.crossOrigin = "Anonymous"; 
+        // REMOVED crossOrigin to prevent CORS issues on local/simple hosting
+        // If images are on same domain (GitHub Pages), this is safer.
         img.src = src;
         
         img.onload = function() {
-            // Get 9 distinct colors (using distance check)
-            const colors = extractDistinctColors(img, 9);
-            
-            colors.forEach(hex => {
-                const chip = document.createElement('div');
-                chip.className = 'color-chip';
-                chip.style.backgroundColor = hex;
-                // Assign group ID to know which photo it came from
-                chip.dataset.groupId = groupIndex; 
-                
-                chip.onclick = () => showHex(hex);
-                
-                // Add event listeners for hover state
-                chip.addEventListener('mouseenter', () => activateGroup(groupIndex));
-                chip.addEventListener('mouseleave', () => deactivateGroup());
-                
-                generatedChips.push(chip);
-            });
-            
+            try {
+                const colors = extractDistinctColors(img, 9);
+                createChips(colors, groupIndex);
+            } catch (e) {
+                // Fallback if canvas is tainted or error
+                console.log("Canvas error on " + src);
+                createChips(Array(9).fill('#cccccc'), groupIndex); 
+            }
+            checkDone();
+        }
+        
+        img.onerror = function() {
+            console.log("Failed to load " + src);
+            // Skip this image but don't hang
+            checkDone();
+        }
+        
+        function checkDone() {
             loadedImages++;
-            if(loadedImages === allImages.length) {
+            if(loadedImages >= allImages.length) {
                 paletteLoader.style.display = "none";
                 finishPaletteSetup();
             }
@@ -1010,32 +1005,35 @@ function generatePalettes() {
     });
 }
 
+function createChips(colors, groupIndex) {
+    colors.forEach(hex => {
+        const chip = document.createElement('div');
+        chip.className = 'color-chip';
+        chip.style.backgroundColor = hex;
+        chip.dataset.groupId = groupIndex; 
+        chip.onclick = () => showHex(hex);
+        chip.addEventListener('mouseenter', () => activateGroup(groupIndex));
+        chip.addEventListener('mouseleave', () => deactivateGroup());
+        generatedChips.push(chip);
+    });
+}
+
 function finishPaletteSetup() {
-    // 1. Randomize order of ALL chips
     const shuffled = generatedChips.sort(() => Math.random() - 0.5);
-    
-    // 2. Append them to the grid
     shuffled.forEach(chip => palettesView.appendChild(chip));
-    
-    // 3. Trigger Pop-in Animation
     animateScatter();
 }
 
 function animateScatter() {
-    // Random delay for each chip to create "popcorn" effect
     const chips = document.querySelectorAll('.color-chip');
     chips.forEach(chip => {
         chip.classList.remove('popped');
-        // Force reflow
         void chip.offsetWidth;
-        
-        const delay = Math.random() * 1.0; // 0 to 1s delay
+        const delay = Math.random() * 1.0; 
         chip.style.animationDelay = `${delay}s`;
         chip.classList.add('popped');
     });
 }
-
-// --- COLOR ALGORITHMS ---
 
 function extractDistinctColors(imgElement, count) {
     const canvas = document.createElement('canvas');
@@ -1044,56 +1042,51 @@ function extractDistinctColors(imgElement, count) {
     canvas.height = 50;
     ctx.drawImage(imgElement, 0, 0, 50, 50);
     
-    const imgData = ctx.getImageData(0, 0, 50, 50).data;
-    const colorCounts = {};
-    
-    // Quantize
-    for (let i = 0; i < imgData.length; i += 4) {
-        const r = imgData[i];
-        const g = imgData[i+1];
-        const b = imgData[i+2];
-        const hex = rgbToHex(r, g, b);
-        colorCounts[hex] = (colorCounts[hex] || 0) + 1;
-    }
-    
-    // Sort by frequency
-    let sortedColors = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]);
-    
-    // Filter duplicates using Euclidean distance
-    const distinct = [];
-    
-    for (let hex of sortedColors) {
-        if (distinct.length >= count) break;
+    // Wrap in try/catch for "Tainted Canvas" security errors
+    try {
+        const imgData = ctx.getImageData(0, 0, 50, 50).data;
+        const colorCounts = {};
         
-        const rgb1 = hexToRgb(hex);
-        let isDistinct = true;
-        
-        for (let picked of distinct) {
-            const rgb2 = hexToRgb(picked);
-            const distance = Math.sqrt(
-                Math.pow(rgb1.r - rgb2.r, 2) +
-                Math.pow(rgb1.g - rgb2.g, 2) +
-                Math.pow(rgb1.b - rgb2.b, 2)
-            );
-            
-            // If colors are too close (e.g. < 40), skip this one
-            if (distance < 40) {
-                isDistinct = false;
-                break;
-            }
+        for (let i = 0; i < imgData.length; i += 4) {
+            const r = Math.round(imgData[i] / 32) * 32;
+            const g = Math.round(imgData[i+1] / 32) * 32;
+            const b = Math.round(imgData[i+2] / 32) * 32;
+            const hex = rgbToHex(r, g, b);
+            colorCounts[hex] = (colorCounts[hex] || 0) + 1;
         }
         
-        if (isDistinct) distinct.push(hex);
+        let sortedColors = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]);
+        
+        // Distance check for variety
+        const distinct = [];
+        for (let hex of sortedColors) {
+            if (distinct.length >= count) break;
+            const rgb1 = hexToRgb(hex);
+            let isDistinct = true;
+            for (let picked of distinct) {
+                const rgb2 = hexToRgb(picked);
+                const distance = Math.sqrt(Math.pow(rgb1.r - rgb2.r, 2) + Math.pow(rgb1.g - rgb2.g, 2) + Math.pow(rgb1.b - rgb2.b, 2));
+                if (distance < 40) { isDistinct = false; break; }
+            }
+            if (isDistinct) distinct.push(hex);
+        }
+        
+        // Fill remaining
+        let i = 0;
+        while (distinct.length < count) {
+            // If we run out of colors, cycle or fill grey
+            if (i < sortedColors.length) {
+                 if (!distinct.includes(sortedColors[i])) distinct.push(sortedColors[i]);
+            } else {
+                 distinct.push("#cccccc"); 
+            }
+            i++;
+        }
+        return distinct;
+        
+    } catch (e) {
+        return Array(count).fill('#cccccc');
     }
-    
-    // Fill remaining slots if we ran out of distinct colors
-    let i = 0;
-    while (distinct.length < count && i < sortedColors.length) {
-        if (!distinct.includes(sortedColors[i])) distinct.push(sortedColors[i]);
-        i++;
-    }
-    
-    return distinct;
 }
 
 function hexToRgb(hex) {
@@ -1106,16 +1099,10 @@ function rgbToHex(r, g, b) {
 }
 
 // --- INTERACTION ---
-
 let activeGroupId = null;
-
-function activateGroup(id) {
-    activeGroupId = id;
-}
-
+function activateGroup(id) { activeGroupId = id; }
 function deactivateGroup() {
     activeGroupId = null;
-    // Reset positions
     const allChips = document.querySelectorAll('.color-chip');
     allChips.forEach(chip => {
         chip.style.transform = 'translate(0,0) scale(1)';
@@ -1125,24 +1112,15 @@ function deactivateGroup() {
 
 function handleSwimEffect(e) {
     if (activeGroupId === null || palettesView.style.display === 'none') return;
-    
-    // Select all chips belonging to the active group
     const siblings = document.querySelectorAll(`.color-chip[data-group-id="${activeGroupId}"]`);
-    
     siblings.forEach(chip => {
         const rect = chip.getBoundingClientRect();
         const chipX = rect.left + rect.width / 2;
         const chipY = rect.top + rect.height / 2;
-        
-        // Calculate distance to mouse
         const deltaX = e.clientX - chipX;
         const deltaY = e.clientY - chipY;
-        
-        // Move slightly towards mouse (magnetic effect)
-        // Divide by 5 to make it subtle/laggy
         const moveX = deltaX * 0.15; 
         const moveY = deltaY * 0.15;
-        
         chip.classList.add('swimming');
         chip.style.transform = `translate(${moveX}px, ${moveY}px) scale(1.3)`;
     });
@@ -1197,7 +1175,7 @@ function showMenu() {
   
   menuView.style.display = "grid"; 
   document.removeEventListener('keydown', handleKeyInput);
-  document.removeEventListener('mousemove', handleSwimEffect); // Stop tracking mouse
+  document.removeEventListener('mousemove', handleSwimEffect);
   
   document.body.classList.remove('spotlight-mode');
 
