@@ -42,7 +42,8 @@
       pointer-events: none;
       transition: opacity 0.5s ease;
   }
-  body.spotlight-mode .insta-link { opacity: 0; pointer-events: none; }
+  /* Dim instagram in spotlight mode */
+  body.spotlight-mode .insta-logo { opacity: 0.2; }
 
   body {
     margin: 0;
@@ -81,7 +82,7 @@
     pointer-events: none;
   }
 
-  /* --- HEADER --- */
+  /* --- HEADER (FLEXBOX LAYOUT) --- */
   header {
     text-align: center;
     padding: 4rem 1rem 2rem;
@@ -89,16 +90,24 @@
     flex-shrink: 0;
     z-index: 20; 
     transition: opacity 0.5s;
+    /* Flexbox to center the content row */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
-  
-  .title-wrapper {
+
+  /* Wrapper to lock Logo and Title in one line */
+  .header-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px; /* Space between logo and text */
       position: relative;
-      display: inline-block;
   }
 
   h1 {
     font-size: 3rem;
-    margin: 0 0 10px 0;
+    margin: 0;
     letter-spacing: -0.05em;
     font-weight: 700;
     line-height: 1;
@@ -106,13 +115,9 @@
 
   /* INSTAGRAM LOGO */
   .insta-link {
-      position: absolute;
-      left: -60px; 
-      top: 50%;
-      transform: translateY(-50%);
-      width: 35px;
-      height: 35px;
       display: block;
+      width: 32px;
+      height: 32px;
       transition: opacity 0.2s;
   }
   .insta-link img {
@@ -120,6 +125,7 @@
       height: 100%;
       object-fit: contain;
       transition: filter 0.3s;
+      display: block;
   }
   .insta-link:hover { opacity: 0.6; }
   [data-theme="dark"] .insta-link img { filter: invert(1); }
@@ -127,7 +133,7 @@
   /* --- BACK BUTTON --- */
   #back-btn {
     display: none;
-    margin: 20px auto;
+    margin: 20px auto 0; /* Add top margin */
     padding: 10px 20px;
     background: transparent;
     border: 1px solid var(--text);
@@ -185,7 +191,6 @@
     transform: translateY(-5px);
     box-shadow: 0 15px 30px rgba(0,0,0,0.2);
   }
-  
   .menu-item:hover::before { opacity: 0.1; }
 
   .menu-item h3 {
@@ -305,7 +310,7 @@
   }
   .cell img.fade-in { opacity: 1; }
 
-  /* --- PALETTES VIEW (RECTANGLES) --- */
+  /* --- PALETTES VIEW (FAIL-SAFE) --- */
   #palettes-view {
       display: none; 
       padding: 40px;
@@ -313,9 +318,9 @@
       width: 100%;
       max-width: 1200px;
       display: grid;
-      /* CENTERED GRID on all screens */
+      /* CENTERED GRID */
       justify-content: center;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 20px; 
       flex-grow: 1;
       align-content: start;
@@ -323,7 +328,6 @@
       min-height: 50vh;
   }
   
-  /* The Strip Card */
   .palette-strip {
       display: flex;
       flex-direction: column;
@@ -332,16 +336,22 @@
       overflow: hidden;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       cursor: pointer;
-      /* START HIDDEN - JS reveals this */
-      opacity: 0; 
-      transform: scale(0.9);
       transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.5s ease;
+      
+      /* FAILSAFE: Visible by default to prevent blank screen bugs */
+      opacity: 1; 
+      transform: scale(1);
   }
   
-  /* REVEAL CLASS (This was missing/mismatched in previous version) */
-  .palette-strip.reveal {
+  /* Animation Class applied by JS */
+  .palette-strip.animate-hidden {
+      opacity: 0;
+      transform: translateY(30px) scale(0.9);
+  }
+  
+  .palette-strip.animate-visible {
       opacity: 1;
-      transform: scale(1);
+      transform: translateY(0) scale(1);
   }
 
   .palette-strip:hover {
@@ -376,7 +386,6 @@
       white-space: nowrap;
   }
   .color-swatch:hover .hex-tooltip { opacity: 1; }
-
 
   /* Centered Loader */
   #palette-loader {
@@ -580,7 +589,7 @@
     box-sizing: content-box;
     position: relative;
     z-index: 2;
-    pointer-events: none; /* No drag */
+    pointer-events: none; 
   }
 
   .visualizer-controls {
@@ -705,11 +714,6 @@
           right: auto;
           transform: scale(0.75);
       }
-      
-      /* Mobile Logo alignment */
-      .title-wrapper { display: block; margin-bottom: 10px; }
-      .insta-link { left: 50%; transform: translateX(-50%) translateY(-40px); top: 0; }
-      h1 { margin-top: 40px; font-size: 2.5rem; }
   }
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
@@ -732,7 +736,6 @@
     .nav-arrow-horiz { order: 2; }
     .vertical-center-column { order: 1; width: 100%; gap: 10px; }
     
-    /* Ensure absolute position logic holds on smallest screens */
     .light-switch-container { top: 10px; left: 10px; right: auto; transform: scale(0.7); }
   }
 </style>
@@ -743,7 +746,7 @@
   <div id="intro"><h1>FujingAround</h1></div>
 
   <header>
-    <div class="title-wrapper">
+    <div class="header-title-row">
         <a href="https://www.instagram.com/fujingaround/" target="_blank" class="insta-link">
             <img src="instagram.png" alt="Instagram">
         </a>
@@ -778,7 +781,7 @@
   <div id="palettes-view">
       <div id="palette-loader">Analyzing Colors...</div>
   </div>
-
+  
   <div id="prints-view">
     
     <div class="light-switch-container" id="spotlight-switch">
@@ -961,10 +964,8 @@ function openTrip(index) {
 }
 
 // ================================
-// PALETTES LOGIC (SAFE MODE + RANDOM POP-IN)
+// PALETTES LOGIC (FAILSAFE)
 // ================================
-let generatedStrips = [];
-
 function openPalettes() {
     menuView.style.display = "none";
     galleryView.style.display = "none";
@@ -977,6 +978,7 @@ function openPalettes() {
         paletteLoader.style.display = "block";
         generatePalettes();
     } else {
+        // Re-run random pop-in
         animateRandomPopIn();
     }
     window.scrollTo(0, 0);
@@ -984,18 +986,19 @@ function openPalettes() {
 
 function generatePalettes() {
     let loadedImages = 0;
+    let generatedStrips = [];
     
     allImages.forEach(src => {
         const img = new Image();
+        // Removing crossOrigin prevents many CORS errors on GitHub Pages
         img.src = src;
         
         img.onload = function() {
             try {
                 const colors = extractDistinctColors(img, 3);
-                createStrip(colors, src);
+                createStripData(colors, src, generatedStrips);
             } catch (e) {
-                // Safe mode fallback to grayscale
-                createStrip(['#333333', '#777777', '#cccccc'], src); 
+                createStripData(['#333333', '#777777', '#cccccc'], src, generatedStrips); 
             }
             checkDone();
         }
@@ -1006,15 +1009,18 @@ function generatePalettes() {
             loadedImages++;
             if(loadedImages >= allImages.length) {
                 paletteLoader.style.display = "none";
-                appendAndAnimate();
+                appendStrips(generatedStrips);
             }
         }
     });
 }
 
-function createStrip(colors, src) {
+function createStripData(colors, src, array) {
     const strip = document.createElement('div');
     strip.className = 'palette-strip';
+    
+    // PREPARE FOR ANIMATION: Start hidden using inline style that JS will remove later
+    strip.classList.add('animate-hidden');
     
     colors.forEach(hex => {
         const swatch = document.createElement('div');
@@ -1033,32 +1039,34 @@ function createStrip(colors, src) {
         };
         strip.appendChild(swatch);
     });
-    
-    // Push to array first, don't append yet
-    generatedStrips.push(strip);
+    array.push(strip);
 }
 
-function appendAndAnimate() {
-    // Randomize order before appending
-    const shuffled = generatedStrips.sort(() => Math.random() - 0.5);
+function appendStrips(strips) {
+    // Randomize order
+    const shuffled = strips.sort(() => Math.random() - 0.5);
     shuffled.forEach(strip => palettesView.appendChild(strip));
-    
     animateRandomPopIn();
 }
 
 function animateRandomPopIn() {
     const strips = document.querySelectorAll('.palette-strip');
+    
     // Reset
     strips.forEach(strip => {
-        strip.classList.remove('reveal');
-        strip.style.opacity = '0';
+        strip.classList.remove('animate-visible');
+        strip.classList.add('animate-hidden');
     });
     
-    // Random delay
+    // Shuffle indices for animation order
     const indices = Array.from(strips.keys()).sort(() => Math.random() - 0.5);
+    
     indices.forEach((index, i) => {
         setTimeout(() => {
-            if(strips[index]) strips[index].classList.add('reveal');
+            if(strips[index]) {
+                strips[index].classList.remove('animate-hidden');
+                strips[index].classList.add('animate-visible');
+            }
         }, i * 50);
     });
 }
@@ -1070,47 +1078,42 @@ function extractDistinctColors(imgElement, count) {
     canvas.height = 50;
     ctx.drawImage(imgElement, 0, 0, 50, 50);
     
-    try {
-        const imgData = ctx.getImageData(0, 0, 50, 50).data;
-        const colorCounts = {};
-        
-        for (let i = 0; i < imgData.length; i += 4) {
-            const r = Math.round(imgData[i] / 32) * 32;
-            const g = Math.round(imgData[i+1] / 32) * 32;
-            const b = Math.round(imgData[i+2] / 32) * 32;
-            const hex = rgbToHex(r, g, b);
-            colorCounts[hex] = (colorCounts[hex] || 0) + 1;
-        }
-        
-        let sortedColors = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]);
-        
-        const distinct = [];
-        for (let hex of sortedColors) {
-            if (distinct.length >= count) break;
-            const rgb1 = hexToRgb(hex);
-            let isDistinct = true;
-            for (let picked of distinct) {
-                const rgb2 = hexToRgb(picked);
-                const distance = Math.sqrt(Math.pow(rgb1.r - rgb2.r, 2) + Math.pow(rgb1.g - rgb2.g, 2) + Math.pow(rgb1.b - rgb2.b, 2));
-                if (distance < 40) { isDistinct = false; break; }
-            }
-            if (isDistinct) distinct.push(hex);
-        }
-        
-        let i = 0;
-        while (distinct.length < count) {
-            if (i < sortedColors.length) {
-                 if (!distinct.includes(sortedColors[i])) distinct.push(sortedColors[i]);
-            } else {
-                 distinct.push("#cccccc"); 
-            }
-            i++;
-        }
-        return distinct;
-        
-    } catch (e) {
-        return Array(count).fill('#cccccc');
+    const imgData = ctx.getImageData(0, 0, 50, 50).data;
+    const colorCounts = {};
+    
+    for (let i = 0; i < imgData.length; i += 4) {
+        const r = Math.round(imgData[i] / 32) * 32;
+        const g = Math.round(imgData[i+1] / 32) * 32;
+        const b = Math.round(imgData[i+2] / 32) * 32;
+        const hex = rgbToHex(r, g, b);
+        colorCounts[hex] = (colorCounts[hex] || 0) + 1;
     }
+    
+    let sortedColors = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]);
+    
+    const distinct = [];
+    for (let hex of sortedColors) {
+        if (distinct.length >= count) break;
+        const rgb1 = hexToRgb(hex);
+        let isDistinct = true;
+        for (let picked of distinct) {
+            const rgb2 = hexToRgb(picked);
+            const distance = Math.sqrt(Math.pow(rgb1.r - rgb2.r, 2) + Math.pow(rgb1.g - rgb2.g, 2) + Math.pow(rgb1.b - rgb2.b, 2));
+            if (distance < 40) { isDistinct = false; break; }
+        }
+        if (isDistinct) distinct.push(hex);
+    }
+    
+    let i = 0;
+    while (distinct.length < count) {
+        if (i < sortedColors.length) {
+             if (!distinct.includes(sortedColors[i])) distinct.push(sortedColors[i]);
+        } else {
+             distinct.push("#cccccc"); 
+        }
+        i++;
+    }
+    return distinct;
 }
 
 function hexToRgb(hex) {
