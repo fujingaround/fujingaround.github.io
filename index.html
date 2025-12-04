@@ -313,6 +313,7 @@
       width: 100%;
       max-width: 1200px;
       display: grid;
+      /* CENTERED GRID */
       justify-content: center;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 20px; 
@@ -330,10 +331,11 @@
       overflow: hidden;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       cursor: pointer;
-      
-      opacity: 1; /* FAILSAFE VISIBILITY */
-      transform: scale(1);
       transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.5s ease;
+      
+      /* FAILSAFE: Visible by default */
+      opacity: 1; 
+      transform: scale(1);
   }
   
   /* Animation Logic */
@@ -397,6 +399,50 @@
       text-align: center;
   }
   @keyframes pulse { from { opacity: 0.3; } to { opacity: 0.8; } }
+
+  /* Hex Zoom Overlay (FIXED) */
+  #hex-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 11000;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      /* Default hidden prevents the #000000 glitch */
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+  }
+  #hex-overlay.active { 
+      visibility: visible;
+      opacity: 1; 
+      pointer-events: auto; 
+  }
+  
+  .hex-display {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 50px rgba(0,0,0,0.5);
+      transform: scale(0.8);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  #hex-overlay.active .hex-display { transform: scale(1); }
+  
+  .hex-text {
+      font-size: 2rem;
+      font-weight: 900;
+      font-family: monospace;
+      background: rgba(255,255,255,0.8);
+      padding: 10px 20px;
+      border-radius: 8px;
+      color: #000;
+  }
 
   /* --- PRINTS VISUALIZER VIEW --- */
   #prints-view {
@@ -708,7 +754,6 @@
       }
       
       /* Mobile Logo alignment */
-      .title-wrapper { display: block; margin-bottom: 10px; }
       .insta-link { left: 50%; transform: translateX(-50%) translateY(-40px); top: 0; }
       h1 { margin-top: 40px; font-size: 2.5rem; }
   }
@@ -918,6 +963,8 @@ const lightboxImg = document.getElementById("lightbox-img");
 const footerContainer = document.getElementById("footer-container");
 const spotlightSwitch = document.getElementById("spotlight-switch");
 const toggleDarkBtn = document.getElementById("toggle-dark");
+const hexOverlay = document.getElementById("hex-overlay");
+const hexText = document.getElementById("hex-text");
 const paletteLoader = document.getElementById("palette-loader");
 
 
@@ -982,6 +1029,7 @@ function openPalettes() {
         paletteLoader.style.display = "block";
         generatePalettes();
     } else {
+        // Re-run random pop-in
         animateRandomPopIn();
     }
     window.scrollTo(0, 0);
@@ -993,7 +1041,7 @@ function generatePalettes() {
     
     allImages.forEach(src => {
         const img = new Image();
-        // Removed crossOrigin for safer local/github loading
+        // Removing crossOrigin prevents many CORS errors on GitHub Pages
         img.src = src;
         
         img.onload = function() {
@@ -1001,7 +1049,6 @@ function generatePalettes() {
                 const colors = extractDistinctColors(img, 3);
                 createStripData(colors, src, generatedStrips);
             } catch (e) {
-                // Fallback if canvas fails
                 createStripData(['#333333', '#777777', '#cccccc'], src, generatedStrips); 
             }
             checkDone();
@@ -1087,15 +1134,8 @@ function extractDistinctColors(imgElement, count) {
             const r = Math.round(imgData[i] / 32) * 32;
             const g = Math.round(imgData[i+1] / 32) * 32;
             const b = Math.round(imgData[i+2] / 32) * 32;
-            const { h, s, l } = rgbToHsl(r, g, b);
-            
-            // Filter extremes
-            if (l < 0.1 || l > 0.9) continue;
-            
-            // Weighted score: Frequency + Saturation Boost
             const hex = rgbToHex(r, g, b);
-            const score = 1 + (s * 5); 
-            colorCounts[hex] = (colorCounts[hex] || 0) + score;
+            colorCounts[hex] = (colorCounts[hex] || 0) + 1;
         }
         
         let sortedColors = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]);
@@ -1108,7 +1148,7 @@ function extractDistinctColors(imgElement, count) {
             for (let picked of distinct) {
                 const rgb2 = hexToRgb(picked);
                 const distance = Math.sqrt(Math.pow(rgb1.r - rgb2.r, 2) + Math.pow(rgb1.g - rgb2.g, 2) + Math.pow(rgb1.b - rgb2.b, 2));
-                if (distance < 50) { isDistinct = false; break; }
+                if (distance < 40) { isDistinct = false; break; }
             }
             if (isDistinct) distinct.push(hex);
         }
@@ -1138,23 +1178,16 @@ function rgbToHex(r, g, b) {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
 
-function rgbToHsl(r, g, b){
-    r /= 255, g /= 255, b /= 255;
-    var max = Math.max(r, g, b), min = Math.min(r, g, b);
-    var h, s, l = (max + min) / 2;
-    if(max == min){
-        h = s = 0; 
-    } else {
-        var d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch(max){
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
-        }
-        h /= 6;
-    }
-    return { h, s, l };
+function showHex(hex) {
+    hexText.innerText = hex;
+    const display = document.querySelector('.hex-display');
+    display.style.backgroundColor = hex;
+    hexText.style.color = "#000"; 
+    hexOverlay.classList.add('active');
+}
+
+function closeHex() {
+    hexOverlay.classList.remove('active');
 }
 
 
