@@ -37,9 +37,8 @@
       --text: #cccccc; 
   }
 
-  /* Hide arrows AND instructions in spotlight mode */
-  body.spotlight-mode .nav-arrow,
-  body.spotlight-mode .visualizer-controls {
+  /* Hide arrows in spotlight mode */
+  body.spotlight-mode .nav-arrow {
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.5s ease;
@@ -190,7 +189,6 @@
     text-align: center;
   }
 
-  /* --- PRINTS BUTTON --- */
   .menu-item.prints-btn {
     aspect-ratio: auto;
     height: auto;
@@ -248,7 +246,7 @@
   #gear-info { font-weight: 300; }
   #copyright-info { font-weight: 300; margin-top: 5px; }
 
-  /* --- GALLERY VIEW & LOADING ANIMATION --- */
+  /* --- GALLERY VIEW --- */
   #gallery-view {
     display: none;
     padding: 20px;
@@ -261,8 +259,6 @@
     column-gap: 20px;
     width: 100%;
   }
-  
-  /* The Container for each image */
   .cell {
     break-inside: avoid;
     margin-bottom: 20px;
@@ -270,15 +266,11 @@
     display: inline-block;
     width: 100%;
     cursor: zoom-in;
-    
-    /* LOADING SKELETON STYLES */
-    min-height: 250px; /* Forces a shape even before image loads */
-    background-color: var(--loading-bg); /* Grey background */
+    min-height: 250px; 
+    background-color: var(--loading-bg); 
     border-radius: 4px;
     overflow: hidden;
   }
-  
-  /* The "Shimmer" Animation for loading */
   .cell::before {
     content: "";
     position: absolute;
@@ -288,38 +280,22 @@
     animation: loading 1.5s infinite;
     z-index: 1;
   }
+  @keyframes loading { 100% { transform: translateX(100%); } }
   
-  @keyframes loading {
-    100% { transform: translateX(100%); }
-  }
-  
-  /* Once image loads, we hide the shimmer using a class */
-  .cell.loaded::before {
-      display: none;
-      animation: none;
-  }
-  .cell.loaded {
-      background-color: transparent;
-      min-height: auto; /* Let image dictate height once loaded */
-  }
+  .cell.loaded::before { display: none; animation: none; }
+  .cell.loaded { background-color: transparent; min-height: auto; }
 
-  /* The Image Itself */
   .cell img {
     width: 100%;
     height: auto;
     display: block;
-    /* Start hidden to prevent jumping */
     opacity: 0; 
     transition: opacity 0.6s ease-in; 
     pointer-events: none;
     position: relative;
     z-index: 2;
   }
-  
-  /* Class added by JS when load completes */
-  .cell img.fade-in {
-      opacity: 1;
-  }
+  .cell img.fade-in { opacity: 1; }
 
   /* --- PRINTS VISUALIZER VIEW --- */
   #prints-view {
@@ -329,7 +305,7 @@
     justify-content: center;
     min-height: 60vh;
     padding: 20px;
-    position: relative; /* Anchor for absolute switch */
+    position: relative;
     flex-grow: 1;
   }
 
@@ -385,7 +361,6 @@
       font-weight: bold;
       animation: bounce 2s infinite;
   }
-  
   @keyframes bounce {
       0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
       40% {transform: translateY(-5px);}
@@ -397,9 +372,7 @@
       height: 100px;
       background-color: #e0e0e0;
       border-radius: 4px;
-      box-shadow: 
-          inset 0 1px 3px rgba(255,255,255,0.8),
-          0 4px 8px rgba(0,0,0,0.2);
+      box-shadow: inset 0 1px 3px rgba(255,255,255,0.8), 0 4px 8px rgba(0,0,0,0.2);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -412,9 +385,7 @@
       background-color: #f0f0f0;
       border: 1px solid #d0d0d0;
       cursor: pointer;
-      box-shadow: 
-          inset 0 -6px 4px -4px rgba(0,0,0,0.3),
-          0 4px 4px rgba(0,0,0,0.1);
+      box-shadow: inset 0 -6px 4px -4px rgba(0,0,0,0.3), 0 4px 4px rgba(0,0,0,0.1);
       transition: all 0.2s ease-in-out;
       transform: perspective(300px) rotateX(-20deg); 
   }
@@ -422,9 +393,7 @@
   body.spotlight-mode .light-switch-toggle {
       transform: perspective(300px) rotateX(20deg);
       background-color: #fafafa;
-      box-shadow: 
-          inset 0 6px 4px -4px rgba(255, 255, 220, 0.6),
-          0 -4px 4px rgba(0,0,0,0.1);
+      box-shadow: inset 0 6px 4px -4px rgba(255, 255, 220, 0.6), 0 -4px 4px rgba(0,0,0,0.1);
   }
   
   body.spotlight-mode .light-switch-plate {
@@ -446,17 +415,11 @@
     align-items: center;
   }
   
-  /* 1. The Light Cone (Fixed to VIEWPORT) */
   body.spotlight-mode::before {
       content: '';
       position: fixed;
       inset: 0;
-      background: radial-gradient(
-          circle at 50% -20%, 
-          rgba(255, 255, 250, 0.15) 0%, 
-          rgba(255, 255, 250, 0.05) 40%, 
-          rgba(0,0,0,0) 80%
-      );
+      background: radial-gradient(circle at 50% -20%, rgba(255, 255, 250, 0.15) 0%, rgba(255, 255, 250, 0.05) 40%, rgba(0,0,0,0) 80%);
       pointer-events: none;
       z-index: 1; 
       mix-blend-mode: screen;
@@ -464,19 +427,13 @@
       transition: opacity 0.8s ease;
   }
   
-  /* 2. The Wall Halo (Fixed to VIEWPORT Center) */
   body.spotlight-mode::after {
       content: '';
       position: fixed;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       width: 100vw; height: 100vh;
-      background: radial-gradient(
-          circle at 50% 50%,
-          rgba(255, 255, 255, 0.25) 0%, 
-          rgba(255, 255, 255, 0.10) 30%, 
-          rgba(0,0,0,0) 65%
-      );
+      background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.10) 30%, rgba(0,0,0,0) 65%);
       pointer-events: none;
       z-index: 1;
       mix-blend-mode: screen;
@@ -484,13 +441,8 @@
       transition: opacity 0.8s ease;
   }
   
-  /* 3. The Lit Frame (Pop) */
   body.spotlight-mode .framed-photo {
-      box-shadow: 
-        0 -2px 6px rgba(255,255,255,1.0), 
-        0 60px 100px rgba(0,0,0,1),       
-        0 20px 40px rgba(0,0,0,0.9) !important;
-      
+      box-shadow: 0 -2px 6px rgba(255,255,255,1.0), 0 60px 100px rgba(0,0,0,1), 0 20px 40px rgba(0,0,0,0.9) !important;
       filter: contrast(1.05);
       position: relative;
       z-index: 10;
@@ -518,23 +470,8 @@
     position: relative;
   }
   
-  /* Styles for the "Instructions:" Header */
-  .visualizer-controls h4 {
-      margin: 0 0 15px 0;
-      font-weight: bold;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-size: 0.85rem;
-  }
-  
-  .visualizer-controls span {
-    display: inline-block;
-    margin: 0 10px;
-    border: 1px solid var(--text);
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-  }
+  .visualizer-controls h4 { margin: 0 0 15px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem; }
+  .visualizer-controls span { display: inline-block; margin: 0 10px; border: 1px solid var(--text); padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; }
   
   /* --- BUY SECTION --- */
   .buy-section {
@@ -589,7 +526,7 @@
   .lightbox-content { position: relative; max-width: 90vw; max-height: 90vh; }
   #lightbox-img { max-width: 100%; max-height: 90vh; display: block; box-shadow: 0 20px 50px rgba(0,0,0,0.5); pointer-events: none; }
   
-  /* --- RESTORED CSS WATERMARK --- */
+  /* --- CSS WATERMARK --- */
   .watermark { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; pointer-events: none; overflow: hidden; z-index: 50; }
   .watermark span { 
       color: #ffffff; 
@@ -665,7 +602,6 @@
     .nav-arrow-horiz { order: 2; }
     .vertical-center-column { order: 1; width: 100%; gap: 10px; }
     
-    /* Ensure absolute position logic holds on smallest screens */
     .light-switch-container { top: 10px; left: 10px; right: auto; transform: scale(0.7); }
   }
 </style>
@@ -758,17 +694,17 @@
 const trips = [
   {
     title: "Summer 2024",
-    coverImage: "image1.jpeg", 
+    coverImage: "thumbnails/image1.jpeg", // Use thumbnail for cover
     images: ["image1.jpeg", "image2.jpg", "image3.jpg"]
   },
   {
     title: "Winter 2023",
-    coverImage: "image5.jpg", 
+    coverImage: "thumbnails/image5.jpg", 
     images: ["image4.jpg", "image5.jpg", "image6.jpg", "image7.jpg"]
   },
   {
     title: "Balkans, 2025",
-    coverImage: "MNE9.JPG", 
+    coverImage: "thumbnails/MNE9.JPG", 
     images: [
       "MNE1.JPG", "MNE2.JPG", "MNE3.JPG", "MNE4.JPG", "MNE5.JPG",
       "MNE6.JPG", "MNE7.JPG", "MNE8.JPG", "MNE9.JPG", "MNE10.JPG",
@@ -782,7 +718,7 @@ const trips = [
   },
   {
     title: "Spring 2026",
-    coverImage: "image2.jpg", 
+    coverImage: "thumbnails/image2.jpg", 
     images: ["image2.jpg"]
   }
 ];
@@ -852,26 +788,26 @@ function openTrip(index) {
     const cell = document.createElement("div");
     cell.className = "cell";
     
-    // Create Image Element
     const img = document.createElement("img");
     img.loading = "lazy";
     
-    // SMART LOADING LOGIC:
-    // 1. If it loads normally:
+    // GRID USES THUMBNAILS FOLDER
+    img.src = `thumbnails/${src}`;
+    
+    // SMART LOADING LOGIC
     img.onload = () => {
         img.classList.add('fade-in');
-        cell.classList.add('loaded'); // Removes shimmer background
+        cell.classList.add('loaded'); 
     };
-    // 2. Set src triggers load
-    img.src = src;
     
-    // 3. Check if it loaded instantly from cache
     if (img.complete) {
         img.classList.add('fade-in');
         cell.classList.add('loaded');
     }
 
-    cell.onclick = () => openLightbox(src);
+    // LIGHTBOX USES PROTECTED FOLDER
+    cell.onclick = () => openLightbox(`protected/${src}`);
+    
     cell.appendChild(img);
     grid.appendChild(cell);
   });
@@ -948,7 +884,10 @@ function changeFrame(direction) {
 
 function updateVisualizer() {
   const currentSrc = allImages[currentImgIndex];
-  visualizerImg.src = currentSrc;
+  
+  // VISUALIZER USES PROTECTED FOLDER (High Quality, Watermarked)
+  visualizerImg.src = `protected/${currentSrc}`;
+  
   frames.forEach(f => visualizerImg.classList.remove(f.class));
   visualizerImg.classList.add(frames[currentFrameIndex].class);
   frameNameDisplay.innerText = `Current Frame: ${frames[currentFrameIndex].name}`;
@@ -959,7 +898,7 @@ function updateVisualizer() {
 // LIGHTBOX LOGIC
 // ================================
 function openLightbox(src) {
-  lightboxImg.src = src;
+  lightboxImg.src = src; // 'src' already includes path from openTrip
   lightbox.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
