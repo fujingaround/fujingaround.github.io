@@ -92,30 +92,11 @@
   }
   h1 {
     font-size: 3rem;
-    margin: 0 0 15px 0;
+    margin: 0 0 10px 0;
     letter-spacing: -0.05em;
     font-weight: 700;
   }
-
-  .insta-link {
-      position: absolute;
-      top: 4rem; 
-      left: 40px;
-      display: block;
-      width: 40px;
-      height: 40px;
-      transition: opacity 0.2s;
-  }
-  .insta-link img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      filter: invert(0); 
-  }
-  [data-theme="dark"] .insta-link img { filter: invert(1); }
-  .insta-link:hover { opacity: 0.6; }
-
-  .palettes-btn {
+  .social-link {
     display: inline-block;
     color: var(--text);
     text-decoration: none;
@@ -123,11 +104,11 @@
     font-weight: bold;
     border: 1px solid var(--text);
     padding: 8px 16px;
+    margin-top: 10px;
     text-transform: uppercase;
     transition: background 0.2s;
-    cursor: pointer;
   }
-  .palettes-btn:hover {
+  .social-link:hover {
     background: var(--btn-hover);
   }
 
@@ -208,44 +189,44 @@
     text-align: center;
   }
 
-  .menu-item.prints-btn {
+  /* --- SPECIAL BUTTONS (PRINTS & PALETTES) --- */
+  .menu-item.action-btn {
     aspect-ratio: auto;
     height: auto;
     min-height: 180px;
-    max-width: 300px;
-    margin: 0 auto;
+    max-width: 100%; /* Can span full cell */
     background: var(--bg);
     border: 2px solid var(--text); 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    grid-column: 1 / -1;
+    /* Removed grid-column: 1 / -1 so they sit side-by-side */
   }
-  .menu-item.prints-btn::before { display: none; }
+  .menu-item.action-btn::before { display: none; }
   
-  .menu-item.prints-btn h3 {
+  .menu-item.action-btn h3 {
     color: var(--text);
     text-shadow: none;
     font-size: 2rem;
     font-weight: 800;
     letter-spacing: -0.02em;
   }
-  .menu-item.prints-btn p {
+  .menu-item.action-btn p {
     margin: 10px 0 0;
     opacity: 0.6;
     font-weight: 400;
     color: var(--text);
   }
 
-  .icon-cart {
+  .icon-svg {
     width: 35px;
     height: 35px;
     fill: var(--text);
     margin-bottom: 15px;
   }
 
-  /* --- FOOTER --- */
+  /* --- FOOTER (SCROLL TO SEE) --- */
   #footer-container {
     position: relative; 
     width: 100%;
@@ -314,63 +295,69 @@
   }
   .cell img.fade-in { opacity: 1; }
 
-  /* --- PALETTES VIEW (NEW ANIMATED) --- */
+  /* --- PALETTES VIEW (NEW GRID STYLE) --- */
   #palettes-view {
       display: none; 
       padding: 40px;
       margin: 0 auto;
       width: 100%;
-      max-width: 1400px;
-      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-      gap: 15px;
+      max-width: 1200px;
+      /* Responsive grid for the clusters */
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 30px;
       flex-grow: 1;
   }
   
-  /* Loading Text for Palettes */
+  /* A single 3x3 cluster representing one image */
+  .palette-cluster {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 2px; /* Tiny gap between chips */
+      aspect-ratio: 1 / 1;
+      width: 100%;
+  }
+
+  /* Individual Chip */
+  .color-chip {
+      width: 100%;
+      height: 100%;
+      background-color: #eee;
+      cursor: pointer;
+      border-radius: 2px;
+      /* Initial state for pop animation */
+      opacity: 0;
+      transform: scale(0.5);
+      transition: transform 0.2s ease;
+  }
+  
+  .color-chip:hover {
+      transform: scale(1.1);
+      z-index: 2;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  }
+
+  /* Keyframe for random pop-in */
+  @keyframes popChip {
+      to { opacity: 1; transform: scale(1); }
+  }
+  
+  .color-chip.popped {
+      animation: popChip 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+
   #palette-loader {
       display: none;
       width: 100%;
       text-align: center;
+      grid-column: 1 / -1;
       font-size: 1.2rem;
-      color: var(--text);
       opacity: 0.5;
       padding: 50px;
       animation: pulse 1s infinite alternate;
   }
   @keyframes pulse { from { opacity: 0.3; } to { opacity: 0.7; } }
-
-  /* The actual palette strip */
-  .palette-strip {
-      display: flex;
-      flex-direction: column;
-      height: 200px;
-      border-radius: 4px;
-      overflow: hidden;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      cursor: pointer;
-      
-      /* START HIDDEN FOR ANIMATION */
-      opacity: 0;
-      transform: scale(0.8) translateY(20px);
-  }
-  
-  /* The "Pop In" Animation Class */
-  .palette-strip.pop-in {
-      animation: popInBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-  }
-  
-  @keyframes popInBounce {
-      0% { opacity: 0; transform: scale(0.8) translateY(20px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); }
-  }
-  
-  .palette-strip:hover { 
-      transform: scale(1.05) !important; 
-      z-index: 2; 
-      transition: transform 0.2s ease;
-  }
-  
-  .color-swatch { flex: 1; width: 100%; }
 
   /* Hex Zoom Overlay */
   #hex-overlay {
@@ -418,7 +405,7 @@
     justify-content: center;
     min-height: 60vh;
     padding: 20px;
-    position: relative;
+    position: relative; /* Anchor for absolute switch */
     flex-grow: 1;
   }
 
@@ -451,7 +438,7 @@
   .nav-arrow:hover { opacity: 1; transform: scale(1.1); }
   .nav-arrow-vert { font-size: 2.5rem; }
 
-  /* --- LIGHT SWITCH --- */
+  /* --- LIGHT SWITCH (ABSOLUTE) --- */
   .light-switch-container {
       position: absolute; 
       top: 50%;
@@ -474,6 +461,7 @@
       font-weight: bold;
       animation: bounce 2s infinite;
   }
+  
   @keyframes bounce {
       0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
       40% {transform: translateY(-5px);}
@@ -485,7 +473,9 @@
       height: 100px;
       background-color: #e0e0e0;
       border-radius: 4px;
-      box-shadow: inset 0 1px 3px rgba(255,255,255,0.8), 0 4px 8px rgba(0,0,0,0.2);
+      box-shadow: 
+          inset 0 1px 3px rgba(255,255,255,0.8),
+          0 4px 8px rgba(0,0,0,0.2);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -498,7 +488,9 @@
       background-color: #f0f0f0;
       border: 1px solid #d0d0d0;
       cursor: pointer;
-      box-shadow: inset 0 -6px 4px -4px rgba(0,0,0,0.3), 0 4px 4px rgba(0,0,0,0.1);
+      box-shadow: 
+          inset 0 -6px 4px -4px rgba(0,0,0,0.3),
+          0 4px 4px rgba(0,0,0,0.1);
       transition: all 0.2s ease-in-out;
       transform: perspective(300px) rotateX(-20deg); 
   }
@@ -506,7 +498,9 @@
   body.spotlight-mode .light-switch-toggle {
       transform: perspective(300px) rotateX(20deg);
       background-color: #fafafa;
-      box-shadow: inset 0 6px 4px -4px rgba(255, 255, 220, 0.6), 0 -4px 4px rgba(0,0,0,0.1);
+      box-shadow: 
+          inset 0 6px 4px -4px rgba(255, 255, 220, 0.6),
+          0 -4px 4px rgba(0,0,0,0.1);
   }
   
   body.spotlight-mode .light-switch-plate {
@@ -515,7 +509,9 @@
       background-color: #333;
   }
 
+
   /* --- LIGHTING PHYSICS --- */
+  
   .framed-photo-wrapper {
     position: relative;
     max-width: 70vw; 
@@ -526,11 +522,17 @@
     align-items: center;
   }
   
+  /* 1. The Light Cone (Fixed to VIEWPORT) */
   body.spotlight-mode::before {
       content: '';
       position: fixed;
       inset: 0;
-      background: radial-gradient(circle at 50% -20%, rgba(255, 255, 250, 0.15) 0%, rgba(255, 255, 250, 0.05) 40%, rgba(0,0,0,0) 80%);
+      background: radial-gradient(
+          circle at 50% -20%, 
+          rgba(255, 255, 250, 0.15) 0%, 
+          rgba(255, 255, 250, 0.05) 40%, 
+          rgba(0,0,0,0) 80%
+      );
       pointer-events: none;
       z-index: 1; 
       mix-blend-mode: screen;
@@ -538,13 +540,19 @@
       transition: opacity 0.8s ease;
   }
   
+  /* 2. The Wall Halo (Fixed to VIEWPORT Center) */
   body.spotlight-mode::after {
       content: '';
       position: fixed;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       width: 100vw; height: 100vh;
-      background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.10) 30%, rgba(0,0,0,0) 65%);
+      background: radial-gradient(
+          circle at 50% 50%,
+          rgba(255, 255, 255, 0.25) 0%, 
+          rgba(255, 255, 255, 0.10) 30%, 
+          rgba(0,0,0,0) 65%
+      );
       pointer-events: none;
       z-index: 1;
       mix-blend-mode: screen;
@@ -552,8 +560,13 @@
       transition: opacity 0.8s ease;
   }
   
+  /* 3. The Lit Frame (Pop) */
   body.spotlight-mode .framed-photo {
-      box-shadow: 0 -2px 6px rgba(255,255,255,1.0), 0 60px 100px rgba(0,0,0,1), 0 20px 40px rgba(0,0,0,0.9) !important;
+      box-shadow: 
+        0 -2px 6px rgba(255,255,255,1.0), 
+        0 60px 100px rgba(0,0,0,1),       
+        0 20px 40px rgba(0,0,0,0.9) !important;
+      
       filter: contrast(1.05);
       position: relative;
       z-index: 10;
@@ -567,7 +580,7 @@
     box-sizing: content-box;
     position: relative;
     z-index: 2;
-    pointer-events: none;
+    pointer-events: none; /* No drag */
   }
 
   .visualizer-controls {
@@ -682,8 +695,8 @@
   @media (max-width: 900px) {
       .grid { column-count: 2; }
       #menu-view { grid-template-columns: 1fr; }
-      #palettes-view { grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); padding: 20px; }
       
+      /* Mobile: Switch at Top Left, ABSOLUTE */
       .light-switch-container { 
           position: absolute;
           top: 20px; 
@@ -691,16 +704,17 @@
           right: auto;
           transform: scale(0.75);
       }
-      .insta-link { top: 4rem; left: 1rem; }
   }
   @media (max-width: 600px) {
-    h1 { font-size: 2rem; margin-bottom: 20px; }
-    .insta-link { position: static; margin: 0 auto 10px; display: inline-block; }
+    h1 { font-size: 2rem; }
     .grid { column-count: 1; }
     #menu-view { padding: 20px; }
     .menu-item h3 { font-size: 2.5rem; }
 
-    #footer-container { padding: 40px 20px; font-size: 0.65rem; }
+    #footer-container { 
+        padding: 40px 20px;
+        font-size: 0.65rem;
+    }
     
     .footer-controls { bottom: 10px; right: 10px; }
     .control-btn { padding: 8px 12px; font-size: 0.7rem; }
@@ -722,24 +736,27 @@
   <div id="intro"><h1>FujingAround</h1></div>
 
   <header>
-    <a href="https://www.instagram.com/fujingaround/" target="_blank" class="insta-link">
-        <img src="instagram_icon.png" alt="Instagram">
-    </a>
-    
+    <a href="https://www.instagram.com/fujingaround/" target="_blank" class="social-link">Instagram</a>
     <h1>FujingAround</h1>
-    
-    <div onclick="openPalettes()" class="palettes-btn">Palettes</div>
     <br>
     <button id="back-btn" onclick="showMenu()">← Back to Menu</button>
   </header>
 
   <div id="menu-view">
-    <div class="menu-item prints-btn" onclick="openPrints()">
-      <svg class="icon-cart" viewBox="0 0 24 24">
+    <div class="menu-item action-btn" onclick="openPrints()">
+      <svg class="icon-svg" viewBox="0 0 24 24">
         <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
       </svg>
       <h3>Prints</h3>
       <p>Visualize frames</p>
+    </div>
+
+    <div class="menu-item action-btn" onclick="openPalettes()">
+      <svg class="icon-svg" viewBox="0 0 24 24">
+        <path d="M12 3a9 9 0 0 0 0 18c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7zm-1.5-4.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm3.5 1.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm-5-3.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm6.5-1.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5z"/>
+      </svg>
+      <h3>Palettes</h3>
+      <p>Color analysis</p>
     </div>
   </div>
 
@@ -749,7 +766,7 @@
 
   <div id="palettes-view">
       <div id="palette-loader">Analyzing Colors...</div>
-      </div>
+  </div>
   
   <div id="hex-overlay" onclick="closeHex()">
       <div class="hex-display">
@@ -770,9 +787,11 @@
       <div class="nav-arrow nav-arrow-horiz" onclick="changeImage(-1)">❮</div>
       <div class="vertical-center-column">
           <div class="nav-arrow nav-arrow-vert" onclick="changeFrame(1)">▲</div>
+          
           <div class="framed-photo-wrapper">
             <img id="visualizer-img" class="framed-photo frame-matte" src="" alt="Print Preview">
           </div>
+          
           <div class="nav-arrow nav-arrow-vert" onclick="changeFrame(-1)">▼</div>
       </div>
       <div class="nav-arrow nav-arrow-horiz" onclick="changeImage(1)">❯</div>
@@ -893,7 +912,7 @@ const paletteLoader = document.getElementById("palette-loader");
 
 
 function initMenu() {
-  const printsBtn = document.querySelector('.prints-btn');
+  const printsBtn = document.querySelector('.menu-item.action-btn'); // Find the first action btn (prints)
   trips.forEach((trip, index) => {
     const btn = document.createElement("div");
     btn.className = "menu-item";
@@ -914,17 +933,19 @@ function openTrip(index) {
   trip.images.forEach(src => {
     const cell = document.createElement("div");
     cell.className = "cell";
+    
     const img = document.createElement("img");
     img.loading = "lazy";
     img.onload = () => {
         img.classList.add('fade-in');
-        cell.classList.add('loaded'); 
+        cell.classList.add('loaded');
     };
     img.src = src;
     if (img.complete) {
         img.classList.add('fade-in');
         cell.classList.add('loaded');
     }
+
     cell.onclick = () => openLightbox(src);
     cell.appendChild(img);
     grid.appendChild(cell);
@@ -937,11 +958,8 @@ function openTrip(index) {
 }
 
 // ================================
-// PALETTE ENGINE (POP-IN ANIMATION)
+// PALETTES LOGIC (Mosaic Style)
 // ================================
-let paletteQueue = [];
-let isProcessingQueue = false;
-
 function openPalettes() {
     menuView.style.display = "none";
     galleryView.style.display = "none";
@@ -949,10 +967,9 @@ function openPalettes() {
     palettesView.style.display = "grid"; 
     backBtn.style.display = "block";
     
-    // Only generate once
-    // Count children that are palette-strips (exclude loader)
-    const existingStrips = palettesView.querySelectorAll('.palette-strip').length;
-    if (existingStrips === 0) {
+    // Only generate if empty (minus loader)
+    const existingChips = palettesView.querySelectorAll('.palette-cluster').length;
+    if (existingChips === 0) {
         paletteLoader.style.display = "block";
         generatePalettes();
     }
@@ -960,58 +977,51 @@ function openPalettes() {
 }
 
 function generatePalettes() {
+    let loadedImages = 0;
+    
     allImages.forEach(src => {
         const img = new Image();
         img.crossOrigin = "Anonymous"; 
         img.src = src;
         
         img.onload = function() {
-            const colors = extractColors(img);
+            // Get 9 colors per image
+            const colors = extractColors(img, 9);
             
-            const strip = document.createElement('div');
-            strip.className = 'palette-strip';
+            // Create a 3x3 container for this image's colors
+            const cluster = document.createElement('div');
+            cluster.className = 'palette-cluster';
             
             colors.forEach(hex => {
-                const swatch = document.createElement('div');
-                swatch.className = 'color-swatch';
-                swatch.style.backgroundColor = hex;
-                swatch.onclick = () => showHex(hex);
-                strip.appendChild(swatch);
+                const chip = document.createElement('div');
+                chip.className = 'color-chip';
+                chip.style.backgroundColor = hex;
+                chip.onclick = () => showHex(hex);
+                cluster.appendChild(chip);
             });
             
-            // Add to queue instead of appending immediately
-            paletteQueue.push(strip);
-            startQueueProcessor();
+            palettesView.appendChild(cluster);
+            
+            // RANDOM POP-IN EFFECT
+            // Get all the chips in this cluster
+            const chips = Array.from(cluster.children);
+            // Shuffle indices [0..8]
+            const indices = [0,1,2,3,4,5,6,7,8].sort(() => Math.random() - 0.5);
+            
+            // Animate them in random order with delay
+            indices.forEach((index, i) => {
+                setTimeout(() => {
+                    if(chips[index]) chips[index].classList.add('popped');
+                }, i * 50); // 50ms stagger
+            });
+
+            loadedImages++;
+            if(loadedImages === 1) paletteLoader.style.display = "none";
         }
     });
 }
 
-function startQueueProcessor() {
-    if (isProcessingQueue) return;
-    isProcessingQueue = true;
-
-    // Process queue every 100ms
-    const interval = setInterval(() => {
-        if (paletteQueue.length > 0) {
-            // Hide the loading text once first item arrives
-            paletteLoader.style.display = "none";
-            
-            const strip = paletteQueue.shift();
-            palettesView.appendChild(strip);
-            
-            // Trigger animation in next frame
-            requestAnimationFrame(() => {
-                strip.classList.add('pop-in');
-            });
-        } else {
-            // Wait for more or stop if all done?
-            // Just keep checking is fine, or clear if idle too long.
-            // For robustness, we let it run as image loads are async.
-        }
-    }, 100); 
-}
-
-function extractColors(imgElement) {
+function extractColors(imgElement, count) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     canvas.width = 50;
@@ -1030,7 +1040,7 @@ function extractColors(imgElement) {
     }
     
     const sorted = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]);
-    return sorted.slice(0, 3);
+    return sorted.slice(0, count);
 }
 
 function rgbToHex(r, g, b) {
