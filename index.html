@@ -194,14 +194,13 @@
     aspect-ratio: auto;
     height: auto;
     min-height: 180px;
-    max-width: 100%; /* Can span full cell */
+    max-width: 100%;
     background: var(--bg);
     border: 2px solid var(--text); 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* Removed grid-column: 1 / -1 so they sit side-by-side */
   }
   .menu-item.action-btn::before { display: none; }
   
@@ -246,7 +245,7 @@
   #gear-info { font-weight: 300; }
   #copyright-info { font-weight: 300; margin-top: 5px; }
 
-  /* --- GALLERY VIEW --- */
+  /* --- GALLERY VIEW & LOADING ANIMATION --- */
   #gallery-view {
     display: none;
     padding: 20px;
@@ -295,17 +294,18 @@
   }
   .cell img.fade-in { opacity: 1; }
 
-  /* --- PALETTES VIEW (NEW GRID STYLE) --- */
+  /* --- PALETTES VIEW (MOSAIC GRID) --- */
   #palettes-view {
       display: none; 
       padding: 40px;
       margin: 0 auto;
       width: 100%;
       max-width: 1200px;
-      /* Responsive grid for the clusters */
+      /* Grid of clusters */
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 30px;
+      /* Each cluster is about 150px wide */
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 30px; /* Space between groups */
       flex-grow: 1;
   }
   
@@ -314,9 +314,18 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(3, 1fr);
-      gap: 2px; /* Tiny gap between chips */
+      gap: 3px; /* Gap between individual chips within a group */
       aspect-ratio: 1 / 1;
       width: 100%;
+      padding: 5px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+  }
+  
+  /* HOVER EFFECT: Show outline around the group of 9 */
+  .palette-cluster:hover {
+      outline: 1px solid var(--text);
+      background-color: rgba(125,125,125,0.1);
   }
 
   /* Individual Chip */
@@ -334,8 +343,8 @@
   
   .color-chip:hover {
       transform: scale(1.1);
-      z-index: 2;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      z-index: 5;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
   }
 
   /* Keyframe for random pop-in */
@@ -343,8 +352,9 @@
       to { opacity: 1; transform: scale(1); }
   }
   
+  /* Class added by JS */
   .color-chip.popped {
-      animation: popChip 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      animation: popChip 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   }
 
   #palette-loader {
@@ -695,6 +705,7 @@
   @media (max-width: 900px) {
       .grid { column-count: 2; }
       #menu-view { grid-template-columns: 1fr; }
+      #palettes-view { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
       
       /* Mobile: Switch at Top Left, ABSOLUTE */
       .light-switch-container { 
@@ -726,6 +737,7 @@
     .nav-arrow-horiz { order: 2; }
     .vertical-center-column { order: 1; width: 100%; gap: 10px; }
     
+    /* Ensure absolute position logic holds on smallest screens */
     .light-switch-container { top: 10px; left: 10px; right: auto; transform: scale(0.7); }
   }
 </style>
@@ -912,7 +924,7 @@ const paletteLoader = document.getElementById("palette-loader");
 
 
 function initMenu() {
-  const printsBtn = document.querySelector('.menu-item.action-btn'); // Find the first action btn (prints)
+  const printsBtn = document.querySelector('.menu-item.action-btn'); 
   trips.forEach((trip, index) => {
     const btn = document.createElement("div");
     btn.className = "menu-item";
@@ -958,7 +970,7 @@ function openTrip(index) {
 }
 
 // ================================
-// PALETTES LOGIC (Mosaic Style)
+// PALETTES LOGIC (Mosaic Style with Re-Animation)
 // ================================
 function openPalettes() {
     menuView.style.display = "none";
@@ -967,13 +979,31 @@ function openPalettes() {
     palettesView.style.display = "grid"; 
     backBtn.style.display = "block";
     
-    // Only generate if empty (minus loader)
     const existingChips = palettesView.querySelectorAll('.palette-cluster').length;
     if (existingChips === 0) {
         paletteLoader.style.display = "block";
         generatePalettes();
+    } else {
+        // Re-animate if already generated
+        animateAllChipsRandomly();
     }
     window.scrollTo(0, 0);
+}
+
+function animateAllChipsRandomly() {
+    const chips = Array.from(document.querySelectorAll('.color-chip'));
+    // Reset state
+    chips.forEach(c => c.classList.remove('popped'));
+    
+    // Shuffle
+    const shuffled = chips.sort(() => Math.random() - 0.5);
+    
+    // Animate
+    shuffled.forEach((chip, i) => {
+        setTimeout(() => {
+            chip.classList.add('popped');
+        }, i * 2); // Very fast ripple for whole screen
+    });
 }
 
 function generatePalettes() {
@@ -985,10 +1015,8 @@ function generatePalettes() {
         img.src = src;
         
         img.onload = function() {
-            // Get 9 colors per image
             const colors = extractColors(img, 9);
             
-            // Create a 3x3 container for this image's colors
             const cluster = document.createElement('div');
             cluster.className = 'palette-cluster';
             
@@ -1002,17 +1030,13 @@ function generatePalettes() {
             
             palettesView.appendChild(cluster);
             
-            // RANDOM POP-IN EFFECT
-            // Get all the chips in this cluster
+            // Initial animation for this cluster
             const chips = Array.from(cluster.children);
-            // Shuffle indices [0..8]
             const indices = [0,1,2,3,4,5,6,7,8].sort(() => Math.random() - 0.5);
-            
-            // Animate them in random order with delay
             indices.forEach((index, i) => {
                 setTimeout(() => {
                     if(chips[index]) chips[index].classList.add('popped');
-                }, i * 50); // 50ms stagger
+                }, i * 50);
             });
 
             loadedImages++;
