@@ -37,12 +37,15 @@
       --text: #cccccc; 
   }
 
+  /* Hide arrows/controls in spotlight mode */
   body.spotlight-mode .nav-arrow,
   body.spotlight-mode .visualizer-controls {
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.5s ease;
   }
+  /* Dim the fixed instagram icon in spotlight mode */
+  body.spotlight-mode .insta-fixed { opacity: 0.2; }
 
   body {
     margin: 0;
@@ -81,6 +84,29 @@
     pointer-events: none;
   }
 
+  /* --- FIXED INSTAGRAM ICON (TOP LEFT) --- */
+  .insta-fixed {
+      position: fixed;
+      top: 30px;
+      left: 30px;
+      z-index: 500;
+      width: 40px;
+      height: 40px;
+      transition: opacity 0.3s;
+      cursor: pointer;
+  }
+  .insta-fixed img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      /* Invert colors in dark mode so black icon becomes white */
+      transition: filter 0.3s;
+  }
+  .insta-fixed:hover { opacity: 0.6; }
+  
+  [data-theme="dark"] .insta-fixed img { filter: invert(1); }
+
+
   /* --- HEADER --- */
   header {
     text-align: center;
@@ -95,21 +121,6 @@
     margin: 0 0 10px 0;
     letter-spacing: -0.05em;
     font-weight: 700;
-  }
-  .social-link {
-    display: inline-block;
-    color: var(--text);
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: bold;
-    border: 1px solid var(--text);
-    padding: 8px 16px;
-    margin-top: 10px;
-    text-transform: uppercase;
-    transition: background 0.2s;
-  }
-  .social-link:hover {
-    background: var(--btn-hover);
   }
 
   /* --- BACK BUTTON --- */
@@ -245,7 +256,7 @@
   #gear-info { font-weight: 300; }
   #copyright-info { font-weight: 300; margin-top: 5px; }
 
-  /* --- GALLERY VIEW & LOADING ANIMATION --- */
+  /* --- GALLERY VIEW --- */
   #gallery-view {
     display: none;
     padding: 20px;
@@ -294,44 +305,57 @@
   }
   .cell img.fade-in { opacity: 1; }
 
-  /* --- PALETTES VIEW --- */
+  /* --- PALETTES VIEW (RECTANGLES) --- */
   #palettes-view {
       display: none; 
       padding: 40px;
       margin: 0 auto;
       width: 100%;
       max-width: 1200px;
+      /* Responsive grid of cards */
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-      gap: 5px; 
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px; 
       flex-grow: 1;
       align-content: start;
   }
   
-  .color-chip {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      background-color: #eee;
+  /* The Strip Card (Vertical Rectangle) */
+  .palette-strip {
+      display: flex;
+      flex-direction: column;
+      height: 250px; /* Rectangle height */
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       cursor: pointer;
-      border-radius: 2px;
       opacity: 0;
-      transform: scale(0); 
-      transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s; 
-      will-change: transform;
+      transform: translateY(20px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
   
-  @keyframes popChip {
-      to { opacity: 1; transform: scale(1); }
+  /* Animation Class */
+  .palette-strip.loaded {
+      animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   }
-  .color-chip.popped {
-      animation: popChip 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
   }
 
-  .color-chip.swimming {
-      z-index: 100;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  .palette-strip:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+      z-index: 2;
   }
+
+  /* The 3 Colors inside the strip */
+  .color-swatch {
+      flex: 1; /* Each takes equal 33% height */
+      width: 100%;
+      transition: flex-grow 0.2s ease;
+  }
+  /* Fun effect: Hovering a color expands it slightly */
+  .color-swatch:hover { flex-grow: 1.5; }
 
   #palette-loader {
       display: none;
@@ -508,7 +532,7 @@
     align-items: center;
   }
   
-  /* 1. The Light Cone */
+  /* 1. The Light Cone (Fixed to VIEWPORT) */
   body.spotlight-mode::before {
       content: '';
       position: fixed;
@@ -526,7 +550,7 @@
       transition: opacity 0.8s ease;
   }
   
-  /* 2. The Wall Halo */
+  /* 2. The Wall Halo (Fixed to VIEWPORT Center) */
   body.spotlight-mode::after {
       content: '';
       position: fixed;
@@ -546,7 +570,7 @@
       transition: opacity 0.8s ease;
   }
   
-  /* 3. The Lit Frame */
+  /* 3. The Lit Frame (Pop) */
   body.spotlight-mode .framed-photo {
       box-shadow: 
         0 -2px 6px rgba(255,255,255,1.0), 
@@ -566,7 +590,7 @@
     box-sizing: content-box;
     position: relative;
     z-index: 2;
-    pointer-events: none; 
+    pointer-events: none; /* No drag */
   }
 
   .visualizer-controls {
@@ -721,10 +745,13 @@
 
 <body>
 
+  <a href="https://www.instagram.com/fujingaround/" target="_blank" class="insta-fixed">
+      <img src="instagram.png" alt="Instagram">
+  </a>
+
   <div id="intro"><h1>FujingAround</h1></div>
 
   <header>
-    <a href="https://www.instagram.com/fujingaround/" target="_blank" class="social-link">Instagram</a>
     <h1>FujingAround</h1>
     <br>
     <button id="back-btn" onclick="showMenu()">← Back to Menu</button>
@@ -946,9 +973,9 @@ function openTrip(index) {
 }
 
 // ================================
-// PALETTES LOGIC (Swim + Scatter + FailSafe)
+// PALETTES LOGIC (SIMPLE STRIP VERSION)
 // ================================
-let generatedChips = [];
+let generatedStrips = 0;
 
 function openPalettes() {
     menuView.style.display = "none";
@@ -957,41 +984,35 @@ function openPalettes() {
     palettesView.style.display = "grid"; 
     backBtn.style.display = "block";
     
-    if (generatedChips.length === 0) {
+    const existingStrips = palettesView.querySelectorAll('.palette-strip').length;
+    if (existingStrips === 0) {
         paletteLoader.style.display = "block";
         generatePalettes();
-    } else {
-        animateScatter();
     }
-    
-    document.addEventListener('mousemove', handleSwimEffect);
     window.scrollTo(0, 0);
 }
 
 function generatePalettes() {
     let loadedImages = 0;
     
-    allImages.forEach((src, groupIndex) => {
+    allImages.forEach(src => {
         const img = new Image();
-        // REMOVED crossOrigin to prevent CORS issues on local/simple hosting
-        // If images are on same domain (GitHub Pages), this is safer.
+        img.crossOrigin = "Anonymous"; 
         img.src = src;
         
         img.onload = function() {
             try {
-                const colors = extractDistinctColors(img, 9);
-                createChips(colors, groupIndex);
+                // Get 3 simple dominant colors
+                const colors = extractDistinctColors(img, 3);
+                createStrip(colors);
             } catch (e) {
-                // Fallback if canvas is tainted or error
                 console.log("Canvas error on " + src);
-                createChips(Array(9).fill('#cccccc'), groupIndex); 
+                createStrip(Array(3).fill('#cccccc')); 
             }
             checkDone();
         }
         
         img.onerror = function() {
-            console.log("Failed to load " + src);
-            // Skip this image but don't hang
             checkDone();
         }
         
@@ -999,40 +1020,27 @@ function generatePalettes() {
             loadedImages++;
             if(loadedImages >= allImages.length) {
                 paletteLoader.style.display = "none";
-                finishPaletteSetup();
             }
         }
     });
 }
 
-function createChips(colors, groupIndex) {
+function createStrip(colors) {
+    const strip = document.createElement('div');
+    strip.className = 'palette-strip';
+    
     colors.forEach(hex => {
-        const chip = document.createElement('div');
-        chip.className = 'color-chip';
-        chip.style.backgroundColor = hex;
-        chip.dataset.groupId = groupIndex; 
-        chip.onclick = () => showHex(hex);
-        chip.addEventListener('mouseenter', () => activateGroup(groupIndex));
-        chip.addEventListener('mouseleave', () => deactivateGroup());
-        generatedChips.push(chip);
+        const swatch = document.createElement('div');
+        swatch.className = 'color-swatch';
+        swatch.style.backgroundColor = hex;
+        swatch.onclick = () => showHex(hex);
+        strip.appendChild(swatch);
     });
-}
-
-function finishPaletteSetup() {
-    const shuffled = generatedChips.sort(() => Math.random() - 0.5);
-    shuffled.forEach(chip => palettesView.appendChild(chip));
-    animateScatter();
-}
-
-function animateScatter() {
-    const chips = document.querySelectorAll('.color-chip');
-    chips.forEach(chip => {
-        chip.classList.remove('popped');
-        void chip.offsetWidth;
-        const delay = Math.random() * 1.0; 
-        chip.style.animationDelay = `${delay}s`;
-        chip.classList.add('popped');
-    });
+    
+    palettesView.appendChild(strip);
+    
+    // Simple pop in animation
+    setTimeout(() => strip.classList.add('loaded'), 50);
 }
 
 function extractDistinctColors(imgElement, count) {
@@ -1042,7 +1050,6 @@ function extractDistinctColors(imgElement, count) {
     canvas.height = 50;
     ctx.drawImage(imgElement, 0, 0, 50, 50);
     
-    // Wrap in try/catch for "Tainted Canvas" security errors
     try {
         const imgData = ctx.getImageData(0, 0, 50, 50).data;
         const colorCounts = {};
@@ -1057,7 +1064,7 @@ function extractDistinctColors(imgElement, count) {
         
         let sortedColors = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]);
         
-        // Distance check for variety
+        // Simple distance check
         const distinct = [];
         for (let hex of sortedColors) {
             if (distinct.length >= count) break;
@@ -1074,7 +1081,6 @@ function extractDistinctColors(imgElement, count) {
         // Fill remaining
         let i = 0;
         while (distinct.length < count) {
-            // If we run out of colors, cycle or fill grey
             if (i < sortedColors.length) {
                  if (!distinct.includes(sortedColors[i])) distinct.push(sortedColors[i]);
             } else {
@@ -1096,34 +1102,6 @@ function hexToRgb(hex) {
 
 function rgbToHex(r, g, b) {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-}
-
-// --- INTERACTION ---
-let activeGroupId = null;
-function activateGroup(id) { activeGroupId = id; }
-function deactivateGroup() {
-    activeGroupId = null;
-    const allChips = document.querySelectorAll('.color-chip');
-    allChips.forEach(chip => {
-        chip.style.transform = 'translate(0,0) scale(1)';
-        chip.classList.remove('swimming');
-    });
-}
-
-function handleSwimEffect(e) {
-    if (activeGroupId === null || palettesView.style.display === 'none') return;
-    const siblings = document.querySelectorAll(`.color-chip[data-group-id="${activeGroupId}"]`);
-    siblings.forEach(chip => {
-        const rect = chip.getBoundingClientRect();
-        const chipX = rect.left + rect.width / 2;
-        const chipY = rect.top + rect.height / 2;
-        const deltaX = e.clientX - chipX;
-        const deltaY = e.clientY - chipY;
-        const moveX = deltaX * 0.15; 
-        const moveY = deltaY * 0.15;
-        chip.classList.add('swimming');
-        chip.style.transform = `translate(${moveX}px, ${moveY}px) scale(1.3)`;
-    });
 }
 
 function showHex(hex) {
@@ -1175,7 +1153,6 @@ function showMenu() {
   
   menuView.style.display = "grid"; 
   document.removeEventListener('keydown', handleKeyInput);
-  document.removeEventListener('mousemove', handleSwimEffect);
   
   document.body.classList.remove('spotlight-mode');
 
