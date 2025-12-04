@@ -37,7 +37,6 @@
       --text: #cccccc; 
   }
 
-  /* Hide arrows AND instructions in spotlight mode */
   body.spotlight-mode .nav-arrow,
   body.spotlight-mode .visualizer-controls {
       opacity: 0;
@@ -93,11 +92,30 @@
   }
   h1 {
     font-size: 3rem;
-    margin: 0 0 10px 0;
+    margin: 0 0 15px 0;
     letter-spacing: -0.05em;
     font-weight: 700;
   }
-  .social-link {
+
+  .insta-link {
+      position: absolute;
+      top: 4rem; 
+      left: 40px;
+      display: block;
+      width: 40px;
+      height: 40px;
+      transition: opacity 0.2s;
+  }
+  .insta-link img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: invert(0); 
+  }
+  [data-theme="dark"] .insta-link img { filter: invert(1); }
+  .insta-link:hover { opacity: 0.6; }
+
+  .palettes-btn {
     display: inline-block;
     color: var(--text);
     text-decoration: none;
@@ -105,11 +123,11 @@
     font-weight: bold;
     border: 1px solid var(--text);
     padding: 8px 16px;
-    margin-top: 10px;
     text-transform: uppercase;
     transition: background 0.2s;
+    cursor: pointer;
   }
-  .social-link:hover {
+  .palettes-btn:hover {
     background: var(--btn-hover);
   }
 
@@ -190,7 +208,6 @@
     text-align: center;
   }
 
-  /* --- PRINTS BUTTON --- */
   .menu-item.prints-btn {
     aspect-ratio: auto;
     height: auto;
@@ -228,7 +245,7 @@
     margin-bottom: 15px;
   }
 
-  /* --- FOOTER (SCROLL TO SEE) --- */
+  /* --- FOOTER --- */
   #footer-container {
     position: relative; 
     width: 100%;
@@ -248,7 +265,7 @@
   #gear-info { font-weight: 300; }
   #copyright-info { font-weight: 300; margin-top: 5px; }
 
-  /* --- GALLERY VIEW & LOADING ANIMATION --- */
+  /* --- GALLERY VIEW --- */
   #gallery-view {
     display: none;
     padding: 20px;
@@ -261,8 +278,6 @@
     column-gap: 20px;
     width: 100%;
   }
-  
-  /* The Container for each image */
   .cell {
     break-inside: avoid;
     margin-bottom: 20px;
@@ -270,15 +285,11 @@
     display: inline-block;
     width: 100%;
     cursor: zoom-in;
-    
-    /* LOADING SKELETON STYLES */
-    min-height: 250px; /* Forces a shape even before image loads */
-    background-color: var(--loading-bg); /* Grey background */
+    min-height: 250px; 
+    background-color: var(--loading-bg); 
     border-radius: 4px;
     overflow: hidden;
   }
-  
-  /* The "Shimmer" Animation for loading */
   .cell::before {
     content: "";
     position: absolute;
@@ -288,37 +299,115 @@
     animation: loading 1.5s infinite;
     z-index: 1;
   }
-  
-  @keyframes loading {
-    100% { transform: translateX(100%); }
-  }
-  
-  /* Once image loads, we hide the shimmer using a class */
-  .cell.loaded::before {
-      display: none;
-      animation: none;
-  }
-  .cell.loaded {
-      background-color: transparent;
-      min-height: auto; /* Let image dictate height once loaded */
-  }
-
-  /* The Image Itself */
+  @keyframes loading { 100% { transform: translateX(100%); } }
+  .cell.loaded::before { display: none; animation: none; }
+  .cell.loaded { background-color: transparent; min-height: auto; }
   .cell img {
     width: 100%;
     height: auto;
     display: block;
-    /* Start hidden to prevent jumping */
     opacity: 0; 
     transition: opacity 0.6s ease-in; 
     pointer-events: none;
     position: relative;
     z-index: 2;
   }
+  .cell img.fade-in { opacity: 1; }
+
+  /* --- PALETTES VIEW (NEW ANIMATED) --- */
+  #palettes-view {
+      display: none; 
+      padding: 40px;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 1400px;
+      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+      gap: 15px;
+      flex-grow: 1;
+  }
   
-  /* Class added by JS when load completes */
-  .cell img.fade-in {
-      opacity: 1;
+  /* Loading Text for Palettes */
+  #palette-loader {
+      display: none;
+      width: 100%;
+      text-align: center;
+      font-size: 1.2rem;
+      color: var(--text);
+      opacity: 0.5;
+      padding: 50px;
+      animation: pulse 1s infinite alternate;
+  }
+  @keyframes pulse { from { opacity: 0.3; } to { opacity: 0.7; } }
+
+  /* The actual palette strip */
+  .palette-strip {
+      display: flex;
+      flex-direction: column;
+      height: 200px;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      
+      /* START HIDDEN FOR ANIMATION */
+      opacity: 0;
+      transform: scale(0.8) translateY(20px);
+  }
+  
+  /* The "Pop In" Animation Class */
+  .palette-strip.pop-in {
+      animation: popInBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+  
+  @keyframes popInBounce {
+      0% { opacity: 0; transform: scale(0.8) translateY(20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  
+  .palette-strip:hover { 
+      transform: scale(1.05) !important; 
+      z-index: 2; 
+      transition: transform 0.2s ease;
+  }
+  
+  .color-swatch { flex: 1; width: 100%; }
+
+  /* Hex Zoom Overlay */
+  #hex-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 11000;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+  }
+  #hex-overlay.active { opacity: 1; pointer-events: auto; }
+  
+  .hex-display {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 50px rgba(0,0,0,0.5);
+      transform: scale(0.8);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  #hex-overlay.active .hex-display { transform: scale(1); }
+  
+  .hex-text {
+      font-size: 2rem;
+      font-weight: 900;
+      font-family: monospace;
+      background: rgba(255,255,255,0.8);
+      padding: 10px 20px;
+      border-radius: 8px;
+      color: #000;
   }
 
   /* --- PRINTS VISUALIZER VIEW --- */
@@ -329,7 +418,7 @@
     justify-content: center;
     min-height: 60vh;
     padding: 20px;
-    position: relative; /* Anchor for absolute switch */
+    position: relative;
     flex-grow: 1;
   }
 
@@ -362,7 +451,7 @@
   .nav-arrow:hover { opacity: 1; transform: scale(1.1); }
   .nav-arrow-vert { font-size: 2.5rem; }
 
-  /* --- LIGHT SWITCH (ABSOLUTE POSITIONED) --- */
+  /* --- LIGHT SWITCH --- */
   .light-switch-container {
       position: absolute; 
       top: 50%;
@@ -385,7 +474,6 @@
       font-weight: bold;
       animation: bounce 2s infinite;
   }
-  
   @keyframes bounce {
       0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
       40% {transform: translateY(-5px);}
@@ -397,9 +485,7 @@
       height: 100px;
       background-color: #e0e0e0;
       border-radius: 4px;
-      box-shadow: 
-          inset 0 1px 3px rgba(255,255,255,0.8),
-          0 4px 8px rgba(0,0,0,0.2);
+      box-shadow: inset 0 1px 3px rgba(255,255,255,0.8), 0 4px 8px rgba(0,0,0,0.2);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -412,9 +498,7 @@
       background-color: #f0f0f0;
       border: 1px solid #d0d0d0;
       cursor: pointer;
-      box-shadow: 
-          inset 0 -6px 4px -4px rgba(0,0,0,0.3),
-          0 4px 4px rgba(0,0,0,0.1);
+      box-shadow: inset 0 -6px 4px -4px rgba(0,0,0,0.3), 0 4px 4px rgba(0,0,0,0.1);
       transition: all 0.2s ease-in-out;
       transform: perspective(300px) rotateX(-20deg); 
   }
@@ -422,9 +506,7 @@
   body.spotlight-mode .light-switch-toggle {
       transform: perspective(300px) rotateX(20deg);
       background-color: #fafafa;
-      box-shadow: 
-          inset 0 6px 4px -4px rgba(255, 255, 220, 0.6),
-          0 -4px 4px rgba(0,0,0,0.1);
+      box-shadow: inset 0 6px 4px -4px rgba(255, 255, 220, 0.6), 0 -4px 4px rgba(0,0,0,0.1);
   }
   
   body.spotlight-mode .light-switch-plate {
@@ -433,9 +515,7 @@
       background-color: #333;
   }
 
-
   /* --- LIGHTING PHYSICS --- */
-  
   .framed-photo-wrapper {
     position: relative;
     max-width: 70vw; 
@@ -446,17 +526,11 @@
     align-items: center;
   }
   
-  /* 1. The Light Cone (Fixed to VIEWPORT) */
   body.spotlight-mode::before {
       content: '';
       position: fixed;
       inset: 0;
-      background: radial-gradient(
-          circle at 50% -20%, 
-          rgba(255, 255, 250, 0.15) 0%, 
-          rgba(255, 255, 250, 0.05) 40%, 
-          rgba(0,0,0,0) 80%
-      );
+      background: radial-gradient(circle at 50% -20%, rgba(255, 255, 250, 0.15) 0%, rgba(255, 255, 250, 0.05) 40%, rgba(0,0,0,0) 80%);
       pointer-events: none;
       z-index: 1; 
       mix-blend-mode: screen;
@@ -464,19 +538,13 @@
       transition: opacity 0.8s ease;
   }
   
-  /* 2. The Wall Halo (Fixed to VIEWPORT Center) */
   body.spotlight-mode::after {
       content: '';
       position: fixed;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       width: 100vw; height: 100vh;
-      background: radial-gradient(
-          circle at 50% 50%,
-          rgba(255, 255, 255, 0.25) 0%, 
-          rgba(255, 255, 255, 0.10) 30%, 
-          rgba(0,0,0,0) 65%
-      );
+      background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.10) 30%, rgba(0,0,0,0) 65%);
       pointer-events: none;
       z-index: 1;
       mix-blend-mode: screen;
@@ -484,13 +552,8 @@
       transition: opacity 0.8s ease;
   }
   
-  /* 3. The Lit Frame (Pop) */
   body.spotlight-mode .framed-photo {
-      box-shadow: 
-        0 -2px 6px rgba(255,255,255,1.0), 
-        0 60px 100px rgba(0,0,0,1),       
-        0 20px 40px rgba(0,0,0,0.9) !important;
-      
+      box-shadow: 0 -2px 6px rgba(255,255,255,1.0), 0 60px 100px rgba(0,0,0,1), 0 20px 40px rgba(0,0,0,0.9) !important;
       filter: contrast(1.05);
       position: relative;
       z-index: 10;
@@ -504,7 +567,7 @@
     box-sizing: content-box;
     position: relative;
     z-index: 2;
-    pointer-events: none; /* No drag */
+    pointer-events: none;
   }
 
   .visualizer-controls {
@@ -518,23 +581,8 @@
     position: relative;
   }
   
-  /* Styles for the "Instructions:" Header */
-  .visualizer-controls h4 {
-      margin: 0 0 15px 0;
-      font-weight: bold;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-size: 0.85rem;
-  }
-  
-  .visualizer-controls span {
-    display: inline-block;
-    margin: 0 10px;
-    border: 1px solid var(--text);
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-  }
+  .visualizer-controls h4 { margin: 0 0 15px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem; }
+  .visualizer-controls span { display: inline-block; margin: 0 10px; border: 1px solid var(--text); padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; }
   
   /* --- BUY SECTION --- */
   .buy-section {
@@ -589,7 +637,7 @@
   .lightbox-content { position: relative; max-width: 90vw; max-height: 90vh; }
   #lightbox-img { max-width: 100%; max-height: 90vh; display: block; box-shadow: 0 20px 50px rgba(0,0,0,0.5); pointer-events: none; }
   
-  /* --- RESTORED CSS WATERMARK --- */
+  /* --- CSS WATERMARK --- */
   .watermark { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; pointer-events: none; overflow: hidden; z-index: 50; }
   .watermark span { 
       color: #ffffff; 
@@ -634,8 +682,8 @@
   @media (max-width: 900px) {
       .grid { column-count: 2; }
       #menu-view { grid-template-columns: 1fr; }
+      #palettes-view { grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); padding: 20px; }
       
-      /* Mobile: Switch at Top Left, ABSOLUTE */
       .light-switch-container { 
           position: absolute;
           top: 20px; 
@@ -643,17 +691,16 @@
           right: auto;
           transform: scale(0.75);
       }
+      .insta-link { top: 4rem; left: 1rem; }
   }
   @media (max-width: 600px) {
-    h1 { font-size: 2rem; }
+    h1 { font-size: 2rem; margin-bottom: 20px; }
+    .insta-link { position: static; margin: 0 auto 10px; display: inline-block; }
     .grid { column-count: 1; }
     #menu-view { padding: 20px; }
     .menu-item h3 { font-size: 2.5rem; }
 
-    #footer-container { 
-        padding: 40px 20px;
-        font-size: 0.65rem;
-    }
+    #footer-container { padding: 40px 20px; font-size: 0.65rem; }
     
     .footer-controls { bottom: 10px; right: 10px; }
     .control-btn { padding: 8px 12px; font-size: 0.7rem; }
@@ -665,7 +712,6 @@
     .nav-arrow-horiz { order: 2; }
     .vertical-center-column { order: 1; width: 100%; gap: 10px; }
     
-    /* Ensure absolute position logic holds on smallest screens */
     .light-switch-container { top: 10px; left: 10px; right: auto; transform: scale(0.7); }
   }
 </style>
@@ -676,8 +722,13 @@
   <div id="intro"><h1>FujingAround</h1></div>
 
   <header>
+    <a href="https://www.instagram.com/fujingaround/" target="_blank" class="insta-link">
+        <img src="instagram_icon.png" alt="Instagram">
+    </a>
+    
     <h1>FujingAround</h1>
-    <a href="https://www.instagram.com/fujingaround/" target="_blank" class="social-link">Instagram</a>
+    
+    <div onclick="openPalettes()" class="palettes-btn">Palettes</div>
     <br>
     <button id="back-btn" onclick="showMenu()">← Back to Menu</button>
   </header>
@@ -696,6 +747,16 @@
     <div class="grid" id="grid"></div>
   </div>
 
+  <div id="palettes-view">
+      <div id="palette-loader">Analyzing Colors...</div>
+      </div>
+  
+  <div id="hex-overlay" onclick="closeHex()">
+      <div class="hex-display">
+          <div class="hex-text" id="hex-text">#000000</div>
+      </div>
+  </div>
+
   <div id="prints-view">
     
     <div class="light-switch-container" id="spotlight-switch">
@@ -709,11 +770,9 @@
       <div class="nav-arrow nav-arrow-horiz" onclick="changeImage(-1)">❮</div>
       <div class="vertical-center-column">
           <div class="nav-arrow nav-arrow-vert" onclick="changeFrame(1)">▲</div>
-          
           <div class="framed-photo-wrapper">
             <img id="visualizer-img" class="framed-photo frame-matte" src="" alt="Print Preview">
           </div>
-          
           <div class="nav-arrow nav-arrow-vert" onclick="changeFrame(-1)">▼</div>
       </div>
       <div class="nav-arrow nav-arrow-horiz" onclick="changeImage(1)">❯</div>
@@ -820,6 +879,7 @@ document.body.addEventListener("touchstart", dismissIntro);
 const menuView = document.getElementById("menu-view");
 const galleryView = document.getElementById("gallery-view");
 const printsView = document.getElementById("prints-view");
+const palettesView = document.getElementById("palettes-view");
 const grid = document.getElementById("grid");
 const backBtn = document.getElementById("back-btn");
 const lightbox = document.getElementById("lightbox");
@@ -827,6 +887,9 @@ const lightboxImg = document.getElementById("lightbox-img");
 const footerContainer = document.getElementById("footer-container");
 const spotlightSwitch = document.getElementById("spotlight-switch");
 const toggleDarkBtn = document.getElementById("toggle-dark");
+const hexOverlay = document.getElementById("hex-overlay");
+const hexText = document.getElementById("hex-text");
+const paletteLoader = document.getElementById("palette-loader");
 
 
 function initMenu() {
@@ -851,26 +914,17 @@ function openTrip(index) {
   trip.images.forEach(src => {
     const cell = document.createElement("div");
     cell.className = "cell";
-    
-    // Create Image Element
     const img = document.createElement("img");
     img.loading = "lazy";
-    
-    // SMART LOADING LOGIC:
-    // 1. If it loads normally:
     img.onload = () => {
         img.classList.add('fade-in');
-        cell.classList.add('loaded'); // Removes shimmer background
+        cell.classList.add('loaded'); 
     };
-    // 2. Set src triggers load
     img.src = src;
-    
-    // 3. Check if it loaded instantly from cache
     if (img.complete) {
         img.classList.add('fade-in');
         cell.classList.add('loaded');
     }
-
     cell.onclick = () => openLightbox(src);
     cell.appendChild(img);
     grid.appendChild(cell);
@@ -883,7 +937,121 @@ function openTrip(index) {
 }
 
 // ================================
-// PRINTS VISUALIZER & BUY LOGIC
+// PALETTE ENGINE (POP-IN ANIMATION)
+// ================================
+let paletteQueue = [];
+let isProcessingQueue = false;
+
+function openPalettes() {
+    menuView.style.display = "none";
+    galleryView.style.display = "none";
+    printsView.style.display = "none";
+    palettesView.style.display = "grid"; 
+    backBtn.style.display = "block";
+    
+    // Only generate once
+    // Count children that are palette-strips (exclude loader)
+    const existingStrips = palettesView.querySelectorAll('.palette-strip').length;
+    if (existingStrips === 0) {
+        paletteLoader.style.display = "block";
+        generatePalettes();
+    }
+    window.scrollTo(0, 0);
+}
+
+function generatePalettes() {
+    allImages.forEach(src => {
+        const img = new Image();
+        img.crossOrigin = "Anonymous"; 
+        img.src = src;
+        
+        img.onload = function() {
+            const colors = extractColors(img);
+            
+            const strip = document.createElement('div');
+            strip.className = 'palette-strip';
+            
+            colors.forEach(hex => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.backgroundColor = hex;
+                swatch.onclick = () => showHex(hex);
+                strip.appendChild(swatch);
+            });
+            
+            // Add to queue instead of appending immediately
+            paletteQueue.push(strip);
+            startQueueProcessor();
+        }
+    });
+}
+
+function startQueueProcessor() {
+    if (isProcessingQueue) return;
+    isProcessingQueue = true;
+
+    // Process queue every 100ms
+    const interval = setInterval(() => {
+        if (paletteQueue.length > 0) {
+            // Hide the loading text once first item arrives
+            paletteLoader.style.display = "none";
+            
+            const strip = paletteQueue.shift();
+            palettesView.appendChild(strip);
+            
+            // Trigger animation in next frame
+            requestAnimationFrame(() => {
+                strip.classList.add('pop-in');
+            });
+        } else {
+            // Wait for more or stop if all done?
+            // Just keep checking is fine, or clear if idle too long.
+            // For robustness, we let it run as image loads are async.
+        }
+    }, 100); 
+}
+
+function extractColors(imgElement) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 50;
+    canvas.height = 50;
+    ctx.drawImage(imgElement, 0, 0, 50, 50);
+    
+    const imgData = ctx.getImageData(0, 0, 50, 50).data;
+    const colorCounts = {};
+    
+    for (let i = 0; i < imgData.length; i += 4) {
+        const r = Math.round(imgData[i] / 32) * 32;
+        const g = Math.round(imgData[i+1] / 32) * 32;
+        const b = Math.round(imgData[i+2] / 32) * 32;
+        const hex = rgbToHex(r, g, b);
+        colorCounts[hex] = (colorCounts[hex] || 0) + 1;
+    }
+    
+    const sorted = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]);
+    return sorted.slice(0, 3);
+}
+
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+function showHex(hex) {
+    hexText.innerText = hex;
+    const display = document.querySelector('.hex-display');
+    display.style.backgroundColor = hex;
+    hexText.style.color = "#000"; 
+    hexOverlay.classList.add('active');
+}
+
+function closeHex() {
+    hexOverlay.classList.remove('active');
+}
+
+
+// ================================
+// PRINTS LOGIC
 // ================================
 let currentImgIndex = 0;
 let currentFrameIndex = 1;
@@ -894,6 +1062,7 @@ const photoIdDisplay = document.getElementById("photo-id-display");
 function openPrints() {
   menuView.style.display = "none";
   galleryView.style.display = "none";
+  palettesView.style.display = "none";
   printsView.style.display = "flex";
   backBtn.style.display = "block";
   
@@ -909,6 +1078,7 @@ function openPrints() {
 function showMenu() {
   galleryView.style.display = "none";
   printsView.style.display = "none";
+  palettesView.style.display = "none";
   backBtn.style.display = "none";
   
   spotlightSwitch.style.display = "none"; 
@@ -990,24 +1160,16 @@ spotlightSwitch.addEventListener("click", (e) => {
 initMenu();
 
 // ================================
-// IMAGE PROTECTION (NO RIGHT CLICK / NO DRAG)
+// IMAGE PROTECTION
 // ================================
 document.addEventListener('contextmenu', function(e) {
-    if (e.target.tagName === 'IMG') {
-        e.preventDefault(); 
-    }
+    if (e.target.tagName === 'IMG') { e.preventDefault(); }
 });
-
 document.addEventListener('dragstart', function(e) {
-    if (e.target.tagName === 'IMG') {
-        e.preventDefault(); 
-    }
+    if (e.target.tagName === 'IMG') { e.preventDefault(); }
 });
-
 window.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
-        e.preventDefault();
-    }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) { e.preventDefault(); }
 });
 </script>
 </body>
