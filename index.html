@@ -36,17 +36,14 @@
       --bg: #050505; 
       --text: #cccccc; 
   }
-
-  /* Hide arrows in spotlight mode */
   body.spotlight-mode .nav-arrow,
   body.spotlight-mode .visualizer-controls {
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.5s ease;
   }
-  
-  /* Dim instagram logo in spotlight mode */
-  body.spotlight-mode .insta-logo { opacity: 0.2; }
+  /* Hide instagram in spotlight mode to reduce distraction */
+  body.spotlight-mode .insta-link { opacity: 0; pointer-events: none; }
 
   body {
     margin: 0;
@@ -94,12 +91,11 @@
     z-index: 20; 
     transition: opacity 0.5s;
   }
-  
-  /* Container to hold Title + Logo together */
-  .header-content {
+
+  /* Container to lock Logo and Title together */
+  .title-wrapper {
       position: relative;
-      display: inline-block; /* Fits width of title */
-      max-width: 100%;
+      display: inline-block;
   }
 
   h1 {
@@ -110,14 +106,17 @@
     line-height: 1;
   }
 
-  /* --- INSTAGRAM LOGO (SCROLLS WITH PAGE) --- */
+  /* INSTAGRAM LOGO - Positioned relative to the Title text */
   .insta-link {
       position: absolute;
-      left: -60px; /* Push to the left of the title */
+      /* Move to the left of the text */
+      left: -50px; 
+      /* Center vertically relative to text */
       top: 50%;
-      transform: translateY(-60%); /* Center vertically with text */
-      width: 35px;
-      height: 35px;
+      transform: translateY(-50%);
+      
+      width: 32px;
+      height: 32px;
       display: block;
       transition: opacity 0.2s;
   }
@@ -191,7 +190,6 @@
     transform: translateY(-5px);
     box-shadow: 0 15px 30px rgba(0,0,0,0.2);
   }
-  
   .menu-item:hover::before { opacity: 0.1; }
 
   .menu-item h3 {
@@ -207,7 +205,7 @@
     text-align: center;
   }
 
-  /* --- ACTION BUTTONS (PRINTS & PALETTES) --- */
+  /* --- ACTION BUTTONS --- */
   .menu-item.action-btn {
     aspect-ratio: auto;
     height: auto;
@@ -243,7 +241,7 @@
     margin-bottom: 15px;
   }
 
-  /* --- FOOTER (SCROLL TO SEE) --- */
+  /* --- FOOTER --- */
   #footer-container {
     position: relative; 
     width: 100%;
@@ -259,11 +257,10 @@
     z-index: 10;
     transition: opacity 0.5s;
   }
-  
   #gear-info { font-weight: 300; }
   #copyright-info { font-weight: 300; margin-top: 5px; }
 
-  /* --- GALLERY VIEW & LOADING ANIMATION --- */
+  /* --- GALLERY VIEW --- */
   #gallery-view {
     display: none;
     padding: 20px;
@@ -312,7 +309,7 @@
   }
   .cell img.fade-in { opacity: 1; }
 
-  /* --- PALETTES VIEW (RECTANGLES - VISIBILITY FIXED) --- */
+  /* --- PALETTES VIEW (RECTANGLES) --- */
   #palettes-view {
       display: none; 
       padding: 40px;
@@ -324,7 +321,6 @@
       gap: 20px; 
       flex-grow: 1;
       align-content: start;
-      position: relative;
       min-height: 50vh;
   }
   
@@ -336,21 +332,13 @@
       overflow: hidden;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       cursor: pointer;
-      /* FIX: Start visible to avoid white screen if animation fails */
-      opacity: 0; 
-      animation: simpleFadeIn 0.8s forwards;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
   
-  @keyframes simpleFadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-  }
-
   .palette-strip:hover {
       transform: translateY(-5px) scale(1.02);
       box-shadow: 0 15px 30px rgba(0,0,0,0.2);
       z-index: 2;
-      transition: transform 0.2s;
   }
 
   .color-swatch {
@@ -360,24 +348,19 @@
   }
   .color-swatch:hover { flex-grow: 1.5; }
 
-  /* Centered Loader */
+  /* Loader text */
   #palette-loader {
       display: none;
+      width: 100%;
+      text-align: center;
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 1.5rem;
-      font-weight: 300;
-      letter-spacing: 1px;
-      color: var(--text);
-      opacity: 0.7;
-      animation: pulse 1s infinite alternate;
-      z-index: 100;
+      top: 200px;
+      left: 0;
+      font-size: 1.2rem;
+      opacity: 0.5;
   }
-  @keyframes pulse { from { opacity: 0.3; } to { opacity: 0.8; } }
 
-  /* Hex Zoom Overlay */
+  /* Hex Overlay */
   #hex-overlay {
       position: fixed;
       inset: 0;
@@ -423,7 +406,7 @@
     justify-content: center;
     min-height: 60vh;
     padding: 20px;
-    position: relative; /* Anchor for absolute switch */
+    position: relative;
     flex-grow: 1;
   }
 
@@ -598,7 +581,7 @@
     box-sizing: content-box;
     position: relative;
     z-index: 2;
-    pointer-events: none; /* No drag */
+    pointer-events: none; 
   }
 
   .visualizer-controls {
@@ -723,8 +706,10 @@
           transform: scale(0.75);
       }
       
-      .insta-link { left: 50%; transform: translateX(-50%) translateY(40px); }
-      .header-content { display: block; }
+      /* Adjust header layout for mobile to prevent overlap */
+      .title-wrapper { display: block; margin-bottom: 10px; }
+      .insta-link { left: 50%; transform: translateX(-50%) translateY(-40px); top: 0; }
+      h1 { margin-top: 40px; font-size: 2.5rem; }
   }
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
@@ -757,9 +742,9 @@
   <div id="intro"><h1>FujingAround</h1></div>
 
   <header>
-    <div class="header-content">
+    <div class="title-wrapper">
         <a href="https://www.instagram.com/fujingaround/" target="_blank" class="insta-link">
-            <img src="instagram.png" alt="Instagram" class="insta-logo">
+            <img src="instagram.png" alt="Instagram">
         </a>
         <h1>FujingAround</h1>
     </div>
@@ -983,10 +968,8 @@ function openTrip(index) {
 }
 
 // ================================
-// PALETTES LOGIC (STRIPS REVERTED)
+// PALETTES LOGIC (FAILSAFE)
 // ================================
-let generatedStrips = [];
-
 function openPalettes() {
     menuView.style.display = "none";
     galleryView.style.display = "none";
@@ -994,13 +977,10 @@ function openPalettes() {
     palettesView.style.display = "grid"; 
     backBtn.style.display = "block";
     
-    // Only generate if empty (minus loader)
     const existingStrips = palettesView.querySelectorAll('.palette-strip').length;
     if (existingStrips === 0) {
         paletteLoader.style.display = "block";
         generatePalettes();
-    } else {
-        // Re-animate existing logic could be added here if desired
     }
     window.scrollTo(0, 0);
 }
@@ -1010,23 +990,25 @@ function generatePalettes() {
     
     allImages.forEach(src => {
         const img = new Image();
-        img.crossOrigin = "Anonymous"; 
+        // Removing crossOrigin prevents many CORS errors on GitHub Pages for repo assets
         img.src = src;
         
         img.onload = function() {
             try {
-                // Get 3 simple dominant colors
+                // Try to extract colors
                 const colors = extractDistinctColors(img, 3);
                 createStrip(colors, src);
             } catch (e) {
-                // Fallback for security errors
-                console.log("Canvas error on " + src);
-                createStrip(Array(3).fill('#cccccc'), src); 
+                // If security error (Tainted Canvas), fallback to greyscale placeholder
+                // so page isn't blank.
+                console.log("Canvas security error on " + src);
+                createStrip(['#333', '#777', '#ccc'], src); 
             }
             checkDone();
         }
         
         img.onerror = function() {
+            // If 404, just skip
             checkDone();
         }
         
@@ -1042,8 +1024,6 @@ function generatePalettes() {
 function createStrip(colors, src) {
     const strip = document.createElement('div');
     strip.className = 'palette-strip';
-    // FIX: Add opacity 1 directly so it doesn't stay hidden if animation glitch
-    strip.style.opacity = '1';
     
     colors.forEach(hex => {
         const swatch = document.createElement('div');
@@ -1066,49 +1046,43 @@ function extractDistinctColors(imgElement, count) {
     canvas.height = 50;
     ctx.drawImage(imgElement, 0, 0, 50, 50);
     
-    try {
-        const imgData = ctx.getImageData(0, 0, 50, 50).data;
-        const colorCounts = {};
-        
-        for (let i = 0; i < imgData.length; i += 4) {
-            const r = Math.round(imgData[i] / 32) * 32;
-            const g = Math.round(imgData[i+1] / 32) * 32;
-            const b = Math.round(imgData[i+2] / 32) * 32;
-            const hex = rgbToHex(r, g, b);
-            colorCounts[hex] = (colorCounts[hex] || 0) + 1;
-        }
-        
-        let sortedColors = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]);
-        
-        // Simple distance check
-        const distinct = [];
-        for (let hex of sortedColors) {
-            if (distinct.length >= count) break;
-            const rgb1 = hexToRgb(hex);
-            let isDistinct = true;
-            for (let picked of distinct) {
-                const rgb2 = hexToRgb(picked);
-                const distance = Math.sqrt(Math.pow(rgb1.r - rgb2.r, 2) + Math.pow(rgb1.g - rgb2.g, 2) + Math.pow(rgb1.b - rgb2.b, 2));
-                if (distance < 40) { isDistinct = false; break; }
-            }
-            if (isDistinct) distinct.push(hex);
-        }
-        
-        // Fill remaining
-        let i = 0;
-        while (distinct.length < count) {
-            if (i < sortedColors.length) {
-                 if (!distinct.includes(sortedColors[i])) distinct.push(sortedColors[i]);
-            } else {
-                 distinct.push("#cccccc"); 
-            }
-            i++;
-        }
-        return distinct;
-        
-    } catch (e) {
-        return Array(count).fill('#cccccc');
+    const imgData = ctx.getImageData(0, 0, 50, 50).data;
+    const colorCounts = {};
+    
+    for (let i = 0; i < imgData.length; i += 4) {
+        const r = Math.round(imgData[i] / 32) * 32;
+        const g = Math.round(imgData[i+1] / 32) * 32;
+        const b = Math.round(imgData[i+2] / 32) * 32;
+        const hex = rgbToHex(r, g, b);
+        colorCounts[hex] = (colorCounts[hex] || 0) + 1;
     }
+    
+    let sortedColors = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]);
+    
+    const distinct = [];
+    for (let hex of sortedColors) {
+        if (distinct.length >= count) break;
+        const rgb1 = hexToRgb(hex);
+        let isDistinct = true;
+        for (let picked of distinct) {
+            const rgb2 = hexToRgb(picked);
+            const distance = Math.sqrt(Math.pow(rgb1.r - rgb2.r, 2) + Math.pow(rgb1.g - rgb2.g, 2) + Math.pow(rgb1.b - rgb2.b, 2));
+            if (distance < 40) { isDistinct = false; break; }
+        }
+        if (isDistinct) distinct.push(hex);
+    }
+    
+    // Fill if not enough colors
+    let i = 0;
+    while (distinct.length < count) {
+        if (i < sortedColors.length) {
+             if (!distinct.includes(sortedColors[i])) distinct.push(sortedColors[i]);
+        } else {
+             distinct.push("#cccccc"); 
+        }
+        i++;
+    }
+    return distinct;
 }
 
 function hexToRgb(hex) {
