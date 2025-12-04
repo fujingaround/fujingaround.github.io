@@ -36,15 +36,13 @@
       --bg: #050505; 
       --text: #cccccc; 
   }
-
-  /* Hide arrows in spotlight mode */
   body.spotlight-mode .nav-arrow,
   body.spotlight-mode .visualizer-controls {
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.5s ease;
   }
-  body.spotlight-mode .insta-fixed { opacity: 0.2; }
+  body.spotlight-mode .insta-link { opacity: 0; pointer-events: none; }
 
   body {
     margin: 0;
@@ -111,7 +109,7 @@
       position: absolute;
       left: -60px; 
       top: 50%;
-      transform: translateY(-60%);
+      transform: translateY(-50%);
       width: 35px;
       height: 35px;
       display: block;
@@ -315,9 +313,9 @@
       width: 100%;
       max-width: 1200px;
       display: grid;
-      /* Centered grid items */
+      /* CENTERED GRID on all screens */
       justify-content: center;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 20px; 
       flex-grow: 1;
       align-content: start;
@@ -334,32 +332,29 @@
       overflow: hidden;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       cursor: pointer;
-      /* Hidden initially for JS random animation */
+      /* START HIDDEN - JS reveals this */
       opacity: 0; 
       transform: scale(0.9);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.5s ease;
   }
   
-  /* Animation Class applied by JS */
-  .palette-strip.popped {
-      animation: popStrip 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  }
-  @keyframes popStrip {
-      to { opacity: 1; transform: scale(1); }
+  /* REVEAL CLASS (This was missing/mismatched in previous version) */
+  .palette-strip.reveal {
+      opacity: 1;
+      transform: scale(1);
   }
 
   .palette-strip:hover {
-      transform: translateY(-5px) scale(1.02) !important;
+      transform: translateY(-5px) scale(1.02);
       box-shadow: 0 15px 30px rgba(0,0,0,0.2);
       z-index: 2;
   }
 
-  /* Color Swatch with Tooltip */
   .color-swatch {
       flex: 1; 
       width: 100%;
       transition: flex-grow 0.2s ease;
-      position: relative; /* For tooltip anchor */
+      position: relative;
   }
   .color-swatch:hover { flex-grow: 1.5; }
 
@@ -377,7 +372,7 @@
       font-family: monospace;
       opacity: 0;
       transition: opacity 0.2s;
-      pointer-events: none; /* Important: allows click to pass to lightbox */
+      pointer-events: none; 
       white-space: nowrap;
   }
   .color-swatch:hover .hex-tooltip { opacity: 1; }
@@ -397,7 +392,7 @@
       opacity: 0.7;
       animation: pulse 1s infinite alternate;
       z-index: 100;
-      width: 100%; /* Full width for centering */
+      width: 100%;
       text-align: center;
   }
   @keyframes pulse { from { opacity: 0.3; } to { opacity: 0.8; } }
@@ -443,7 +438,7 @@
   .nav-arrow:hover { opacity: 1; transform: scale(1.1); }
   .nav-arrow-vert { font-size: 2.5rem; }
 
-  /* --- LIGHT SWITCH --- */
+  /* --- LIGHT SWITCH (ABSOLUTE) --- */
   .light-switch-container {
       position: absolute; 
       top: 50%;
@@ -700,13 +695,9 @@
   @media (max-width: 900px) {
       .grid { column-count: 2; }
       #menu-view { grid-template-columns: 1fr; }
+      #palettes-view { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
       
-      /* Center the palette strips */
-      #palettes-view { 
-          justify-content: center; 
-          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
-      }
-      
+      /* Mobile: Switch at Top Left, ABSOLUTE */
       .light-switch-container { 
           position: absolute;
           top: 20px; 
@@ -715,6 +706,7 @@
           transform: scale(0.75);
       }
       
+      /* Mobile Logo alignment */
       .title-wrapper { display: block; margin-bottom: 10px; }
       .insta-link { left: 50%; transform: translateX(-50%) translateY(-40px); top: 0; }
       h1 { margin-top: 40px; font-size: 2.5rem; }
@@ -740,6 +732,7 @@
     .nav-arrow-horiz { order: 2; }
     .vertical-center-column { order: 1; width: 100%; gap: 10px; }
     
+    /* Ensure absolute position logic holds on smallest screens */
     .light-switch-container { top: 10px; left: 10px; right: auto; transform: scale(0.7); }
   }
 </style>
@@ -785,7 +778,7 @@
   <div id="palettes-view">
       <div id="palette-loader">Analyzing Colors...</div>
   </div>
-  
+
   <div id="prints-view">
     
     <div class="light-switch-container" id="spotlight-switch">
@@ -968,8 +961,10 @@ function openTrip(index) {
 }
 
 // ================================
-// PALETTES LOGIC (SAFE MODE)
+// PALETTES LOGIC (SAFE MODE + RANDOM POP-IN)
 // ================================
+let generatedStrips = [];
+
 function openPalettes() {
     menuView.style.display = "none";
     galleryView.style.display = "none";
@@ -982,7 +977,6 @@ function openPalettes() {
         paletteLoader.style.display = "block";
         generatePalettes();
     } else {
-        // Re-run random pop-in
         animateRandomPopIn();
     }
     window.scrollTo(0, 0);
@@ -993,7 +987,6 @@ function generatePalettes() {
     
     allImages.forEach(src => {
         const img = new Image();
-        // Attempt without crossOrigin first to minimize CORS strictness
         img.src = src;
         
         img.onload = function() {
@@ -1001,8 +994,7 @@ function generatePalettes() {
                 const colors = extractDistinctColors(img, 3);
                 createStrip(colors, src);
             } catch (e) {
-                // Safe mode: if analysis fails, use neutral grayscale
-                // This prevents the blank screen error.
+                // Safe mode fallback to grayscale
                 createStrip(['#333333', '#777777', '#cccccc'], src); 
             }
             checkDone();
@@ -1014,7 +1006,7 @@ function generatePalettes() {
             loadedImages++;
             if(loadedImages >= allImages.length) {
                 paletteLoader.style.display = "none";
-                animateRandomPopIn();
+                appendAndAnimate();
             }
         }
     });
@@ -1042,24 +1034,31 @@ function createStrip(colors, src) {
         strip.appendChild(swatch);
     });
     
-    palettesView.appendChild(strip);
+    // Push to array first, don't append yet
+    generatedStrips.push(strip);
+}
+
+function appendAndAnimate() {
+    // Randomize order before appending
+    const shuffled = generatedStrips.sort(() => Math.random() - 0.5);
+    shuffled.forEach(strip => palettesView.appendChild(strip));
+    
+    animateRandomPopIn();
 }
 
 function animateRandomPopIn() {
     const strips = document.querySelectorAll('.palette-strip');
     // Reset
     strips.forEach(strip => {
+        strip.classList.remove('reveal');
         strip.style.opacity = '0';
-        strip.style.transform = 'translateY(20px)';
-        strip.classList.remove('loaded');
     });
     
-    // Shuffle indices
+    // Random delay
     const indices = Array.from(strips.keys()).sort(() => Math.random() - 0.5);
-    
     indices.forEach((index, i) => {
         setTimeout(() => {
-            if(strips[index]) strips[index].classList.add('loaded');
+            if(strips[index]) strips[index].classList.add('reveal');
         }, i * 50);
     });
 }
@@ -1071,42 +1070,47 @@ function extractDistinctColors(imgElement, count) {
     canvas.height = 50;
     ctx.drawImage(imgElement, 0, 0, 50, 50);
     
-    const imgData = ctx.getImageData(0, 0, 50, 50).data;
-    const colorCounts = {};
-    
-    for (let i = 0; i < imgData.length; i += 4) {
-        const r = Math.round(imgData[i] / 32) * 32;
-        const g = Math.round(imgData[i+1] / 32) * 32;
-        const b = Math.round(imgData[i+2] / 32) * 32;
-        const hex = rgbToHex(r, g, b);
-        colorCounts[hex] = (colorCounts[hex] || 0) + 1;
-    }
-    
-    let sortedColors = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]);
-    const distinct = [];
-    
-    for (let hex of sortedColors) {
-        if (distinct.length >= count) break;
-        const rgb1 = hexToRgb(hex);
-        let isDistinct = true;
-        for (let picked of distinct) {
-            const rgb2 = hexToRgb(picked);
-            const distance = Math.sqrt(Math.pow(rgb1.r - rgb2.r, 2) + Math.pow(rgb1.g - rgb2.g, 2) + Math.pow(rgb1.b - rgb2.b, 2));
-            if (distance < 40) { isDistinct = false; break; }
+    try {
+        const imgData = ctx.getImageData(0, 0, 50, 50).data;
+        const colorCounts = {};
+        
+        for (let i = 0; i < imgData.length; i += 4) {
+            const r = Math.round(imgData[i] / 32) * 32;
+            const g = Math.round(imgData[i+1] / 32) * 32;
+            const b = Math.round(imgData[i+2] / 32) * 32;
+            const hex = rgbToHex(r, g, b);
+            colorCounts[hex] = (colorCounts[hex] || 0) + 1;
         }
-        if (isDistinct) distinct.push(hex);
-    }
-    
-    let i = 0;
-    while (distinct.length < count) {
-        if (i < sortedColors.length) {
-             if (!distinct.includes(sortedColors[i])) distinct.push(sortedColors[i]);
-        } else {
-             distinct.push("#cccccc"); 
+        
+        let sortedColors = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]);
+        
+        const distinct = [];
+        for (let hex of sortedColors) {
+            if (distinct.length >= count) break;
+            const rgb1 = hexToRgb(hex);
+            let isDistinct = true;
+            for (let picked of distinct) {
+                const rgb2 = hexToRgb(picked);
+                const distance = Math.sqrt(Math.pow(rgb1.r - rgb2.r, 2) + Math.pow(rgb1.g - rgb2.g, 2) + Math.pow(rgb1.b - rgb2.b, 2));
+                if (distance < 40) { isDistinct = false; break; }
+            }
+            if (isDistinct) distinct.push(hex);
         }
-        i++;
+        
+        let i = 0;
+        while (distinct.length < count) {
+            if (i < sortedColors.length) {
+                 if (!distinct.includes(sortedColors[i])) distinct.push(sortedColors[i]);
+            } else {
+                 distinct.push("#cccccc"); 
+            }
+            i++;
+        }
+        return distinct;
+        
+    } catch (e) {
+        return Array(count).fill('#cccccc');
     }
-    return distinct;
 }
 
 function hexToRgb(hex) {
@@ -1117,7 +1121,6 @@ function hexToRgb(hex) {
 function rgbToHex(r, g, b) {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
-
 
 // ================================
 // PRINTS LOGIC
