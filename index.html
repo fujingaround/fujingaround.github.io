@@ -37,14 +37,12 @@
       --text: #cccccc; 
   }
 
-  /* Hide arrows/controls in spotlight mode */
   body.spotlight-mode .nav-arrow,
   body.spotlight-mode .visualizer-controls {
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.5s ease;
   }
-  /* Dim the fixed instagram icon in spotlight mode */
   body.spotlight-mode .insta-fixed { opacity: 0.2; }
 
   body {
@@ -99,11 +97,9 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
-      /* Invert colors in dark mode so black icon becomes white */
       transition: filter 0.3s;
   }
   .insta-fixed:hover { opacity: 0.6; }
-  
   [data-theme="dark"] .insta-fixed img { filter: invert(1); }
 
 
@@ -312,100 +308,69 @@
       margin: 0 auto;
       width: 100%;
       max-width: 1200px;
-      /* Responsive grid of cards */
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 20px; 
       flex-grow: 1;
       align-content: start;
+      position: relative;
+      min-height: 50vh;
   }
   
   /* The Strip Card (Vertical Rectangle) */
   .palette-strip {
       display: flex;
       flex-direction: column;
-      height: 250px; /* Rectangle height */
+      height: 250px; 
       border-radius: 4px;
       overflow: hidden;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       cursor: pointer;
+      
+      /* Hidden initially for random pop-in */
       opacity: 0;
-      transform: translateY(20px);
+      transform: scale(0.9);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
   
-  /* Animation Class */
-  .palette-strip.loaded {
-      animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  /* Animation Class for Random Pop-in */
+  .palette-strip.popped {
+      animation: popStrip 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   }
-  @keyframes fadeInUp {
-      to { opacity: 1; transform: translateY(0); }
+  @keyframes popStrip {
+      to { opacity: 1; transform: scale(1); }
   }
 
   .palette-strip:hover {
-      transform: translateY(-5px);
+      transform: translateY(-5px) scale(1.02) !important;
       box-shadow: 0 15px 30px rgba(0,0,0,0.2);
       z-index: 2;
   }
 
   /* The 3 Colors inside the strip */
   .color-swatch {
-      flex: 1; /* Each takes equal 33% height */
+      flex: 1; 
       width: 100%;
       transition: flex-grow 0.2s ease;
   }
-  /* Fun effect: Hovering a color expands it slightly */
   .color-swatch:hover { flex-grow: 1.5; }
 
+  /* Centered Loader */
   #palette-loader {
       display: none;
-      width: 100%;
-      text-align: center;
-      grid-column: 1 / -1;
-      font-size: 1.2rem;
-      opacity: 0.5;
-      padding: 50px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.5rem;
+      font-weight: 300;
+      letter-spacing: 1px;
+      color: var(--text);
+      opacity: 0.7;
       animation: pulse 1s infinite alternate;
+      z-index: 100;
   }
-  @keyframes pulse { from { opacity: 0.3; } to { opacity: 0.7; } }
-
-  /* Hex Zoom Overlay */
-  #hex-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 11000;
-      background: rgba(0,0,0,0.9);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-  }
-  #hex-overlay.active { opacity: 1; pointer-events: auto; }
-  
-  .hex-display {
-      width: 300px;
-      height: 300px;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 0 50px rgba(0,0,0,0.5);
-      transform: scale(0.8);
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  #hex-overlay.active .hex-display { transform: scale(1); }
-  
-  .hex-text {
-      font-size: 2rem;
-      font-weight: 900;
-      font-family: monospace;
-      background: rgba(255,255,255,0.8);
-      padding: 10px 20px;
-      border-radius: 8px;
-      color: #000;
-  }
+  @keyframes pulse { from { opacity: 0.3; } to { opacity: 0.8; } }
 
   /* --- PRINTS VISUALIZER VIEW --- */
   #prints-view {
@@ -532,7 +497,7 @@
     align-items: center;
   }
   
-  /* 1. The Light Cone (Fixed to VIEWPORT) */
+  /* 1. The Light Cone */
   body.spotlight-mode::before {
       content: '';
       position: fixed;
@@ -550,7 +515,7 @@
       transition: opacity 0.8s ease;
   }
   
-  /* 2. The Wall Halo (Fixed to VIEWPORT Center) */
+  /* 2. The Wall Halo */
   body.spotlight-mode::after {
       content: '';
       position: fixed;
@@ -705,7 +670,7 @@
   @media (max-width: 900px) {
       .grid { column-count: 2; }
       #menu-view { grid-template-columns: 1fr; }
-      #palettes-view { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+      #palettes-view { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
       
       /* Mobile: Switch at Top Left, ABSOLUTE */
       .light-switch-container { 
@@ -781,12 +746,6 @@
 
   <div id="palettes-view">
       <div id="palette-loader">Analyzing Colors...</div>
-  </div>
-  
-  <div id="hex-overlay" onclick="closeHex()">
-      <div class="hex-display">
-          <div class="hex-text" id="hex-text">#000000</div>
-      </div>
   </div>
 
   <div id="prints-view">
@@ -921,8 +880,6 @@ const lightboxImg = document.getElementById("lightbox-img");
 const footerContainer = document.getElementById("footer-container");
 const spotlightSwitch = document.getElementById("spotlight-switch");
 const toggleDarkBtn = document.getElementById("toggle-dark");
-const hexOverlay = document.getElementById("hex-overlay");
-const hexText = document.getElementById("hex-text");
 const paletteLoader = document.getElementById("palette-loader");
 
 
@@ -973,9 +930,9 @@ function openTrip(index) {
 }
 
 // ================================
-// PALETTES LOGIC (SIMPLE STRIP VERSION)
+// PALETTES LOGIC (STRIPS WITH RANDOM POP-IN)
 // ================================
-let generatedStrips = 0;
+let generatedStrips = [];
 
 function openPalettes() {
     menuView.style.display = "none";
@@ -984,10 +941,13 @@ function openPalettes() {
     palettesView.style.display = "grid"; 
     backBtn.style.display = "block";
     
+    // Only generate if empty (minus loader)
     const existingStrips = palettesView.querySelectorAll('.palette-strip').length;
     if (existingStrips === 0) {
         paletteLoader.style.display = "block";
         generatePalettes();
+    } else {
+        animateRandomPopIn(); // Re-animate existing on re-open
     }
     window.scrollTo(0, 0);
 }
@@ -995,37 +955,35 @@ function openPalettes() {
 function generatePalettes() {
     let loadedImages = 0;
     
-    allImages.forEach(src => {
+    allImages.forEach((src, index) => {
         const img = new Image();
-        img.crossOrigin = "Anonymous"; 
+        // CORS note: if images are on same domain, this is fine.
+        // If external, you might need crossOrigin = "Anonymous"
         img.src = src;
         
         img.onload = function() {
             try {
-                // Get 3 simple dominant colors
                 const colors = extractDistinctColors(img, 3);
-                createStrip(colors);
+                createStrip(colors, src);
             } catch (e) {
-                console.log("Canvas error on " + src);
-                createStrip(Array(3).fill('#cccccc')); 
+                createStrip(Array(3).fill('#cccccc'), src); 
             }
             checkDone();
         }
         
-        img.onerror = function() {
-            checkDone();
-        }
+        img.onerror = function() { checkDone(); }
         
         function checkDone() {
             loadedImages++;
             if(loadedImages >= allImages.length) {
                 paletteLoader.style.display = "none";
+                appendAndAnimate();
             }
         }
     });
 }
 
-function createStrip(colors) {
+function createStrip(colors, src) {
     const strip = document.createElement('div');
     strip.className = 'palette-strip';
     
@@ -1033,14 +991,40 @@ function createStrip(colors) {
         const swatch = document.createElement('div');
         swatch.className = 'color-swatch';
         swatch.style.backgroundColor = hex;
-        swatch.onclick = () => showHex(hex);
+        // CLICKING COLOR OPENS IMAGE
+        swatch.onclick = (e) => {
+            e.stopPropagation();
+            openLightbox(src);
+        };
         strip.appendChild(swatch);
     });
     
-    palettesView.appendChild(strip);
+    generatedStrips.push(strip);
+}
+
+function appendAndAnimate() {
+    generatedStrips.forEach(strip => palettesView.appendChild(strip));
+    animateRandomPopIn();
+}
+
+function animateRandomPopIn() {
+    const strips = document.querySelectorAll('.palette-strip');
     
-    // Simple pop in animation
-    setTimeout(() => strip.classList.add('loaded'), 50);
+    // Reset state
+    strips.forEach(strip => {
+        strip.style.opacity = '0';
+        strip.style.transform = 'translateY(20px)';
+        strip.classList.remove('loaded');
+    });
+
+    // Create random order indices
+    const indices = Array.from(strips.keys()).sort(() => Math.random() - 0.5);
+    
+    indices.forEach((index, i) => {
+        setTimeout(() => {
+            if(strips[index]) strips[index].classList.add('loaded');
+        }, i * 50); // Stagger by 50ms
+    });
 }
 
 function extractDistinctColors(imgElement, count) {
@@ -1064,7 +1048,6 @@ function extractDistinctColors(imgElement, count) {
         
         let sortedColors = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]);
         
-        // Simple distance check
         const distinct = [];
         for (let hex of sortedColors) {
             if (distinct.length >= count) break;
@@ -1078,7 +1061,6 @@ function extractDistinctColors(imgElement, count) {
             if (isDistinct) distinct.push(hex);
         }
         
-        // Fill remaining
         let i = 0;
         while (distinct.length < count) {
             if (i < sortedColors.length) {
@@ -1102,18 +1084,6 @@ function hexToRgb(hex) {
 
 function rgbToHex(r, g, b) {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-}
-
-function showHex(hex) {
-    hexText.innerText = hex;
-    const display = document.querySelector('.hex-display');
-    display.style.backgroundColor = hex;
-    hexText.style.color = "#000"; 
-    hexOverlay.classList.add('active');
-}
-
-function closeHex() {
-    hexOverlay.classList.remove('active');
 }
 
 
