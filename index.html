@@ -42,7 +42,8 @@
       pointer-events: none;
       transition: opacity 0.5s ease;
   }
-  body.spotlight-mode .insta-link { opacity: 0; pointer-events: none; }
+  /* Dim instagram in spotlight mode */
+  body.spotlight-mode .insta-logo { opacity: 0.2; }
 
   body {
     margin: 0;
@@ -81,7 +82,7 @@
     pointer-events: none;
   }
 
-  /* --- HEADER --- */
+  /* --- HEADER (FLEXBOX LAYOUT) --- */
   header {
     text-align: center;
     padding: 4rem 1rem 2rem;
@@ -89,16 +90,24 @@
     flex-shrink: 0;
     z-index: 20; 
     transition: opacity 0.5s;
+    /* Flexbox to center the content row */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
-  
-  .title-wrapper {
+
+  /* Wrapper to lock Logo and Title in one line */
+  .header-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px; /* Space between logo and text */
       position: relative;
-      display: inline-block;
   }
 
   h1 {
     font-size: 3rem;
-    margin: 0 0 10px 0;
+    margin: 0;
     letter-spacing: -0.05em;
     font-weight: 700;
     line-height: 1;
@@ -106,13 +115,9 @@
 
   /* INSTAGRAM LOGO */
   .insta-link {
-      position: absolute;
-      left: -60px; 
-      top: 50%;
-      transform: translateY(-60%);
-      width: 35px;
-      height: 35px;
       display: block;
+      width: 32px;
+      height: 32px;
       transition: opacity 0.2s;
   }
   .insta-link img {
@@ -120,6 +125,7 @@
       height: 100%;
       object-fit: contain;
       transition: filter 0.3s;
+      display: block;
   }
   .insta-link:hover { opacity: 0.6; }
   [data-theme="dark"] .insta-link img { filter: invert(1); }
@@ -127,7 +133,7 @@
   /* --- BACK BUTTON --- */
   #back-btn {
     display: none;
-    margin: 20px auto;
+    margin: 20px auto 0; /* Add top margin */
     padding: 10px 20px;
     background: transparent;
     border: 1px solid var(--text);
@@ -185,7 +191,6 @@
     transform: translateY(-5px);
     box-shadow: 0 15px 30px rgba(0,0,0,0.2);
   }
-  
   .menu-item:hover::before { opacity: 0.1; }
 
   .menu-item h3 {
@@ -333,16 +338,17 @@
       cursor: pointer;
       transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.5s ease;
       
-      /* FAILSAFE: Visible by default */
+      /* FAILSAFE: Visible by default to prevent blank screen bugs */
       opacity: 1; 
       transform: scale(1);
   }
   
-  /* Animation Logic */
+  /* Animation Class applied by JS */
   .palette-strip.animate-hidden {
       opacity: 0;
       transform: translateY(30px) scale(0.9);
   }
+  
   .palette-strip.animate-visible {
       opacity: 1;
       transform: translateY(0) scale(1);
@@ -754,7 +760,12 @@
       }
       
       /* Mobile Logo alignment */
-      .insta-link { left: 50%; transform: translateX(-50%) translateY(-40px); top: 0; }
+      .title-wrapper { display: block; margin-bottom: 10px; }
+      .insta-link { 
+          left: 50%; 
+          transform: translateX(-50%) translateY(-40px); 
+          top: 0; 
+      }
       h1 { margin-top: 40px; font-size: 2.5rem; }
   }
   @media (max-width: 600px) {
@@ -791,7 +802,7 @@
   <header>
     <div class="title-wrapper">
         <a href="https://www.instagram.com/fujingaround/" target="_blank" class="insta-link">
-            <img src="instagram.png" alt="Instagram">
+            <img src="instagram.png" alt="Instagram" class="insta-logo">
         </a>
         <h1>FujingAround</h1>
     </div>
@@ -1015,7 +1026,7 @@ function openTrip(index) {
 }
 
 // ================================
-// PALETTES LOGIC (FAILSAFE)
+// PALETTES LOGIC (FAILSAFE + VIBRANCY)
 // ================================
 function openPalettes() {
     menuView.style.display = "none";
@@ -1029,7 +1040,6 @@ function openPalettes() {
         paletteLoader.style.display = "block";
         generatePalettes();
     } else {
-        // Re-run random pop-in
         animateRandomPopIn();
     }
     window.scrollTo(0, 0);
@@ -1041,14 +1051,15 @@ function generatePalettes() {
     
     allImages.forEach(src => {
         const img = new Image();
-        // Removing crossOrigin prevents many CORS errors on GitHub Pages
         img.src = src;
         
         img.onload = function() {
             try {
+                // VIBRANCY MODE: Extracts 3 distinctive colors
                 const colors = extractDistinctColors(img, 3);
                 createStripData(colors, src, generatedStrips);
             } catch (e) {
+                // Safe mode fallback
                 createStripData(['#333333', '#777777', '#cccccc'], src, generatedStrips); 
             }
             checkDone();
@@ -1070,7 +1081,7 @@ function createStripData(colors, src, array) {
     const strip = document.createElement('div');
     strip.className = 'palette-strip';
     
-    // Add hidden class for animation
+    // Prepare for animation hidden
     strip.classList.add('animate-hidden');
     
     colors.forEach(hex => {
@@ -1100,15 +1111,12 @@ function appendStrips(strips) {
 
 function animateRandomPopIn() {
     const strips = document.querySelectorAll('.palette-strip');
-    
-    // Reset state
     strips.forEach(strip => {
         strip.classList.remove('animate-visible');
         strip.classList.add('animate-hidden');
     });
     
     const indices = Array.from(strips.keys()).sort(() => Math.random() - 0.5);
-    
     indices.forEach((index, i) => {
         setTimeout(() => {
             if(strips[index]) {
@@ -1134,8 +1142,15 @@ function extractDistinctColors(imgElement, count) {
             const r = Math.round(imgData[i] / 32) * 32;
             const g = Math.round(imgData[i+1] / 32) * 32;
             const b = Math.round(imgData[i+2] / 32) * 32;
+            const { h, s, l } = rgbToHsl(r, g, b);
+            
+            // Filter extreme black/white
+            if (l < 0.1 || l > 0.9) continue;
+            
             const hex = rgbToHex(r, g, b);
-            colorCounts[hex] = (colorCounts[hex] || 0) + 1;
+            // Weight score by saturation
+            const score = 1 + (s * 5); 
+            colorCounts[hex] = (colorCounts[hex] || 0) + score;
         }
         
         let sortedColors = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]);
@@ -1148,7 +1163,7 @@ function extractDistinctColors(imgElement, count) {
             for (let picked of distinct) {
                 const rgb2 = hexToRgb(picked);
                 const distance = Math.sqrt(Math.pow(rgb1.r - rgb2.r, 2) + Math.pow(rgb1.g - rgb2.g, 2) + Math.pow(rgb1.b - rgb2.b, 2));
-                if (distance < 40) { isDistinct = false; break; }
+                if (distance < 50) { isDistinct = false; break; }
             }
             if (isDistinct) distinct.push(hex);
         }
@@ -1178,18 +1193,24 @@ function rgbToHex(r, g, b) {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
 
-function showHex(hex) {
-    hexText.innerText = hex;
-    const display = document.querySelector('.hex-display');
-    display.style.backgroundColor = hex;
-    hexText.style.color = "#000"; 
-    hexOverlay.classList.add('active');
+function rgbToHsl(r, g, b){
+    r /= 255, g /= 255, b /= 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+    var h, s, l = (max + min) / 2;
+    if(max == min){
+        h = s = 0; 
+    } else {
+        var d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch(max){
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return { h, s, l };
 }
-
-function closeHex() {
-    hexOverlay.classList.remove('active');
-}
-
 
 // ================================
 // PRINTS LOGIC
