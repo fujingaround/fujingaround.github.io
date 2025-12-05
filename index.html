@@ -43,7 +43,7 @@
       transition: opacity 0.5s ease;
   }
   /* Dim instagram in spotlight mode */
-  body.spotlight-mode .insta-logo { opacity: 0.2; }
+  body.spotlight-mode .insta-link { opacity: 0.2; }
 
   body {
     margin: 0;
@@ -90,24 +90,20 @@
     flex-shrink: 0;
     z-index: 20; 
     transition: opacity 0.5s;
-    /* Flexbox to center the content row */
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
   /* Wrapper to lock Logo and Title in one line */
-  .header-title-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px; /* Space between logo and text */
+  .title-wrapper {
       position: relative;
+      display: inline-block;
   }
 
   h1 {
     font-size: 3rem;
-    margin: 0;
+    margin: 0 0 10px 0;
     letter-spacing: -0.05em;
     font-weight: 700;
     line-height: 1;
@@ -115,9 +111,13 @@
 
   /* INSTAGRAM LOGO */
   .insta-link {
+      position: absolute;
+      left: -60px; 
+      top: 50%;
+      transform: translateY(-50%);
+      width: 35px;
+      height: 35px;
       display: block;
-      width: 32px;
-      height: 32px;
       transition: opacity 0.2s;
   }
   .insta-link img {
@@ -133,7 +133,7 @@
   /* --- BACK BUTTON --- */
   #back-btn {
     display: none;
-    margin: 20px auto 0; /* Add top margin */
+    margin: 20px auto 0; 
     padding: 10px 20px;
     background: transparent;
     border: 1px solid var(--text);
@@ -337,18 +337,15 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       cursor: pointer;
       transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.5s ease;
-      
-      /* FAILSAFE: Visible by default to prevent blank screen bugs */
       opacity: 1; 
       transform: scale(1);
   }
   
-  /* Animation Class applied by JS */
+  /* Animation Logic */
   .palette-strip.animate-hidden {
       opacity: 0;
       transform: translateY(30px) scale(0.9);
   }
-  
   .palette-strip.animate-visible {
       opacity: 1;
       transform: translateY(0) scale(1);
@@ -415,7 +412,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      /* Default hidden prevents the #000000 glitch */
       visibility: hidden;
       opacity: 0;
       pointer-events: none;
@@ -753,20 +749,12 @@
       /* Mobile: Switch at Top Left, ABSOLUTE */
       .light-switch-container { 
           position: absolute;
-          top: 20px; 
-          left: 20px;
+          top: 10px; 
+          left: 10px;
           right: auto;
           transform: scale(0.75);
+          transform-origin: top left;
       }
-      
-      /* Mobile Logo alignment */
-      .title-wrapper { display: block; margin-bottom: 10px; }
-      .insta-link { 
-          left: 50%; 
-          transform: translateX(-50%) translateY(-40px); 
-          top: 0; 
-      }
-      h1 { margin-top: 40px; font-size: 2.5rem; }
   }
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
@@ -802,7 +790,7 @@
   <header>
     <div class="title-wrapper">
         <a href="https://www.instagram.com/fujingaround/" target="_blank" class="insta-link">
-            <img src="instagram.png" alt="Instagram" class="insta-logo">
+            <img src="instagram.png" alt="Instagram">
         </a>
         <h1>FujingAround</h1>
     </div>
@@ -1040,6 +1028,7 @@ function openPalettes() {
         paletteLoader.style.display = "block";
         generatePalettes();
     } else {
+        // Re-run random pop-in
         animateRandomPopIn();
     }
     window.scrollTo(0, 0);
@@ -1051,6 +1040,7 @@ function generatePalettes() {
     
     allImages.forEach(src => {
         const img = new Image();
+        // Removing crossOrigin prevents many CORS errors on GitHub Pages
         img.src = src;
         
         img.onload = function() {
@@ -1111,12 +1101,15 @@ function appendStrips(strips) {
 
 function animateRandomPopIn() {
     const strips = document.querySelectorAll('.palette-strip');
+    
+    // Reset state
     strips.forEach(strip => {
         strip.classList.remove('animate-visible');
         strip.classList.add('animate-hidden');
     });
     
     const indices = Array.from(strips.keys()).sort(() => Math.random() - 0.5);
+    
     indices.forEach((index, i) => {
         setTimeout(() => {
             if(strips[index]) {
