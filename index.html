@@ -42,8 +42,7 @@
       pointer-events: none;
       transition: opacity 0.5s ease;
   }
-  /* Dim instagram in spotlight mode */
-  body.spotlight-mode .insta-link { opacity: 0.2; pointer-events: none; }
+  body.spotlight-mode .insta-link { opacity: 0; pointer-events: none; }
 
   body {
     margin: 0;
@@ -82,7 +81,7 @@
     pointer-events: none;
   }
 
-  /* --- HEADER (FLEXBOX LAYOUT) --- */
+  /* --- HEADER --- */
   header {
     text-align: center;
     padding: 4rem 1rem 2rem;
@@ -90,13 +89,11 @@
     flex-shrink: 0;
     z-index: 20; 
     transition: opacity 0.5s;
-    /* Flexbox to center the content row */
     display: flex;
     flex-direction: column;
     align-items: center;
   }
-
-  /* Wrapper to lock Logo and Title in one line */
+  
   .title-wrapper {
       position: relative;
       display: inline-block;
@@ -126,7 +123,6 @@
       height: 100%;
       object-fit: contain;
       transition: filter 0.3s;
-      display: block;
   }
   .insta-link:hover { opacity: 0.6; }
   [data-theme="dark"] .insta-link img { filter: invert(1); }
@@ -192,6 +188,7 @@
     transform: translateY(-5px);
     box-shadow: 0 15px 30px rgba(0,0,0,0.2);
   }
+  
   .menu-item:hover::before { opacity: 0.1; }
 
   .menu-item h3 {
@@ -311,7 +308,7 @@
   }
   .cell img.fade-in { opacity: 1; }
 
-  /* --- PALETTES VIEW --- */
+  /* --- PALETTES VIEW (RECTANGLES) --- */
   #palettes-view {
       display: none; 
       padding: 40px;
@@ -399,6 +396,49 @@
       text-align: center;
   }
   @keyframes pulse { from { opacity: 0.3; } to { opacity: 0.8; } }
+
+  /* Hex Zoom Overlay */
+  #hex-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 11000;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+  }
+  #hex-overlay.active { 
+      visibility: visible;
+      opacity: 1; 
+      pointer-events: auto; 
+  }
+  
+  .hex-display {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 50px rgba(0,0,0,0.5);
+      transform: scale(0.8);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  #hex-overlay.active .hex-display { transform: scale(1); }
+  
+  .hex-text {
+      font-size: 2rem;
+      font-weight: 900;
+      font-family: monospace;
+      background: rgba(255,255,255,0.8);
+      padding: 10px 20px;
+      border-radius: 8px;
+      color: #000;
+  }
 
   /* --- PRINTS VISUALIZER VIEW --- */
   #prints-view {
@@ -711,11 +751,7 @@
       
       /* Mobile Logo alignment */
       .title-wrapper { display: block; margin-bottom: 10px; }
-      .insta-link { 
-          left: 50%; 
-          transform: translateX(-50%) translateY(-40px); 
-          top: 0; 
-      }
+      .insta-link { left: 50%; transform: translateX(-50%) translateY(-40px); top: 0; }
       h1 { margin-top: 40px; font-size: 2.5rem; }
   }
   @media (max-width: 600px) {
@@ -752,7 +788,7 @@
   <header>
     <div class="title-wrapper">
         <a href="https://www.instagram.com/fujingaround/" target="_blank" class="insta-link">
-            <img src="instagram.png" alt="Instagram" class="insta-logo">
+            <img src="instagram.png" alt="Instagram">
         </a>
         <h1>FujingAround</h1>
     </div>
@@ -959,7 +995,7 @@ function openTrip(index) {
         cell.classList.add('loaded');
     };
     // Use THUMBNAIL for grid
-    img.src = "thumbnails/" + src;
+    img.src = "thumbnails/" + src.replace('.JPG', '.jpg');
     
     if (img.complete) {
         img.classList.add('fade-in');
@@ -1006,8 +1042,8 @@ function generatePalettes() {
     
     allImages.forEach(src => {
         const img = new Image();
-        // Use THUMBNAILS for analysis to speed up processing
-        img.src = "thumbnails/" + src;
+        // Use THUMBNAILS for speed
+        img.src = "thumbnails/" + src.replace('.JPG', '.jpg');
         
         img.onload = function() {
             try {
