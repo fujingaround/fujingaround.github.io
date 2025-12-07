@@ -42,7 +42,8 @@
       pointer-events: none;
       transition: opacity 0.5s ease;
   }
-  body.spotlight-mode .insta-link { opacity: 0; pointer-events: none; }
+  /* Dim instagram in spotlight mode */
+  body.spotlight-mode .insta-link { opacity: 0.2; pointer-events: none; }
 
   body {
     margin: 0;
@@ -81,7 +82,7 @@
     pointer-events: none;
   }
 
-  /* --- HEADER --- */
+  /* --- HEADER (FLEXBOX LAYOUT) --- */
   header {
     text-align: center;
     padding: 4rem 1rem 2rem;
@@ -89,11 +90,13 @@
     flex-shrink: 0;
     z-index: 20; 
     transition: opacity 0.5s;
+    /* Flexbox to center the content row */
     display: flex;
     flex-direction: column;
     align-items: center;
   }
-  
+
+  /* Wrapper to lock Logo and Title in one line */
   .title-wrapper {
       position: relative;
       display: inline-block;
@@ -123,6 +126,7 @@
       height: 100%;
       object-fit: contain;
       transition: filter 0.3s;
+      display: block;
   }
   .insta-link:hover { opacity: 0.6; }
   [data-theme="dark"] .insta-link img { filter: invert(1); }
@@ -188,7 +192,6 @@
     transform: translateY(-5px);
     box-shadow: 0 15px 30px rgba(0,0,0,0.2);
   }
-  
   .menu-item:hover::before { opacity: 0.1; }
 
   .menu-item h3 {
@@ -321,6 +324,8 @@
       gap: 20px; 
       flex-grow: 1;
       align-content: start;
+      position: relative;
+      min-height: 50vh;
   }
   
   .palette-strip {
@@ -436,7 +441,7 @@
   .nav-arrow:hover { opacity: 1; transform: scale(1.1); }
   .nav-arrow-vert { font-size: 2.5rem; }
 
-  /* --- LIGHT SWITCH (ABSOLUTE) --- */
+  /* --- LIGHT SWITCH --- */
   .light-switch-container {
       position: absolute; 
       top: 50%;
@@ -578,7 +583,7 @@
     box-sizing: content-box;
     position: relative;
     z-index: 2;
-    pointer-events: none; 
+    pointer-events: none; /* No drag */
   }
 
   .visualizer-controls {
@@ -698,21 +703,19 @@
       /* Mobile: Switch at Top Left, ABSOLUTE */
       .light-switch-container { 
           position: absolute;
-          top: 0; /* Align with very top edge of prints view */
-          left: 0;
+          top: 20px; 
+          left: 20px;
           right: auto;
-          transform: scale(0.6); /* Smaller */
-          transform-origin: top left;
-          margin: 10px; /* Small buffer */
+          transform: scale(0.75);
       }
       
-      /* PRINTS VIEW PADDING FOR MOBILE SWITCH */
-      #prints-view {
-          padding-top: 80px; /* Ensures image starts well below switch */
-      }
-
+      /* Mobile Logo alignment */
       .title-wrapper { display: block; margin-bottom: 10px; }
-      .insta-link { left: 50%; transform: translateX(-50%) translateY(-40px); top: 0; }
+      .insta-link { 
+          left: 50%; 
+          transform: translateX(-50%) translateY(-40px); 
+          top: 0; 
+      }
       h1 { margin-top: 40px; font-size: 2.5rem; }
   }
   @media (max-width: 600px) {
@@ -737,7 +740,7 @@
     .vertical-center-column { order: 1; width: 100%; gap: 10px; }
     
     /* Ensure absolute position logic holds on smallest screens */
-    .light-switch-container { top: 0; left: 0; margin: 10px; }
+    .light-switch-container { top: 10px; left: 10px; right: auto; transform: scale(0.7); }
   }
 </style>
 </head>
@@ -749,7 +752,7 @@
   <header>
     <div class="title-wrapper">
         <a href="https://www.instagram.com/fujingaround/" target="_blank" class="insta-link">
-            <img src="instagram.png" alt="Instagram">
+            <img src="instagram.png" alt="Instagram" class="insta-logo">
         </a>
         <h1>FujingAround</h1>
     </div>
@@ -781,6 +784,12 @@
 
   <div id="palettes-view">
       <div id="palette-loader">Analyzing Colors...</div>
+  </div>
+  
+  <div id="hex-overlay" onclick="closeHex()">
+      <div class="hex-display">
+          <div class="hex-text" id="hex-text">#000000</div>
+      </div>
   </div>
 
   <div id="prints-view">
@@ -845,17 +854,17 @@
 const trips = [
   {
     title: "Summer 2024",
-    coverImage: "image1.jpeg", 
+    coverImage: "thumbnails/image1.jpeg", 
     images: ["image1.jpeg", "image2.jpg", "image3.jpg"]
   },
   {
     title: "Winter 2023",
-    coverImage: "image5.jpg", 
+    coverImage: "thumbnails/image5.jpg", 
     images: ["image4.jpg", "image5.jpg", "image6.jpg", "image7.jpg"]
   },
   {
     title: "Balkans, 2025",
-    coverImage: "MNE9.JPG", 
+    coverImage: "thumbnails/MNE9.JPG", 
     images: [
       "MNE1.JPG", "MNE2.JPG", "MNE3.JPG", "MNE4.JPG", "MNE5.JPG",
       "MNE6.JPG", "MNE7.JPG", "MNE8.JPG", "MNE9.JPG", "MNE10.JPG",
@@ -869,7 +878,7 @@ const trips = [
   },
   {
     title: "Spring 2026",
-    coverImage: "image2.jpg", 
+    coverImage: "thumbnails/image2.jpg", 
     images: ["image2.jpg"]
   }
 ];
@@ -915,6 +924,8 @@ const lightboxImg = document.getElementById("lightbox-img");
 const footerContainer = document.getElementById("footer-container");
 const spotlightSwitch = document.getElementById("spotlight-switch");
 const toggleDarkBtn = document.getElementById("toggle-dark");
+const hexOverlay = document.getElementById("hex-overlay");
+const hexText = document.getElementById("hex-text");
 const paletteLoader = document.getElementById("palette-loader");
 
 
@@ -947,13 +958,17 @@ function openTrip(index) {
         img.classList.add('fade-in');
         cell.classList.add('loaded');
     };
-    img.src = src;
+    // Use THUMBNAIL for grid
+    img.src = "thumbnails/" + src;
+    
     if (img.complete) {
         img.classList.add('fade-in');
         cell.classList.add('loaded');
     }
 
-    cell.onclick = () => openLightbox(src);
+    // Use WATERMARKED for lightbox
+    cell.onclick = () => openLightbox("watermarked/" + src);
+    
     cell.appendChild(img);
     grid.appendChild(cell);
   });
@@ -991,16 +1006,16 @@ function generatePalettes() {
     
     allImages.forEach(src => {
         const img = new Image();
-        // Removing crossOrigin prevents many CORS errors on GitHub Pages
-        img.src = src;
+        // Use THUMBNAILS for analysis to speed up processing
+        img.src = "thumbnails/" + src;
         
         img.onload = function() {
             try {
-                // VIBRANCY MODE: Extracts 3 distinctive colors
+                // VIBRANCY MODE
                 const colors = extractDistinctColors(img, 3);
                 createStripData(colors, src, generatedStrips);
             } catch (e) {
-                // Safe mode fallback
+                // Fallback
                 createStripData(['#333333', '#777777', '#cccccc'], src, generatedStrips); 
             }
             checkDone();
@@ -1022,7 +1037,7 @@ function createStripData(colors, src, array) {
     const strip = document.createElement('div');
     strip.className = 'palette-strip';
     
-    // Prepare for animation hidden
+    // Hidden start state
     strip.classList.add('animate-hidden');
     
     colors.forEach(hex => {
@@ -1035,9 +1050,10 @@ function createStripData(colors, src, array) {
         tt.innerText = hex;
         swatch.appendChild(tt);
         
+        // Open WATERMARKED version
         swatch.onclick = (e) => {
             e.stopPropagation();
-            openLightbox(src);
+            openLightbox("watermarked/" + src);
         };
         strip.appendChild(swatch);
     });
@@ -1052,8 +1068,6 @@ function appendStrips(strips) {
 
 function animateRandomPopIn() {
     const strips = document.querySelectorAll('.palette-strip');
-    
-    // Reset state
     strips.forEach(strip => {
         strip.classList.remove('animate-visible');
         strip.classList.add('animate-hidden');
@@ -1088,11 +1102,9 @@ function extractDistinctColors(imgElement, count) {
             const b = Math.round(imgData[i+2] / 32) * 32;
             const { h, s, l } = rgbToHsl(r, g, b);
             
-            // Filter extreme black/white
             if (l < 0.1 || l > 0.9) continue;
             
             const hex = rgbToHex(r, g, b);
-            // Weight score by saturation
             const score = 1 + (s * 5); 
             colorCounts[hex] = (colorCounts[hex] || 0) + score;
         }
@@ -1224,7 +1236,8 @@ function changeFrame(direction) {
 
 function updateVisualizer() {
   const currentSrc = allImages[currentImgIndex];
-  visualizerImg.src = currentSrc;
+  // Visualizer uses watermarked for protection
+  visualizerImg.src = "watermarked/" + currentSrc;
   frames.forEach(f => visualizerImg.classList.remove(f.class));
   visualizerImg.classList.add(frames[currentFrameIndex].class);
   frameNameDisplay.innerText = `Current Frame: ${frames[currentFrameIndex].name}`;
