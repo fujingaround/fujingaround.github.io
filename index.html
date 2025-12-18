@@ -690,6 +690,19 @@
   .lightbox-content { position: relative; max-width: 90vw; max-height: 90vh; }
   #lightbox-img { max-width: 100%; max-height: 90vh; display: block; box-shadow: 0 20px 50px rgba(0,0,0,0.5); pointer-events: none; }
   
+  /* --- CSS WATERMARK --- */
+  .watermark { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; pointer-events: none; overflow: hidden; z-index: 50; }
+  .watermark span { 
+      color: #ffffff; 
+      font-size: 8vmin; 
+      font-weight: 900; 
+      text-transform: uppercase; 
+      opacity: 0.3; 
+      transform: rotate(-30deg); 
+      user-select: none; 
+      white-space: nowrap; 
+  }
+
   /* --- FOOTER CONTROLS --- */
   .footer-controls {
       position: fixed;
@@ -883,7 +896,7 @@ const trips = [
   },
   {
     title: "Balkans, 2025",
-    coverImage: "thumbnails/MNE9.JPG", 
+    coverImage: "thumbnails/MNE9.jpg", 
     images: [
       "MNE1.JPG", "MNE2.JPG", "MNE3.JPG", "MNE4.JPG", "MNE5.JPG",
       "MNE6.JPG", "MNE7.JPG", "MNE8.JPG", "MNE9.JPG", "MNE10.JPG",
@@ -892,9 +905,7 @@ const trips = [
       "MNE21.JPG", "MNE22.JPG", "MNE23.JPG", "MNE24.JPG", "MNE25.JPG",
       "MNE26.JPG", "MNE27.JPG", "MNE28.JPG", "MNE29.JPG", "MNE30.JPG",
       "MNE31.JPG", "MNE32.JPG", "MNE33.JPG", "MNE34.JPG", "MNE35.JPG",
-      "MNE36.JPG", "MNE37.JPG", "MNE38.JPG", "MNE39.JPG", "MNE40.JPG", 
-      "MNE41.JPG", "MNE42.JPG", "MNE43.JPG", "MNE44.JPG", "MNE45.JPG", 
-      "MNE46.JPG", "MNE47.JPG"
+      "MNE36.JPG", "MNE37.JPG"
     ]
   },
   {
@@ -976,11 +987,12 @@ function openTrip(index) {
     const img = document.createElement("img");
     img.loading = "lazy";
     
-    // SMART LOADER: Try Exact Match, Fallback to lowercase extension
+    // SMART LOADER for grid
+    const fallbackSrc = "thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg");
+    
     img.onerror = function() {
         if (this.src.endsWith(src)) {
-             // First attempt failed, try fallback
-             this.src = "thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg");
+             this.src = fallbackSrc;
         }
     };
     
@@ -989,7 +1001,6 @@ function openTrip(index) {
         cell.classList.add('loaded');
     };
     
-    // Start with exact match
     img.src = "thumbnails/" + src;
     
     if (img.complete) {
@@ -997,6 +1008,7 @@ function openTrip(index) {
         cell.classList.add('loaded');
     }
 
+    // Lightbox opens watermarked (defaulting to .jpg as backup could be added here too)
     cell.onclick = () => openLightbox("watermarked/" + src);
     
     cell.appendChild(img);
@@ -1024,7 +1036,6 @@ function openPalettes() {
         paletteLoader.style.display = "block";
         generatePalettes();
     } else {
-        // Re-run random pop-in
         animateRandomPopIn();
     }
     window.scrollTo(0, 0);
@@ -1037,16 +1048,14 @@ function generatePalettes() {
     allImages.forEach(src => {
         const img = new Image();
         
-        // Smart Loader for analysis
-        const tryLoad = (path) => {
-            img.src = path;
-        };
+        // Smart loader for analysis (uses thumbnails for speed)
+        const tryLoad = (path) => { img.src = path; };
         
         img.onerror = function() {
             if (this.src.endsWith(src)) {
                  tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
             } else {
-                 checkDone(); // Give up if both fail
+                 checkDone(); 
             }
         };
         
@@ -1076,7 +1085,6 @@ function generatePalettes() {
 function createStripData(colors, src, array) {
     const strip = document.createElement('div');
     strip.className = 'palette-strip';
-    
     strip.classList.add('animate-hidden');
     
     colors.forEach(hex => {
@@ -1287,6 +1295,7 @@ function changeFrame(direction) {
 
 function updateVisualizer() {
   const currentSrc = allImages[currentImgIndex];
+  // Visualizer uses watermarked
   visualizerImg.src = "watermarked/" + currentSrc;
   frames.forEach(f => visualizerImg.classList.remove(f.class));
   visualizerImg.classList.add(frames[currentFrameIndex].class);
