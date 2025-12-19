@@ -202,7 +202,7 @@
     text-align: center;
   }
 
-  /* --- ACTION BUTTONS --- */
+  /* --- ACTION BUTTONS (CLEANED) --- */
   .menu-item.action-btn {
     aspect-ratio: auto;
     height: auto;
@@ -224,19 +224,8 @@
     font-weight: 800;
     letter-spacing: -0.02em;
   }
-  .menu-item.action-btn p {
-    margin: 10px 0 0;
-    opacity: 0.6;
-    font-weight: 400;
-    color: var(--text);
-  }
+  /* Subtext removed from HTML, CSS style no longer needed */
 
-  .icon-svg {
-    width: 35px;
-    height: 35px;
-    fill: var(--text);
-    margin-bottom: 15px;
-  }
 
   /* --- FOOTER --- */
   #footer-container {
@@ -270,6 +259,21 @@
     column-gap: 20px;
     width: 100%;
   }
+
+  /* NEW GALLERY HEADERS */
+  .gallery-header {
+      grid-column: 1 / -1; /* Force span across all columns */
+      font-size: 2rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 50px 0 30px 0;
+      text-align: center;
+      border-bottom: 2px solid var(--text);
+      padding-bottom: 15px;
+      break-inside: avoid; /* Prevent splitting across columns */
+  }
+
   .cell {
     break-inside: avoid;
     margin-bottom: 20px;
@@ -691,19 +695,6 @@
   .lightbox-content { position: relative; max-width: 90vw; max-height: 90vh; }
   #lightbox-img { max-width: 100%; max-height: 90vh; display: block; box-shadow: 0 20px 50px rgba(0,0,0,0.5); pointer-events: none; }
   
-  /* --- CSS WATERMARK --- */
-  .watermark { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; pointer-events: none; overflow: hidden; z-index: 50; }
-  .watermark span { 
-      color: #ffffff; 
-      font-size: 8vmin; 
-      font-weight: 900; 
-      text-transform: uppercase; 
-      opacity: 0.3; 
-      transform: rotate(-30deg); 
-      user-select: none; 
-      white-space: nowrap; 
-  }
-
   /* --- FOOTER CONTROLS --- */
   .footer-controls {
       position: fixed;
@@ -752,6 +743,9 @@
       .title-wrapper { display: block; margin-bottom: 10px; }
       .insta-link { left: 50%; transform: translateX(-50%) translateY(-40px); top: 0; }
       h1 { margin-top: 40px; font-size: 2.5rem; }
+      
+      /* Smaller headers on mobile */
+      .gallery-header { font-size: 1.5rem; margin: 30px 0 20px 0; }
   }
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
@@ -796,19 +790,11 @@
 
   <div id="menu-view">
     <div class="menu-item action-btn" onclick="openPrints()">
-      <svg class="icon-svg" viewBox="0 0 24 24">
-        <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
-      </svg>
       <h3>Prints</h3>
-      <p>Visualize frames</p>
     </div>
 
     <div class="menu-item action-btn" onclick="openPalettes()">
-      <svg class="icon-svg" viewBox="0 0 24 24">
-        <path d="M12 3a9 9 0 0 0 0 18c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7zm-1.5-4.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm3.5 1.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm-5-3.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm6.5-1.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5z"/>
-      </svg>
       <h3>Palettes</h3>
-      <p>Color analysis</p>
     </div>
   </div>
 
@@ -899,6 +885,8 @@ const trips = [
     title: "Balkans, 2025",
     coverImage: "thumbnails/MNE9.jpg", 
     images: [
+      // *** NEW HEADER FEATURE ***
+      "HEADER:Montenegro", 
       "MNE1.JPG", "MNE2.JPG", "MNE3.JPG", "MNE4.JPG", "MNE5.JPG",
       "MNE6.JPG", "MNE7.JPG", "MNE8.JPG", "MNE9.JPG", "MNE10.JPG",
       "MNE11.JPG", "MNE12.JPG", "MNE13.JPG", "MNE14.JPG", "MNE15.JPG",
@@ -908,7 +896,12 @@ const trips = [
       "MNE31.JPG", "MNE32.JPG", "MNE33.JPG", "MNE34.JPG", "MNE35.JPG",
       "MNE36.JPG", "MNE37.JPG", "MNE38.JPG", "MNE39.JPG", "MNE40.JPG",
       "MNE41.JPG", "MNE42.JPG", "MNE43.JPG", "MNE44.JPG", "MNE45.JPG",
-      "MNE46.JPG", "MNE47.JPG"
+      "MNE46.JPG", "MNE47.JPG",
+      // *** SECOND HEADER ***
+      "HEADER:Bosnia",
+      // Placeholders so you can see it works (replace these later)
+      "image1.jpeg", 
+      "image2.jpg"
     ]
   },
   {
@@ -918,7 +911,8 @@ const trips = [
   }
 ];
 
-const allImages = trips.flatMap(t => t.images);
+// Filter out headers when creating list of all images for palettes/prints
+const allImages = trips.flatMap(t => t.images).filter(item => !item.startsWith("HEADER:"));
 
 const frames = [
   { class: "frame-black", name: "Classic Black" },
@@ -984,6 +978,17 @@ function openTrip(index) {
   grid.innerHTML = "";
   
   trip.images.forEach(src => {
+    // --- NEW HEADER LOGIC ---
+    if (src.startsWith("HEADER:")) {
+        const headerTxt = src.split(":")[1];
+        const headerEl = document.createElement("h2");
+        headerEl.className = "gallery-header";
+        headerEl.innerText = headerTxt;
+        grid.appendChild(headerEl);
+        return; // Skip image creation for this item
+    }
+    // ------------------------
+
     const cell = document.createElement("div");
     cell.className = "cell";
     
