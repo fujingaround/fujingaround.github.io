@@ -897,7 +897,7 @@ const trips = [
   },
   {
     title: "Balkans, 2025",
-    coverImage: "thumbnails/MNE9.jpg", // Updated to .jpg for safety
+    coverImage: "thumbnails/MNE9.jpg", 
     images: [
       "MNE1.JPG", "MNE2.JPG", "MNE3.JPG", "MNE4.JPG", "MNE5.JPG",
       "MNE6.JPG", "MNE7.JPG", "MNE8.JPG", "MNE9.JPG", "MNE10.JPG",
@@ -990,8 +990,7 @@ function openTrip(index) {
     const img = document.createElement("img");
     img.loading = "lazy";
     
-    // SMART LOADER for grid thumbnails
-    // If Exact Match fails, try lowercase extension
+    // SMART LOADER for grid
     const tryLoad = (path) => { img.src = path; };
     
     img.onerror = function() {
@@ -1048,15 +1047,24 @@ function generatePalettes() {
     let loadedImages = 0;
     let generatedStrips = [];
     
+    // Safety break if loading takes too long
+    const safetyTimeout = setTimeout(() => {
+        if(paletteLoader.style.display !== "none") {
+            paletteLoader.style.display = "none";
+            appendStrips(generatedStrips);
+        }
+    }, 3000);
+
     allImages.forEach(src => {
         const img = new Image();
         
-        // Smart loader for palette analysis (thumbnails)
+        // Smart loader for palette analysis
         const tryLoad = (path) => { img.src = path; };
         
         const finalize = () => {
             loadedImages++;
             if(loadedImages >= allImages.length) {
+                clearTimeout(safetyTimeout);
                 paletteLoader.style.display = "none";
                 appendStrips(generatedStrips);
             }
@@ -1072,10 +1080,10 @@ function generatePalettes() {
         
         img.onload = function() {
             try {
+                // VIBRANCY MODE
                 const colors = extractDistinctColors(img, 3);
                 createStripData(colors, src, generatedStrips);
             } catch (e) {
-                // Safely handle Tainted Canvas or other errors
                 createStripData(['#333333', '#777777', '#cccccc'], src, generatedStrips); 
             }
             finalize();
@@ -1217,6 +1225,19 @@ function rgbToHsl(r, g, b){
     return { h, s, l };
 }
 
+function showHex(hex) {
+    hexText.innerText = hex;
+    const display = document.querySelector('.hex-display');
+    display.style.backgroundColor = hex;
+    hexText.style.color = "#000"; 
+    hexOverlay.classList.add('active');
+}
+
+function closeHex() {
+    hexOverlay.classList.remove('active');
+}
+
+
 // ================================
 // PRINTS LOGIC
 // ================================
@@ -1285,15 +1306,17 @@ function changeFrame(direction) {
 
 function updateVisualizer() {
   const currentSrc = allImages[currentImgIndex];
-  // Visualizer uses watermarked
-  visualizerImg.src = "watermarked/" + currentSrc;
   
-  // Smart Load for visualizer too
+  // Smart Load for visualizer
+  const tryLoadVis = (path) => { visualizerImg.src = path; };
+  
   visualizerImg.onerror = function() {
       if (this.src.endsWith(currentSrc)) {
-           this.src = "watermarked/" + currentSrc.replace(/\.[^/.]+$/, ".jpg");
+           tryLoadVis("watermarked/" + currentSrc.replace(/\.[^/.]+$/, ".jpg"));
       }
   };
+  
+  tryLoadVis("watermarked/" + currentSrc);
 
   frames.forEach(f => visualizerImg.classList.remove(f.class));
   visualizerImg.classList.add(frames[currentFrameIndex].class);
@@ -1305,15 +1328,21 @@ function updateVisualizer() {
 // LIGHTBOX LOGIC
 // ================================
 function openLightbox(src) {
-  lightboxImg.src = src;
   
   // Smart Load for Lightbox
+  const tryLoadBox = (path) => { lightboxImg.src = path; };
+  
   lightboxImg.onerror = function() {
-      // If .JPG fails, try .jpg
-      if (this.src.includes(".JPG")) {
-           this.src = this.src.replace(".JPG", ".jpg");
+      // If original path fails, try lowercase
+      if (this.src.endsWith(src.split('/').pop())) {
+           // Basic extension replacement
+           const filename = src.split('/').pop();
+           const newFilename = filename.replace(/\.[^/.]+$/, ".jpg");
+           tryLoadBox("watermarked/" + newFilename);
       }
   };
+  
+  tryLoadBox(src);
   
   lightbox.classList.add('active');
   document.body.style.overflow = 'hidden';
