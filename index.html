@@ -395,6 +395,7 @@
   }
   @keyframes pulse { from { opacity: 0.3; } to { opacity: 0.8; } }
 
+  /* Hex Zoom Overlay */
   #hex-overlay {
       position: fixed;
       inset: 0;
@@ -896,7 +897,7 @@ const trips = [
   },
   {
     title: "Balkans, 2025",
-    coverImage: "thumbnails/MNE9.jpg", 
+    coverImage: "thumbnails/MNE9.jpg", // Updated to .jpg for safety
     images: [
       "MNE1.JPG", "MNE2.JPG", "MNE3.JPG", "MNE4.JPG", "MNE5.JPG",
       "MNE6.JPG", "MNE7.JPG", "MNE8.JPG", "MNE9.JPG", "MNE10.JPG",
@@ -906,7 +907,7 @@ const trips = [
       "MNE26.JPG", "MNE27.JPG", "MNE28.JPG", "MNE29.JPG", "MNE30.JPG",
       "MNE31.JPG", "MNE32.JPG", "MNE33.JPG", "MNE34.JPG", "MNE35.JPG",
       "MNE36.JPG", "MNE37.JPG", "MNE38.JPG", "MNE39.JPG", "MNE40.JPG",
-      "MNE41.JPG", "MNE42.JPG", "MNE43.JPG", "MNE44.JPG", "MNE45.JPG", 
+      "MNE41.JPG", "MNE42.JPG", "MNE43.JPG", "MNE44.JPG", "MNE45.JPG",
       "MNE46.JPG", "MNE47.JPG"
     ]
   },
@@ -989,12 +990,13 @@ function openTrip(index) {
     const img = document.createElement("img");
     img.loading = "lazy";
     
-    // SMART LOADER for grid
-    const fallbackSrc = "thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg");
+    // SMART LOADER for grid thumbnails
+    // If Exact Match fails, try lowercase extension
+    const tryLoad = (path) => { img.src = path; };
     
     img.onerror = function() {
         if (this.src.endsWith(src)) {
-             this.src = fallbackSrc;
+             tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
         }
     };
     
@@ -1003,14 +1005,13 @@ function openTrip(index) {
         cell.classList.add('loaded');
     };
     
-    img.src = "thumbnails/" + src;
+    tryLoad("thumbnails/" + src);
     
     if (img.complete) {
         img.classList.add('fade-in');
         cell.classList.add('loaded');
     }
 
-    // Lightbox opens watermarked (defaulting to .jpg as backup could be added here too)
     cell.onclick = () => openLightbox("watermarked/" + src);
     
     cell.appendChild(img);
@@ -1050,37 +1051,37 @@ function generatePalettes() {
     allImages.forEach(src => {
         const img = new Image();
         
-        // Smart loader for analysis (uses thumbnails for speed)
+        // Smart loader for palette analysis (thumbnails)
         const tryLoad = (path) => { img.src = path; };
         
-        img.onerror = function() {
-            if (this.src.endsWith(src)) {
-                 tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
-            } else {
-                 checkDone(); 
-            }
-        };
-        
-        img.onload = function() {
-            try {
-                // VIBRANCY MODE
-                const colors = extractDistinctColors(img, 3);
-                createStripData(colors, src, generatedStrips);
-            } catch (e) {
-                createStripData(['#333333', '#777777', '#cccccc'], src, generatedStrips); 
-            }
-            checkDone();
-        }
-        
-        tryLoad("thumbnails/" + src);
-        
-        function checkDone() {
+        const finalize = () => {
             loadedImages++;
             if(loadedImages >= allImages.length) {
                 paletteLoader.style.display = "none";
                 appendStrips(generatedStrips);
             }
+        };
+
+        img.onerror = function() {
+            if (this.src.endsWith(src)) {
+                 tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
+            } else {
+                 finalize(); // Skip if both fail
+            }
+        };
+        
+        img.onload = function() {
+            try {
+                const colors = extractDistinctColors(img, 3);
+                createStripData(colors, src, generatedStrips);
+            } catch (e) {
+                // Safely handle Tainted Canvas or other errors
+                createStripData(['#333333', '#777777', '#cccccc'], src, generatedStrips); 
+            }
+            finalize();
         }
+        
+        tryLoad("thumbnails/" + src);
     });
 }
 
@@ -1216,19 +1217,6 @@ function rgbToHsl(r, g, b){
     return { h, s, l };
 }
 
-function showHex(hex) {
-    hexText.innerText = hex;
-    const display = document.querySelector('.hex-display');
-    display.style.backgroundColor = hex;
-    hexText.style.color = "#000"; 
-    hexOverlay.classList.add('active');
-}
-
-function closeHex() {
-    hexOverlay.classList.remove('active');
-}
-
-
 // ================================
 // PRINTS LOGIC
 // ================================
@@ -1299,6 +1287,14 @@ function updateVisualizer() {
   const currentSrc = allImages[currentImgIndex];
   // Visualizer uses watermarked
   visualizerImg.src = "watermarked/" + currentSrc;
+  
+  // Smart Load for visualizer too
+  visualizerImg.onerror = function() {
+      if (this.src.endsWith(currentSrc)) {
+           this.src = "watermarked/" + currentSrc.replace(/\.[^/.]+$/, ".jpg");
+      }
+  };
+
   frames.forEach(f => visualizerImg.classList.remove(f.class));
   visualizerImg.classList.add(frames[currentFrameIndex].class);
   frameNameDisplay.innerText = `Current Frame: ${frames[currentFrameIndex].name}`;
@@ -1310,6 +1306,15 @@ function updateVisualizer() {
 // ================================
 function openLightbox(src) {
   lightboxImg.src = src;
+  
+  // Smart Load for Lightbox
+  lightboxImg.onerror = function() {
+      // If .JPG fails, try .jpg
+      if (this.src.includes(".JPG")) {
+           this.src = this.src.replace(".JPG", ".jpg");
+      }
+  };
+  
   lightbox.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
