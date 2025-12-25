@@ -225,13 +225,6 @@
     letter-spacing: -0.02em;
   }
 
-  .icon-svg {
-    width: 35px;
-    height: 35px;
-    fill: var(--text);
-    margin-bottom: 15px;
-  }
-
   /* --- FOOTER --- */
   #footer-container {
     position: relative; 
@@ -259,24 +252,28 @@
     margin: 0 auto;
     flex-grow: 1;
   }
+  
+  /* GALLERY SECTIONS */
+  .gallery-section-title {
+      width: 100%;
+      font-size: 3rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      margin: 60px 0 20px 0;
+      text-align: left; /* Brutalist left align */
+      padding-left: 10px;
+      color: var(--text);
+      border-bottom: 4px solid var(--text);
+      line-height: 1;
+  }
+
+  /* The Photo Grid itself */
   .grid {
     column-count: 3;
     column-gap: 20px;
     width: 100%;
-  }
-
-  /* NEW GALLERY HEADERS */
-  .gallery-header {
-      grid-column: 1 / -1; 
-      font-size: 2rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin: 50px 0 30px 0;
-      text-align: center;
-      border-bottom: 2px solid var(--text);
-      padding-bottom: 15px;
-      break-inside: avoid; 
+    margin-bottom: 40px; /* Space after a section */
   }
 
   .cell {
@@ -793,7 +790,7 @@
       .insta-link { left: 50%; transform: translateX(-50%) translateY(-40px); top: 0; }
       h1 { margin-top: 40px; font-size: 2.5rem; }
       
-      .gallery-header { font-size: 1.5rem; margin: 30px 0 20px 0; }
+      .gallery-section-title { font-size: 2rem; margin: 40px 0 20px 0; }
   }
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
@@ -846,9 +843,7 @@
     </div>
   </div>
 
-  <div id="gallery-view">
-    <div class="grid" id="grid"></div>
-  </div>
+  <div id="gallery-view"></div>
 
   <div id="palettes-view">
       <div id="palette-loader">Analyzing Colors...</div>
@@ -935,7 +930,6 @@ const trips = [
     title: "Balkans, 2025",
     coverImage: "thumbnails/MNE9.jpg", 
     images: [
-      // *** HEADERS ***
       "HEADER:Montenegro", 
       "MNE1.JPG", "MNE2.JPG", "MNE3.JPG", "MNE4.JPG", "MNE5.JPG",
       "MNE6.JPG", "MNE7.JPG", "MNE8.JPG", "MNE9.JPG", "MNE10.JPG",
@@ -948,7 +942,6 @@ const trips = [
       "MNE41.JPG", "MNE42.JPG", "MNE43.JPG", "MNE44.JPG", "MNE45.JPG",
       "MNE46.JPG", "MNE47.JPG", "MNE48.JPG", "MNE49.JPG", "MNE50.JPG",
       "MNE51.JPG", "MNE52.JPG", "MNE53.JPG", "MNE54.JPG",
-      // *** SECOND HEADER ***
       "HEADER:Bosnia",
       "BOS1.jpg", "BOS2.jpg", "BOS3.jpg", "BOS4.jpg", "BOS5.jpg",
       "BOS6.jpg", "BOS7.jpg", "BOS8.jpg", "BOS9.jpg", "BOS10.jpg",
@@ -974,7 +967,7 @@ const frames = [
 ];
 
 // ================================
-// INTRO ANIMATION (FIXED)
+// INTRO ANIMATION
 // ================================
 const intro = document.getElementById("intro");
 let unlocked = false;
@@ -987,7 +980,7 @@ function dismissIntro() {
   }
 }
 
-// Added extra listeners to ensure dismissal works on all devices/screen sizes
+// Added extra listeners + Click anywhere
 window.addEventListener("scroll", dismissIntro);
 window.addEventListener("wheel", dismissIntro);
 window.addEventListener("touchmove", dismissIntro);
@@ -1029,16 +1022,33 @@ function initMenu() {
 
 function openTrip(index) {
   const trip = trips[index];
-  grid.innerHTML = "";
+  galleryView.innerHTML = ""; // Clear existing content
   
+  // Helper to create a grid container
+  const createGrid = () => {
+      const g = document.createElement("div");
+      g.className = "grid";
+      return g;
+  };
+
+  let currentGrid = createGrid();
+  let hasPhotos = false; 
+
   trip.images.forEach(src => {
-    // HEADER LOGIC
+    // HEADER LOGIC: SPLIT GRID
     if (src.startsWith("HEADER:")) {
+        // If we have an active grid with photos, push it to view first
+        if (hasPhotos) {
+            galleryView.appendChild(currentGrid);
+            currentGrid = createGrid(); // Start fresh grid
+            hasPhotos = false;
+        }
+
         const headerTxt = src.split(":")[1];
         const headerEl = document.createElement("h2");
-        headerEl.className = "gallery-header";
+        headerEl.className = "gallery-section-title";
         headerEl.innerText = headerTxt;
-        grid.appendChild(headerEl);
+        galleryView.appendChild(headerEl);
         return; 
     }
 
@@ -1062,7 +1072,6 @@ function openTrip(index) {
         cell.classList.add('loaded');
     };
     
-    // Default load from THUMBNAILS folder
     tryLoad("thumbnails/" + src);
     
     if (img.complete) {
@@ -1070,13 +1079,18 @@ function openTrip(index) {
         cell.classList.add('loaded');
     }
 
-    // ON CLICK: Pass current src (from thumbnail folder) to lightbox
-    // CSS Overlay handles protection
+    // ON CLICK
     cell.onclick = () => openLightbox(img.src);
     
     cell.appendChild(img);
-    grid.appendChild(cell);
+    currentGrid.appendChild(cell); // Append to current grid section
+    hasPhotos = true;
   });
+
+  // Append the final grid section
+  if (hasPhotos) {
+      galleryView.appendChild(currentGrid);
+  }
 
   menuView.style.display = "none";
   galleryView.style.display = "block";
@@ -1108,7 +1122,6 @@ function generatePalettes() {
     let loadedImages = 0;
     let generatedStrips = [];
     
-    // Safety break if loading takes too long
     const safetyTimeout = setTimeout(() => {
         if(paletteLoader.style.display !== "none") {
             paletteLoader.style.display = "none";
@@ -1119,7 +1132,6 @@ function generatePalettes() {
     allImages.forEach(src => {
         const img = new Image();
         
-        // Smart loader
         const tryLoad = (path) => { img.src = path; };
         
         const finalize = () => {
@@ -1149,7 +1161,6 @@ function generatePalettes() {
             finalize();
         }
         
-        // Load from thumbnails folder
         tryLoad("thumbnails/" + src);
     });
 }
