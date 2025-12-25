@@ -11,7 +11,7 @@
     --text: #000000;
     --accent: #000000;
     --btn-hover: #f0f0f0;
-    --lightbox-bg: rgba(0, 0, 0, 0.9);
+    --lightbox-bg: rgba(0, 0, 0, 0.95); 
     --buy-btn-bg: #2e8b57;
     --buy-btn-text: #ffffff;
     --menu-item-overlay: rgba(0, 0, 0, 0.2); 
@@ -202,7 +202,7 @@
     text-align: center;
   }
 
-  /* --- ACTION BUTTONS (CLEANED) --- */
+  /* --- ACTION BUTTONS (CLEAN) --- */
   .menu-item.action-btn {
     aspect-ratio: auto;
     height: auto;
@@ -224,8 +224,13 @@
     font-weight: 800;
     letter-spacing: -0.02em;
   }
-  /* Subtext removed from HTML, CSS style no longer needed */
 
+  .icon-svg {
+    width: 35px;
+    height: 35px;
+    fill: var(--text);
+    margin-bottom: 15px;
+  }
 
   /* --- FOOTER --- */
   #footer-container {
@@ -262,7 +267,7 @@
 
   /* NEW GALLERY HEADERS */
   .gallery-header {
-      grid-column: 1 / -1; /* Force span across all columns */
+      grid-column: 1 / -1; 
       font-size: 2rem;
       font-weight: 800;
       text-transform: uppercase;
@@ -271,7 +276,7 @@
       text-align: center;
       border-bottom: 2px solid var(--text);
       padding-bottom: 15px;
-      break-inside: avoid; /* Prevent splitting across columns */
+      break-inside: avoid; 
   }
 
   .cell {
@@ -676,7 +681,7 @@
   .frame-matte { background-color: #fff; padding: 40px; border: 2px solid #222; box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.3); }
   .frame-white { border: 15px solid #f8f8f8; outline: 1px solid #e0e0e0; box-shadow: 0 15px 30px rgba(0,0,0,0.15), inset 0 0 10px rgba(0,0,0,0.05); }
 
-  /* --- LIGHTBOX --- */
+  /* --- LIGHTBOX (WITH SECURITY) --- */
   #lightbox {
     position: fixed;
     inset: 0;
@@ -692,9 +697,53 @@
     transition: opacity 0.3s ease;
   }
   #lightbox.active { opacity: 1; pointer-events: auto; }
-  .lightbox-content { position: relative; max-width: 90vw; max-height: 90vh; }
-  #lightbox-img { max-width: 100%; max-height: 90vh; display: block; box-shadow: 0 20px 50px rgba(0,0,0,0.5); pointer-events: none; }
   
+  .lightbox-content { 
+      position: relative; 
+      max-width: 90vw; 
+      max-height: 90vh; 
+      display: inline-block; 
+  }
+  
+  #lightbox-img { 
+      max-width: 100%; 
+      max-height: 90vh; 
+      display: block; 
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
+      pointer-events: auto; 
+  }
+  
+  /* GLASS SHIELD (INVISIBLE BARRIER) */
+  .glass-shield {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 60; 
+      background: rgba(255, 255, 255, 0); 
+      cursor: default; 
+  }
+
+  /* CSS WATERMARK (OVERLAY) */
+  .watermark { 
+      position: absolute; 
+      inset: 0; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      overflow: hidden; 
+      z-index: 50; 
+      pointer-events: none; 
+  }
+  .watermark span { 
+      color: #ffffff; 
+      font-size: 8vmin; 
+      font-weight: 900; 
+      text-transform: uppercase; 
+      opacity: 0.3; 
+      transform: rotate(-30deg); 
+      user-select: none; 
+      white-space: nowrap; 
+  }
+
   /* --- FOOTER CONTROLS --- */
   .footer-controls {
       position: fixed;
@@ -744,7 +793,6 @@
       .insta-link { left: 50%; transform: translateX(-50%) translateY(-40px); top: 0; }
       h1 { margin-top: 40px; font-size: 2.5rem; }
       
-      /* Smaller headers on mobile */
       .gallery-header { font-size: 1.5rem; margin: 30px 0 20px 0; }
   }
   @media (max-width: 600px) {
@@ -775,7 +823,7 @@
 
 <body>
 
-  <div id="intro"><h1>FujingAround</h1></div>
+  <div id="intro" onclick="dismissIntro()"><h1>FujingAround</h1></div>
 
   <header>
     <div class="title-wrapper">
@@ -853,6 +901,8 @@
   <div id="lightbox" onclick="closeLightbox(event)">
     <div class="lightbox-content">
       <img id="lightbox-img" src="">
+      <div class="watermark"><span>fujingaround</span></div>
+      <div class="glass-shield"></div>
     </div>
   </div>
 
@@ -885,7 +935,7 @@ const trips = [
     title: "Balkans, 2025",
     coverImage: "thumbnails/MNE9.jpg", 
     images: [
-      // *** NEW HEADER FEATURE ***
+      // *** HEADERS ***
       "HEADER:Montenegro", 
       "MNE1.JPG", "MNE2.JPG", "MNE3.JPG", "MNE4.JPG", "MNE5.JPG",
       "MNE6.JPG", "MNE7.JPG", "MNE8.JPG", "MNE9.JPG", "MNE10.JPG",
@@ -896,16 +946,15 @@ const trips = [
       "MNE31.JPG", "MNE32.JPG", "MNE33.JPG", "MNE34.JPG", "MNE35.JPG",
       "MNE36.JPG", "MNE37.JPG", "MNE38.JPG", "MNE39.JPG", "MNE40.JPG",
       "MNE41.JPG", "MNE42.JPG", "MNE43.JPG", "MNE44.JPG", "MNE45.JPG",
-      "MNE46.JPG", "MNE47.JPG", "MNE48.jpg", "MNE49.jpg", "MNE50.jpg",
-      "MNE51.jpg", "MNE52.jpg", "MNE53.jpg", "MNE54.jpg"
+      "MNE46.JPG", "MNE47.JPG", "MNE48.JPG", "MNE49.JPG", "MNE50.JPG",
+      "MNE51.JPG", "MNE52.JPG", "MNE53.JPG", "MNE54.JPG",
       // *** SECOND HEADER ***
       "HEADER:Bosnia",
-      // Placeholders so you can see it works (replace these later)
-      "BOS1.jpg", "BOS2.jpg", "BOS3.jpg", "BOS4.jpg", "BOS5.jpg", "BOS6.jpg",
-      "BOS7.jpg", "BOS8.jpg", "BOS9.jpg", "BOS10.jpg", "BOS11.jpg", "BOS12.jpg",
-      "BOS12.jpg", "BOS13.jpg", "BOS14.jpg", "BOS15.jpg", "BOS16.jpg", "BOS17.jpg", 
-      "BOS18.jpg", "BOS19.jpg", "BOS20.jpg", "BOS21.jpg", "BOS22.jpg", "BOS23.jpg", 
-      "BOS24.jpg", "BOS25.jpg"
+      "BOS1.jpg", "BOS2.jpg", "BOS3.jpg", "BOS4.jpg", "BOS5.jpg",
+      "BOS6.jpg", "BOS7.jpg", "BOS8.jpg", "BOS9.jpg", "BOS10.jpg",
+      "BOS11.jpg", "BOS12.jpg", "BOS13.jpg", "BOS14.jpg", "BOS15.jpg",
+      "BOS16.jpg", "BOS17.jpg", "BOS18.jpg", "BOS19.jpg", "BOS20.jpg",
+      "BOS21.jpg", "BOS22.jpg", "BOS23.jpg", "BOS24.jpg", "BOS25.jpg"
     ]
   },
   {
@@ -915,7 +964,7 @@ const trips = [
   }
 ];
 
-// Filter out headers when creating list of all images for palettes/prints
+// Filter headers out for analysis
 const allImages = trips.flatMap(t => t.images).filter(item => !item.startsWith("HEADER:"));
 
 const frames = [
@@ -925,7 +974,7 @@ const frames = [
 ];
 
 // ================================
-// INTRO ANIMATION
+// INTRO ANIMATION (FIXED)
 // ================================
 const intro = document.getElementById("intro");
 let unlocked = false;
@@ -938,10 +987,11 @@ function dismissIntro() {
   }
 }
 
+// Added extra listeners to ensure dismissal works on all devices/screen sizes
 window.addEventListener("scroll", dismissIntro);
 window.addEventListener("wheel", dismissIntro);
+window.addEventListener("touchmove", dismissIntro);
 document.body.addEventListener("click", dismissIntro);
-document.body.addEventListener("touchstart", dismissIntro);
 
 // ================================
 // APP LOGIC
@@ -982,16 +1032,15 @@ function openTrip(index) {
   grid.innerHTML = "";
   
   trip.images.forEach(src => {
-    // --- NEW HEADER LOGIC ---
+    // HEADER LOGIC
     if (src.startsWith("HEADER:")) {
         const headerTxt = src.split(":")[1];
         const headerEl = document.createElement("h2");
         headerEl.className = "gallery-header";
         headerEl.innerText = headerTxt;
         grid.appendChild(headerEl);
-        return; // Skip image creation for this item
+        return; 
     }
-    // ------------------------
 
     const cell = document.createElement("div");
     cell.className = "cell";
@@ -999,7 +1048,7 @@ function openTrip(index) {
     const img = document.createElement("img");
     img.loading = "lazy";
     
-    // SMART LOADER for grid
+    // SMART LOADER
     const tryLoad = (path) => { img.src = path; };
     
     img.onerror = function() {
@@ -1013,6 +1062,7 @@ function openTrip(index) {
         cell.classList.add('loaded');
     };
     
+    // Default load from THUMBNAILS folder
     tryLoad("thumbnails/" + src);
     
     if (img.complete) {
@@ -1020,7 +1070,9 @@ function openTrip(index) {
         cell.classList.add('loaded');
     }
 
-    cell.onclick = () => openLightbox("watermarked/" + src);
+    // ON CLICK: Pass current src (from thumbnail folder) to lightbox
+    // CSS Overlay handles protection
+    cell.onclick = () => openLightbox(img.src);
     
     cell.appendChild(img);
     grid.appendChild(cell);
@@ -1033,7 +1085,7 @@ function openTrip(index) {
 }
 
 // ================================
-// PALETTES LOGIC (FAILSAFE + VIBRANCY)
+// PALETTES LOGIC
 // ================================
 function openPalettes() {
     menuView.style.display = "none";
@@ -1067,7 +1119,7 @@ function generatePalettes() {
     allImages.forEach(src => {
         const img = new Image();
         
-        // Smart loader for palette analysis
+        // Smart loader
         const tryLoad = (path) => { img.src = path; };
         
         const finalize = () => {
@@ -1083,26 +1135,26 @@ function generatePalettes() {
             if (this.src.endsWith(src)) {
                  tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
             } else {
-                 finalize(); // Skip if both fail
+                 finalize(); 
             }
         };
         
         img.onload = function() {
             try {
-                // VIBRANCY MODE
                 const colors = extractDistinctColors(img, 3);
-                createStripData(colors, src, generatedStrips);
+                createStripData(colors, img.src, generatedStrips);
             } catch (e) {
-                createStripData(['#333333', '#777777', '#cccccc'], src, generatedStrips); 
+                createStripData(['#333333', '#777777', '#cccccc'], img.src, generatedStrips); 
             }
             finalize();
         }
         
+        // Load from thumbnails folder
         tryLoad("thumbnails/" + src);
     });
 }
 
-function createStripData(colors, src, array) {
+function createStripData(colors, imgSrc, array) {
     const strip = document.createElement('div');
     strip.className = 'palette-strip';
     strip.classList.add('animate-hidden');
@@ -1119,7 +1171,7 @@ function createStripData(colors, src, array) {
         
         swatch.onclick = (e) => {
             e.stopPropagation();
-            openLightbox("watermarked/" + src);
+            openLightbox(imgSrc);
         };
         strip.appendChild(swatch);
     });
@@ -1321,11 +1373,11 @@ function updateVisualizer() {
   
   visualizerImg.onerror = function() {
       if (this.src.endsWith(currentSrc)) {
-           tryLoadVis("watermarked/" + currentSrc.replace(/\.[^/.]+$/, ".jpg"));
+           tryLoadVis("thumbnails/" + currentSrc.replace(/\.[^/.]+$/, ".jpg"));
       }
   };
   
-  tryLoadVis("watermarked/" + currentSrc);
+  tryLoadVis("thumbnails/" + currentSrc);
 
   frames.forEach(f => visualizerImg.classList.remove(f.class));
   visualizerImg.classList.add(frames[currentFrameIndex].class);
@@ -1337,22 +1389,8 @@ function updateVisualizer() {
 // LIGHTBOX LOGIC
 // ================================
 function openLightbox(src) {
-  
-  // Smart Load for Lightbox
-  const tryLoadBox = (path) => { lightboxImg.src = path; };
-  
-  lightboxImg.onerror = function() {
-      // If original path fails, try lowercase
-      if (this.src.endsWith(src.split('/').pop())) {
-           // Basic extension replacement
-           const filename = src.split('/').pop();
-           const newFilename = filename.replace(/\.[^/.]+$/, ".jpg");
-           tryLoadBox("watermarked/" + newFilename);
-      }
-  };
-  
-  tryLoadBox(src);
-  
+  // src is already the full path from the thumbnail image
+  lightboxImg.src = src;
   lightbox.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
