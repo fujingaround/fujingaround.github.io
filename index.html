@@ -6,7 +6,7 @@
 <title>FujingAround</title>
 <style>
   /* --- GLOBAL RESETS --- */
-  * { box-sizing: border-box; } /* Fixes padding/width calculation issues */
+  * { box-sizing: border-box; } 
 
   :root {
     --bg: #ffffff;
@@ -52,7 +52,7 @@
     background: var(--bg);
     color: var(--text);
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    overflow-x: hidden; /* Prevents side scroll */
+    overflow-x: hidden;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -83,7 +83,7 @@
     pointer-events: none;
   }
 
-  /* --- HEADER (FLEXBOX FIX) --- */
+  /* --- HEADER --- */
   header {
     text-align: center;
     padding: 4rem 1rem 2rem;
@@ -97,13 +97,12 @@
     width: 100%;
   }
   
-  /* Container for Logo + Title */
   .title-wrapper {
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: center;
-      gap: 15px; /* Space between logo and text */
+      gap: 15px; 
       position: relative;
   }
 
@@ -115,7 +114,6 @@
     line-height: 1;
   }
 
-  /* INSTAGRAM LOGO */
   .insta-link {
       display: block;
       width: 35px;
@@ -209,7 +207,7 @@
     text-align: center;
   }
 
-  /* --- ACTION BUTTONS --- */
+  /* --- ACTION BUTTONS (CLEAN) --- */
   .menu-item.action-btn {
     aspect-ratio: auto;
     height: auto;
@@ -267,20 +265,23 @@
     margin-bottom: 40px;
   }
 
-  /* GALLERY HEADERS */
+  /* ARTSY GALLERY HEADERS */
   .gallery-header {
       grid-column: 1 / -1; 
-      font-size: 2rem;
-      font-weight: 800;
+      /* Monospace aesthetic looks technical/archival */
+      font-family: 'Courier New', Courier, monospace; 
+      font-size: 1.5rem;
+      font-weight: 400;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin: 50px 0 30px 0;
+      letter-spacing: 0.2em; /* Wide spacing */
+      margin: 80px 0 30px 0;
       text-align: left;
-      padding-left: 10px;
-      border-bottom: 4px solid var(--text);
+      border-bottom: 1px solid var(--text); /* Thinner, sharper line */
+      padding-bottom: 10px;
       break-inside: avoid; 
       color: var(--text);
-      line-height: 1;
+      line-height: 1.2;
+      opacity: 0.8;
   }
 
   .cell {
@@ -829,7 +830,7 @@
       
       #prints-view { padding-top: 80px; }
 
-      .gallery-section-title { font-size: 2rem; margin: 40px 0 20px 0; }
+      .gallery-section-title { font-size: 1.5rem; margin: 40px 0 20px 0; letter-spacing: 0.1em; }
       
       .lightbox-nav-btn { font-size: 4rem; padding: 30px; }
       .lightbox-prev { left: 0; }
@@ -1163,56 +1164,56 @@ function openPalettes() {
     const existingStrips = palettesView.querySelectorAll('.palette-strip').length;
     if (existingStrips === 0) {
         paletteLoader.style.display = "block";
-        generatePalettes();
+        generatePalettes(); // Uses sequential loading to prevent crashes
     } else {
         animateRandomPopIn();
     }
     window.scrollTo(0, 0);
 }
 
-function generatePalettes() {
+// SEQUENTIAL LOADING FOR MOBILE STABILITY
+async function generatePalettes() {
     let loadedImages = 0;
     let generatedStrips = [];
     
-    const safetyTimeout = setTimeout(() => {
-        if(paletteLoader.style.display !== "none") {
-            paletteLoader.style.display = "none";
-            appendStrips(generatedStrips);
-        }
-    }, 3000);
+    // Process images in small batches to prevent memory crash
+    for (const src of allImages) {
+        await new Promise(resolve => {
+            const img = new Image();
+            
+            const tryLoad = (path) => { img.src = path; };
+            
+            // On success or failure, move to next image
+            const next = () => {
+                loadedImages++;
+                resolve();
+            };
 
-    allImages.forEach(src => {
-        const img = new Image();
-        const tryLoad = (path) => { img.src = path; };
-        const finalize = () => {
-            loadedImages++;
-            if(loadedImages >= allImages.length) {
-                clearTimeout(safetyTimeout);
-                paletteLoader.style.display = "none";
-                appendStrips(generatedStrips);
+            img.onerror = function() {
+                if (this.src.endsWith(src)) {
+                     tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
+                } else {
+                     next(); 
+                }
+            };
+            
+            img.onload = function() {
+                try {
+                    const colors = extractDistinctColors(img, 3);
+                    createStripData(colors, src, generatedStrips);
+                } catch (e) {
+                    createStripData(['#333333', '#777777', '#cccccc'], src, generatedStrips); 
+                }
+                next();
             }
-        };
-
-        img.onerror = function() {
-            if (this.src.endsWith(src)) {
-                 tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
-            } else {
-                 finalize(); 
-            }
-        };
-        
-        img.onload = function() {
-            try {
-                const colors = extractDistinctColors(img, 3);
-                createStripData(colors, src, generatedStrips);
-            } catch (e) {
-                createStripData(['#333333', '#777777', '#cccccc'], src, generatedStrips); 
-            }
-            finalize();
-        }
-        
-        tryLoad("thumbnails/" + src);
-    });
+            
+            tryLoad("thumbnails/" + src);
+        });
+    }
+    
+    // All done
+    paletteLoader.style.display = "none";
+    appendStrips(generatedStrips);
 }
 
 function createStripData(colors, originalSrc, array) {
@@ -1494,9 +1495,12 @@ function closeLightbox(event) {
 toggleDarkBtn.addEventListener("click", (e) => {
   e.stopPropagation();
   const currentTheme = document.body.dataset.theme;
-  const newTheme = currentTheme === "dark" ? "light" : "dark";
+  // If no theme is set (default light), treat it as "light" to switch to "dark"
+  const isDark = currentTheme === "dark";
+  const newTheme = isDark ? "light" : "dark";
+  
   document.body.dataset.theme = newTheme;
-  // Update button text to show the option available
+  // If we just switched TO dark, button should offer "Light Mode"
   toggleDarkBtn.innerText = newTheme === "dark" ? "Light Mode" : "Dark Mode";
 });
 
