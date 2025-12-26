@@ -265,23 +265,32 @@
     margin-bottom: 40px;
   }
 
-  /* ARTSY GALLERY HEADERS */
+  /* --- ARTSY HEADERS (UPDATED) --- */
+  /* This creates a line that extends to the right of the text */
   .gallery-header {
       grid-column: 1 / -1; 
-      /* Monospace aesthetic looks technical/archival */
-      font-family: 'Courier New', Courier, monospace; 
-      font-size: 1.5rem;
-      font-weight: 400;
-      text-transform: uppercase;
-      letter-spacing: 0.2em; /* Wide spacing */
-      margin: 80px 0 30px 0;
-      text-align: left;
-      border-bottom: 1px solid var(--text); /* Thinner, sharper line */
-      padding-bottom: 10px;
-      break-inside: avoid; 
+      display: flex;
+      align-items: center;
+      margin: 80px 0 40px 0;
       color: var(--text);
-      line-height: 1.2;
-      opacity: 0.8;
+      break-inside: avoid;
+  }
+
+  .gallery-header span {
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-right: 20px;
+      white-space: nowrap;
+  }
+
+  .gallery-header::after {
+      content: '';
+      flex-grow: 1;
+      height: 2px;
+      background-color: var(--text);
+      opacity: 0.3;
   }
 
   .cell {
@@ -391,23 +400,38 @@
   }
   .color-swatch:hover .hex-tooltip { opacity: 1; }
 
+  /* UPDATED PALETTE LOADER + BAR */
   #palette-loader {
       display: none;
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 1.5rem;
+      font-size: 1.2rem;
       font-weight: 300;
       letter-spacing: 1px;
       color: var(--text);
-      opacity: 0.7;
-      animation: pulse 1s infinite alternate;
       z-index: 100;
-      width: 100%;
+      width: 80%;
+      max-width: 300px;
       text-align: center;
   }
-  @keyframes pulse { from { opacity: 0.3; } to { opacity: 0.8; } }
+  
+  .progress-container {
+      width: 100%;
+      height: 4px;
+      background-color: var(--loading-bg);
+      margin-top: 15px;
+      border-radius: 2px;
+      overflow: hidden;
+  }
+  
+  .progress-bar {
+      width: 0%;
+      height: 100%;
+      background-color: var(--text);
+      transition: width 0.3s ease;
+  }
 
   /* Hex Zoom Overlay */
   #hex-overlay {
@@ -830,7 +854,13 @@
       
       #prints-view { padding-top: 80px; }
 
-      .gallery-section-title { font-size: 1.5rem; margin: 40px 0 20px 0; letter-spacing: 0.1em; }
+      .title-wrapper { display: block; margin-bottom: 10px; }
+      .insta-link { left: 50%; transform: translateX(-50%) translateY(-40px); top: 0; }
+      h1 { margin-top: 40px; font-size: 2.5rem; }
+      
+      /* Artsy Header Mobile Adj */
+      .gallery-header { font-size: 1.5rem; margin: 40px 0 20px 0; }
+      .gallery-header span { font-size: 1.5rem; }
       
       .lightbox-nav-btn { font-size: 4rem; padding: 30px; }
       .lightbox-prev { left: 0; }
@@ -889,7 +919,12 @@
   <div id="gallery-view"></div>
 
   <div id="palettes-view">
-      <div id="palette-loader">Analyzing Colors...</div>
+      <div id="palette-loader">
+          Analyzing Colors...
+          <div class="progress-container">
+              <div class="progress-bar" id="palette-progress-bar"></div>
+          </div>
+      </div>
   </div>
   
   <div id="hex-overlay" onclick="closeHex()">
@@ -1010,7 +1045,6 @@ const trips = [
   }
 ];
 
-// Filter headers out for analysis AND lightbox navigation
 const allImages = trips.flatMap(t => t.images).filter(item => !item.startsWith("HEADER:"));
 
 const frames = [
@@ -1055,11 +1089,11 @@ const toggleDarkBtn = document.getElementById("toggle-dark");
 const hexOverlay = document.getElementById("hex-overlay");
 const hexText = document.getElementById("hex-text");
 const paletteLoader = document.getElementById("palette-loader");
+const paletteProgressBar = document.getElementById("palette-progress-bar");
 
 let currentLightboxIndex = 0;
 let currentGalleryImages = []; 
 
-// Add global listener once
 document.addEventListener('keydown', handleKeyInput);
 
 function initMenu() {
@@ -1081,7 +1115,6 @@ function openTrip(index) {
   const trip = trips[index];
   galleryView.innerHTML = "";
   
-  // Navigation array (remove headers)
   currentGalleryImages = trip.images.filter(src => !src.startsWith("HEADER:"));
   
   const createGrid = () => {
@@ -1102,8 +1135,13 @@ function openTrip(index) {
         }
         const headerTxt = src.split(":")[1];
         const headerEl = document.createElement("h2");
-        headerEl.className = "gallery-section-title";
-        headerEl.innerText = headerTxt;
+        headerEl.className = "gallery-header";
+        
+        // ARTSY HEADER HTML
+        const span = document.createElement("span");
+        span.innerText = headerTxt;
+        headerEl.appendChild(span);
+        
         galleryView.appendChild(headerEl);
         return; 
     }
@@ -1152,7 +1190,7 @@ function openTrip(index) {
 }
 
 // ================================
-// PALETTES LOGIC
+// PALETTES LOGIC (BATCHED)
 // ================================
 function openPalettes() {
     menuView.style.display = "none";
@@ -1164,54 +1202,61 @@ function openPalettes() {
     const existingStrips = palettesView.querySelectorAll('.palette-strip').length;
     if (existingStrips === 0) {
         paletteLoader.style.display = "block";
-        generatePalettes(); // Uses sequential loading to prevent crashes
+        paletteProgressBar.style.width = "0%";
+        generatePalettesBatched();
     } else {
         animateRandomPopIn();
     }
     window.scrollTo(0, 0);
 }
 
-// SEQUENTIAL LOADING FOR MOBILE STABILITY
-async function generatePalettes() {
+// BATCHED PROCESSOR (Faster than 1-by-1, Safer than All-at-Once)
+async function generatePalettesBatched() {
     let loadedImages = 0;
     let generatedStrips = [];
+    const batchSize = 4; // Process 4 images at a time
     
-    // Process images in small batches to prevent memory crash
-    for (const src of allImages) {
-        await new Promise(resolve => {
-            const img = new Image();
-            
-            const tryLoad = (path) => { img.src = path; };
-            
-            // On success or failure, move to next image
-            const next = () => {
-                loadedImages++;
-                resolve();
-            };
+    for (let i = 0; i < allImages.length; i += batchSize) {
+        const batch = allImages.slice(i, i + batchSize);
+        
+        // Wait for this batch to finish before starting next
+        await Promise.all(batch.map(src => {
+            return new Promise(resolve => {
+                const img = new Image();
+                const tryLoad = (path) => { img.src = path; };
+                
+                const done = () => {
+                    loadedImages++;
+                    // Update Progress Bar
+                    const percent = (loadedImages / allImages.length) * 100;
+                    paletteProgressBar.style.width = percent + "%";
+                    resolve();
+                };
 
-            img.onerror = function() {
-                if (this.src.endsWith(src)) {
-                     tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
-                } else {
-                     next(); 
+                img.onerror = function() {
+                    if (this.src.endsWith(src)) {
+                         tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
+                    } else {
+                         done(); 
+                    }
+                };
+                
+                img.onload = function() {
+                    try {
+                        const colors = extractDistinctColors(img, 3);
+                        createStripData(colors, src, generatedStrips);
+                    } catch (e) {
+                        createStripData(['#333333', '#777777', '#cccccc'], src, generatedStrips); 
+                    }
+                    done();
                 }
-            };
-            
-            img.onload = function() {
-                try {
-                    const colors = extractDistinctColors(img, 3);
-                    createStripData(colors, src, generatedStrips);
-                } catch (e) {
-                    createStripData(['#333333', '#777777', '#cccccc'], src, generatedStrips); 
-                }
-                next();
-            }
-            
-            tryLoad("thumbnails/" + src);
-        });
+                
+                tryLoad("thumbnails/" + src);
+            });
+        }));
     }
     
-    // All done
+    // Finished
     paletteLoader.style.display = "none";
     appendStrips(generatedStrips);
 }
@@ -1495,12 +1540,9 @@ function closeLightbox(event) {
 toggleDarkBtn.addEventListener("click", (e) => {
   e.stopPropagation();
   const currentTheme = document.body.dataset.theme;
-  // If no theme is set (default light), treat it as "light" to switch to "dark"
-  const isDark = currentTheme === "dark";
-  const newTheme = isDark ? "light" : "dark";
-  
+  const newTheme = currentTheme === "dark" ? "light" : "dark";
   document.body.dataset.theme = newTheme;
-  // If we just switched TO dark, button should offer "Light Mode"
+  // Update button text to show the option available
   toggleDarkBtn.innerText = newTheme === "dark" ? "Light Mode" : "Dark Mode";
 });
 
@@ -1520,6 +1562,9 @@ document.addEventListener('contextmenu', function(e) {
 });
 document.addEventListener('dragstart', function(e) {
     if (e.target.tagName === 'IMG') { e.preventDefault(); }
+});
+window.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) { e.preventDefault(); }
 });
 </script>
 </body>
