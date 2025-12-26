@@ -11,7 +11,7 @@
     --text: #000000;
     --accent: #000000;
     --btn-hover: #f0f0f0;
-    --lightbox-bg: rgba(0, 0, 0, 0.95); 
+    --lightbox-bg: rgba(0, 0, 0, 0.98); 
     --buy-btn-bg: #2e8b57;
     --buy-btn-text: #ffffff;
     --menu-item-overlay: rgba(0, 0, 0, 0.2); 
@@ -252,28 +252,27 @@
     margin: 0 auto;
     flex-grow: 1;
   }
-  
-  /* GALLERY SECTIONS */
-  .gallery-section-title {
-      width: 100%;
-      font-size: 3rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: -0.02em;
-      margin: 60px 0 20px 0;
-      text-align: left; /* Brutalist left align */
-      padding-left: 10px;
-      color: var(--text);
-      border-bottom: 4px solid var(--text);
-      line-height: 1;
-  }
-
-  /* The Photo Grid itself */
   .grid {
     column-count: 3;
     column-gap: 20px;
     width: 100%;
-    margin-bottom: 40px; /* Space after a section */
+    margin-bottom: 40px;
+  }
+
+  /* GALLERY HEADERS */
+  .gallery-header {
+      grid-column: 1 / -1; 
+      font-size: 2rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 50px 0 30px 0;
+      text-align: left;
+      padding-left: 10px;
+      border-bottom: 4px solid var(--text);
+      break-inside: avoid; 
+      color: var(--text);
+      line-height: 1;
   }
 
   .cell {
@@ -678,7 +677,7 @@
   .frame-matte { background-color: #fff; padding: 40px; border: 2px solid #222; box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.3); }
   .frame-white { border: 15px solid #f8f8f8; outline: 1px solid #e0e0e0; box-shadow: 0 15px 30px rgba(0,0,0,0.15), inset 0 0 10px rgba(0,0,0,0.05); }
 
-  /* --- LIGHTBOX (WITH SECURITY) --- */
+  /* --- LIGHTBOX (UPDATED FOR NAV & CLOSE) --- */
   #lightbox {
     position: fixed;
     inset: 0;
@@ -691,9 +690,10 @@
     z-index: 10000;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    visibility: hidden; /* Fixes the 'can't click after close' bug */
   }
-  #lightbox.active { opacity: 1; pointer-events: auto; }
+  #lightbox.active { opacity: 1; pointer-events: auto; visibility: visible; }
   
   .lightbox-content { 
       position: relative; 
@@ -710,6 +710,41 @@
       pointer-events: auto; 
   }
   
+  /* LIGHTBOX NAV CONTROLS */
+  .lightbox-nav-btn {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      border: none;
+      font-size: 3rem;
+      cursor: pointer;
+      padding: 20px;
+      z-index: 10002;
+      transition: color 0.3s;
+      user-select: none;
+  }
+  .lightbox-nav-btn:hover { color: #fff; }
+  .lightbox-prev { left: 20px; }
+  .lightbox-next { right: 20px; }
+
+  /* LIGHTBOX CLOSE BUTTON */
+  .lightbox-close-btn {
+      position: fixed;
+      top: 20px;
+      right: 30px;
+      font-size: 2.5rem;
+      color: rgba(255,255,255,0.6);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 10002;
+      transition: color 0.3s;
+      line-height: 1;
+  }
+  .lightbox-close-btn:hover { color: #fff; }
+
   /* GLASS SHIELD (INVISIBLE BARRIER) */
   .glass-shield {
       position: absolute;
@@ -791,6 +826,11 @@
       h1 { margin-top: 40px; font-size: 2.5rem; }
       
       .gallery-section-title { font-size: 2rem; margin: 40px 0 20px 0; }
+      
+      /* Bigger touch targets on mobile lightbox */
+      .lightbox-nav-btn { font-size: 4rem; padding: 30px; }
+      .lightbox-prev { left: 0; }
+      .lightbox-next { right: 0; }
   }
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
@@ -893,12 +933,15 @@
     </div>
   </div>
 
-  <div id="lightbox" onclick="closeLightbox(event)">
+  <div id="lightbox">
+    <button class="lightbox-close-btn" onclick="closeLightbox(event)">✕</button>
+    <button class="lightbox-nav-btn lightbox-prev" onclick="navigateLightbox(-1, event)">❮</button>
     <div class="lightbox-content">
       <img id="lightbox-img" src="">
       <div class="watermark"><span>fujingaround</span></div>
       <div class="glass-shield"></div>
     </div>
+    <button class="lightbox-nav-btn lightbox-next" onclick="navigateLightbox(1, event)">❯</button>
   </div>
 
   <div id="footer-container">
@@ -907,7 +950,7 @@
   </div>
 
   <div class="footer-controls">
-      <button id="toggle-dark" class="control-btn">Dark Mode</button>
+      <button id="toggle-dark" class="control-btn">Light Mode</button>
   </div>
 
 
@@ -917,24 +960,14 @@
 // ================================
 const trips = [
   {
-    title: "Italy, 2024",
-    coverImage: "thumbnails/image20.jpeg", 
-    images: ["image20.jpeg", "image21.jpg", "image22.jpg"]
+    title: "Summer 2024",
+    coverImage: "thumbnails/image1.jpeg", 
+    images: ["image1.jpeg", "image2.jpg", "image3.jpg"]
   },
   {
-    title: "Paris, 2024",
-    coverImage: "thumbnails/image30.jpeg", 
-    images: ["image30.jpeg", "image31.jpg", "image32.jpg"]
-  },
-  {
-    title: "London, 2024",
-    coverImage: "thumbnails/image40.jpeg", 
-    images: ["image40.jpeg", "image41.jpg", "image42.jpg"]
-  },
-  {
-    title: "USA, 2025",
-    coverImage: "thumbnails/image50.jpg", 
-    images: ["image50.jpg", "image51.jpg", "image52.jpg", "image53.jpg"]
+    title: "Winter 2023",
+    coverImage: "thumbnails/image5.jpg", 
+    images: ["image4.jpg", "image5.jpg", "image6.jpg", "image7.jpg"]
   },
   {
     title: "Balkans, 2025",
@@ -961,18 +994,13 @@ const trips = [
     ]
   },
   {
-    title: "NYC, 2025",
-    coverImage: "thumbnails/NYC1.jpg", 
-    images: [
-      "NYC1.jpg", "NYC2.jpg", "NYC3.jpg", "NYC4.jpg", "NYC5.jpg", "NYC6.jpg",
-      "NYC7.jpg", "NYC8.jpg", "NYC9.jpg", "NYC10.jpg", "NYC11.jpg", "NYC12.jpg",
-      "NYC13.jpg", "NYC14.jpg", "NYC15.jpg", "NYC16.jpg", "NYC17.jpg", "NYC18.jpg", 
-      "NYC19.jpg"
-    ]
+    title: "Spring 2026",
+    coverImage: "thumbnails/image2.jpg", 
+    images: ["image2.jpg"]
   }
 ];
 
-// Filter headers out for analysis
+// Filter headers out for analysis AND lightbox navigation
 const allImages = trips.flatMap(t => t.images).filter(item => !item.startsWith("HEADER:"));
 
 const frames = [
@@ -995,7 +1023,6 @@ function dismissIntro() {
   }
 }
 
-// Added extra listeners + Click anywhere
 window.addEventListener("scroll", dismissIntro);
 window.addEventListener("wheel", dismissIntro);
 window.addEventListener("touchmove", dismissIntro);
@@ -1019,6 +1046,8 @@ const hexOverlay = document.getElementById("hex-overlay");
 const hexText = document.getElementById("hex-text");
 const paletteLoader = document.getElementById("palette-loader");
 
+let currentLightboxIndex = 0;
+let currentGalleryImages = []; // Stores valid images for current trip navigation
 
 function initMenu() {
   const printsBtn = document.querySelector('.menu-item.action-btn'); 
@@ -1037,9 +1066,11 @@ function initMenu() {
 
 function openTrip(index) {
   const trip = trips[index];
-  galleryView.innerHTML = ""; // Clear existing content
+  grid.innerHTML = "";
   
-  // Helper to create a grid container
+  // Create navigation array for lightbox (no headers)
+  currentGalleryImages = trip.images.filter(src => !src.startsWith("HEADER:"));
+  
   const createGrid = () => {
       const g = document.createElement("div");
       g.className = "grid";
@@ -1050,15 +1081,13 @@ function openTrip(index) {
   let hasPhotos = false; 
 
   trip.images.forEach(src => {
-    // HEADER LOGIC: SPLIT GRID
+    // HEADER LOGIC
     if (src.startsWith("HEADER:")) {
-        // If we have an active grid with photos, push it to view first
         if (hasPhotos) {
             galleryView.appendChild(currentGrid);
-            currentGrid = createGrid(); // Start fresh grid
+            currentGrid = createGrid();
             hasPhotos = false;
         }
-
         const headerTxt = src.split(":")[1];
         const headerEl = document.createElement("h2");
         headerEl.className = "gallery-section-title";
@@ -1095,14 +1124,13 @@ function openTrip(index) {
     }
 
     // ON CLICK
-    cell.onclick = () => openLightbox(img.src);
+    cell.onclick = () => openLightbox(src);
     
     cell.appendChild(img);
-    currentGrid.appendChild(cell); // Append to current grid section
+    currentGrid.appendChild(cell); 
     hasPhotos = true;
   });
 
-  // Append the final grid section
   if (hasPhotos) {
       galleryView.appendChild(currentGrid);
   }
@@ -1146,9 +1174,7 @@ function generatePalettes() {
 
     allImages.forEach(src => {
         const img = new Image();
-        
         const tryLoad = (path) => { img.src = path; };
-        
         const finalize = () => {
             loadedImages++;
             if(loadedImages >= allImages.length) {
@@ -1169,9 +1195,9 @@ function generatePalettes() {
         img.onload = function() {
             try {
                 const colors = extractDistinctColors(img, 3);
-                createStripData(colors, img.src, generatedStrips);
+                createStripData(colors, src, generatedStrips);
             } catch (e) {
-                createStripData(['#333333', '#777777', '#cccccc'], img.src, generatedStrips); 
+                createStripData(['#333333', '#777777', '#cccccc'], src, generatedStrips); 
             }
             finalize();
         }
@@ -1180,7 +1206,7 @@ function generatePalettes() {
     });
 }
 
-function createStripData(colors, imgSrc, array) {
+function createStripData(colors, originalSrc, array) {
     const strip = document.createElement('div');
     strip.className = 'palette-strip';
     strip.classList.add('animate-hidden');
@@ -1197,7 +1223,9 @@ function createStripData(colors, imgSrc, array) {
         
         swatch.onclick = (e) => {
             e.stopPropagation();
-            openLightbox(imgSrc);
+            // Palettes open global image list
+            currentGalleryImages = allImages; 
+            openLightbox(originalSrc);
         };
         strip.appendChild(swatch);
     });
@@ -1245,16 +1273,12 @@ function extractDistinctColors(imgElement, count) {
             const g = Math.round(imgData[i+1] / 32) * 32;
             const b = Math.round(imgData[i+2] / 32) * 32;
             const { h, s, l } = rgbToHsl(r, g, b);
-            
             if (l < 0.1 || l > 0.9) continue;
-            
             const hex = rgbToHex(r, g, b);
             const score = 1 + (s * 5); 
             colorCounts[hex] = (colorCounts[hex] || 0) + score;
         }
-        
         let sortedColors = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]);
-        
         const distinct = [];
         for (let hex of sortedColors) {
             if (distinct.length >= count) break;
@@ -1267,18 +1291,14 @@ function extractDistinctColors(imgElement, count) {
             }
             if (isDistinct) distinct.push(hex);
         }
-        
         let i = 0;
         while (distinct.length < count) {
             if (i < sortedColors.length) {
                  if (!distinct.includes(sortedColors[i])) distinct.push(sortedColors[i]);
-            } else {
-                 distinct.push("#cccccc"); 
-            }
+            } else { distinct.push("#cccccc"); }
             i++;
         }
         return distinct;
-        
     } catch (e) {
         return Array(count).fill('#cccccc');
     }
@@ -1340,10 +1360,8 @@ function openPrints() {
   palettesView.style.display = "none";
   printsView.style.display = "flex";
   backBtn.style.display = "block";
-  
   spotlightSwitch.style.display = "flex"; 
   toggleDarkBtn.style.display = "none"; 
-  
   if (visualizerImg.getAttribute("src") === "") {
     updateVisualizer();
   }
@@ -1355,26 +1373,29 @@ function showMenu() {
   printsView.style.display = "none";
   palettesView.style.display = "none";
   backBtn.style.display = "none";
-  
   spotlightSwitch.style.display = "none"; 
   toggleDarkBtn.style.display = "block"; 
-  
   menuView.style.display = "grid"; 
   document.removeEventListener('keydown', handleKeyInput);
-  
   document.body.classList.remove('spotlight-mode');
-
   window.scrollTo(0, 0);
 }
 
 function handleKeyInput(e) {
-  if (printsView.style.display !== "flex") return;
-  if (e.key === "ArrowUp" || e.key === "ArrowDown") e.preventDefault();
-
-  if (e.key === "ArrowRight") changeImage(1);
-  if (e.key === "ArrowLeft") changeImage(-1);
-  if (e.key === "ArrowUp") changeFrame(1);
-  if (e.key === "ArrowDown") changeFrame(-1);
+  if (printsView.style.display === "flex") {
+      if (e.key === "ArrowUp" || e.key === "ArrowDown") e.preventDefault();
+      if (e.key === "ArrowRight") changeImage(1);
+      if (e.key === "ArrowLeft") changeImage(-1);
+      if (e.key === "ArrowUp") changeFrame(1);
+      if (e.key === "ArrowDown") changeFrame(-1);
+  }
+  
+  // Lightbox Keyboard Navigation
+  if (lightbox.classList.contains('active')) {
+      if (e.key === "ArrowRight") navigateLightbox(1);
+      if (e.key === "ArrowLeft") navigateLightbox(-1);
+      if (e.key === "Escape") closeLightbox();
+  }
 }
 
 function changeImage(direction) {
@@ -1393,18 +1414,13 @@ function changeFrame(direction) {
 
 function updateVisualizer() {
   const currentSrc = allImages[currentImgIndex];
-  
-  // Smart Load for visualizer
   const tryLoadVis = (path) => { visualizerImg.src = path; };
-  
   visualizerImg.onerror = function() {
       if (this.src.endsWith(currentSrc)) {
            tryLoadVis("thumbnails/" + currentSrc.replace(/\.[^/.]+$/, ".jpg"));
       }
   };
-  
   tryLoadVis("thumbnails/" + currentSrc);
-
   frames.forEach(f => visualizerImg.classList.remove(f.class));
   visualizerImg.classList.add(frames[currentFrameIndex].class);
   frameNameDisplay.innerText = `Current Frame: ${frames[currentFrameIndex].name}`;
@@ -1415,14 +1431,51 @@ function updateVisualizer() {
 // LIGHTBOX LOGIC
 // ================================
 function openLightbox(src) {
-  // src is already the full path from the thumbnail image
-  lightboxImg.src = src;
+  // Find current index for navigation
+  const foundIndex = currentGalleryImages.indexOf(src);
+  if(foundIndex !== -1) currentLightboxIndex = foundIndex;
+  
+  loadLightboxImage(src);
+  
   lightbox.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
 
+function loadLightboxImage(src) {
+    const tryLoadBox = (path) => { lightboxImg.src = path; };
+    lightboxImg.onerror = function() {
+      if (this.src.endsWith(src.split('/').pop())) {
+           const filename = src.split('/').pop();
+           const newFilename = filename.replace(/\.[^/.]+$/, ".jpg");
+           tryLoadBox("thumbnails/" + newFilename);
+      }
+    };
+    // Use thumbnails for lightbox too (Single Source)
+    if (!src.includes('/')) src = "thumbnails/" + src;
+    tryLoadBox(src);
+}
+
+function navigateLightbox(direction, e) {
+    if(e) e.stopPropagation();
+    currentLightboxIndex += direction;
+    if (currentLightboxIndex >= currentGalleryImages.length) currentLightboxIndex = 0;
+    if (currentLightboxIndex < 0) currentLightboxIndex = currentGalleryImages.length - 1;
+    loadLightboxImage(currentGalleryImages[currentLightboxIndex]);
+}
+
+// Swipe Support
+let touchStartX = 0;
+let touchEndX = 0;
+
+lightbox.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+lightbox.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    if (touchEndX < touchStartX - 50) navigateLightbox(1);
+    if (touchEndX > touchStartX + 50) navigateLightbox(-1);
+});
+
 function closeLightbox(event) {
-  if (event.target === lightbox || event.target.classList.contains('lightbox-content')) {
+  if (!event || event.target === lightbox || event.target.classList.contains('lightbox-content') || event.target.classList.contains('lightbox-close-btn')) {
     lightbox.classList.remove('active');
     document.body.style.overflow = '';
     setTimeout(() => { lightboxImg.src = ""; }, 300);
@@ -1435,7 +1488,10 @@ function closeLightbox(event) {
 toggleDarkBtn.addEventListener("click", (e) => {
   e.stopPropagation();
   const currentTheme = document.body.dataset.theme;
-  document.body.dataset.theme = currentTheme === "dark" ? "light" : "dark";
+  const newTheme = currentTheme === "dark" ? "light" : "dark";
+  document.body.dataset.theme = newTheme;
+  // Update button text to show the option available
+  toggleDarkBtn.innerText = newTheme === "dark" ? "Light Mode" : "Dark Mode";
 });
 
 spotlightSwitch.addEventListener("click", (e) => {
