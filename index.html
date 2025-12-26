@@ -202,7 +202,7 @@
     text-align: center;
   }
 
-  /* --- ACTION BUTTONS (CLEAN) --- */
+  /* --- ACTION BUTTONS --- */
   .menu-item.action-btn {
     aspect-ratio: auto;
     height: auto;
@@ -677,7 +677,7 @@
   .frame-matte { background-color: #fff; padding: 40px; border: 2px solid #222; box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.3); }
   .frame-white { border: 15px solid #f8f8f8; outline: 1px solid #e0e0e0; box-shadow: 0 15px 30px rgba(0,0,0,0.15), inset 0 0 10px rgba(0,0,0,0.05); }
 
-  /* --- LIGHTBOX (UPDATED FOR NAV & CLOSE) --- */
+  /* --- LIGHTBOX (UPDATED) --- */
   #lightbox {
     position: fixed;
     inset: 0;
@@ -691,7 +691,7 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease, visibility 0.3s ease;
-    visibility: hidden; /* Fixes the 'can't click after close' bug */
+    visibility: hidden; 
   }
   #lightbox.active { opacity: 1; pointer-events: auto; visibility: visible; }
   
@@ -745,7 +745,7 @@
   }
   .lightbox-close-btn:hover { color: #fff; }
 
-  /* GLASS SHIELD (INVISIBLE BARRIER) */
+  /* GLASS SHIELD */
   .glass-shield {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -754,7 +754,7 @@
       cursor: default; 
   }
 
-  /* CSS WATERMARK (OVERLAY) */
+  /* CSS WATERMARK */
   .watermark { 
       position: absolute; 
       inset: 0; 
@@ -827,7 +827,6 @@
       
       .gallery-section-title { font-size: 2rem; margin: 40px 0 20px 0; }
       
-      /* Bigger touch targets on mobile lightbox */
       .lightbox-nav-btn { font-size: 4rem; padding: 30px; }
       .lightbox-prev { left: 0; }
       .lightbox-next { right: 0; }
@@ -877,7 +876,6 @@
     <div class="menu-item action-btn" onclick="openPrints()">
       <h3>Prints</h3>
     </div>
-
     <div class="menu-item action-btn" onclick="openPalettes()">
       <h3>Palettes</h3>
     </div>
@@ -896,7 +894,6 @@
   </div>
 
   <div id="prints-view">
-    
     <div class="light-switch-container" id="spotlight-switch">
         <div class="click-me-text">Click me! &#8595;</div>
         <div class="light-switch-plate">
@@ -908,11 +905,9 @@
       <div class="nav-arrow nav-arrow-horiz" onclick="changeImage(-1)">❮</div>
       <div class="vertical-center-column">
           <div class="nav-arrow nav-arrow-vert" onclick="changeFrame(1)">▲</div>
-          
           <div class="framed-photo-wrapper">
             <img id="visualizer-img" class="framed-photo frame-matte" src="" alt="Print Preview">
           </div>
-          
           <div class="nav-arrow nav-arrow-vert" onclick="changeFrame(-1)">▼</div>
       </div>
       <div class="nav-arrow nav-arrow-horiz" onclick="changeImage(1)">❯</div>
@@ -960,24 +955,14 @@
 // ================================
 const trips = [
   {
-    title: "Italy, 2024",
-    coverImage: "thumbnails/image20.jpeg", 
-    images: ["image20.jpeg", "image21.jpg", "image22.jpg"]
+    title: "Summer 2024",
+    coverImage: "thumbnails/image1.jpeg", 
+    images: ["image1.jpeg", "image2.jpg", "image3.jpg"]
   },
   {
-    title: "Paris, 2024",
-    coverImage: "thumbnails/image30.jpeg", 
-    images: ["image30.jpeg", "image31.jpg", "image32.jpg"]
-  },
-  {
-    title: "London, 2024",
-    coverImage: "thumbnails/image40.jpeg", 
-    images: ["image40.jpeg", "image41.jpg", "image42.jpg"]
-  },
-  {
-    title: "USA, 2025",
-    coverImage: "thumbnails/image50.jpg", 
-    images: ["image50.jpg", "image51.jpg", "image52.jpg", "image53.jpg"]
+    title: "Winter 2023",
+    coverImage: "thumbnails/image5.jpg", 
+    images: ["image4.jpg", "image5.jpg", "image6.jpg", "image7.jpg"]
   },
   {
     title: "Balkans, 2025",
@@ -1012,6 +997,11 @@ const trips = [
       "NYC13.jpg", "NYC14.jpg", "NYC15.jpg", "NYC16.jpg", "NYC17.jpg", "NYC18.jpg", 
       "NYC19.jpg"
     ]
+  },
+  {
+    title: "Spring 2026",
+    coverImage: "thumbnails/image2.jpg", 
+    images: ["image2.jpg"]
   }
 ];
 
@@ -1050,7 +1040,6 @@ const menuView = document.getElementById("menu-view");
 const galleryView = document.getElementById("gallery-view");
 const printsView = document.getElementById("prints-view");
 const palettesView = document.getElementById("palettes-view");
-const grid = document.getElementById("grid");
 const backBtn = document.getElementById("back-btn");
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightbox-img");
@@ -1062,7 +1051,7 @@ const hexText = document.getElementById("hex-text");
 const paletteLoader = document.getElementById("palette-loader");
 
 let currentLightboxIndex = 0;
-let currentGalleryImages = []; // Stores valid images for current trip navigation
+let currentGalleryImages = []; 
 
 function initMenu() {
   const printsBtn = document.querySelector('.menu-item.action-btn'); 
@@ -1081,9 +1070,9 @@ function initMenu() {
 
 function openTrip(index) {
   const trip = trips[index];
-  grid.innerHTML = "";
+  galleryView.innerHTML = "";
   
-  // Create navigation array for lightbox (no headers)
+  // Navigation array (remove headers)
   currentGalleryImages = trip.images.filter(src => !src.startsWith("HEADER:"));
   
   const createGrid = () => {
@@ -1096,7 +1085,6 @@ function openTrip(index) {
   let hasPhotos = false; 
 
   trip.images.forEach(src => {
-    // HEADER LOGIC
     if (src.startsWith("HEADER:")) {
         if (hasPhotos) {
             galleryView.appendChild(currentGrid);
@@ -1117,7 +1105,6 @@ function openTrip(index) {
     const img = document.createElement("img");
     img.loading = "lazy";
     
-    // SMART LOADER
     const tryLoad = (path) => { img.src = path; };
     
     img.onerror = function() {
@@ -1138,7 +1125,6 @@ function openTrip(index) {
         cell.classList.add('loaded');
     }
 
-    // ON CLICK
     cell.onclick = () => openLightbox(src);
     
     cell.appendChild(img);
@@ -1238,7 +1224,6 @@ function createStripData(colors, originalSrc, array) {
         
         swatch.onclick = (e) => {
             e.stopPropagation();
-            // Palettes open global image list
             currentGalleryImages = allImages; 
             openLightbox(originalSrc);
         };
