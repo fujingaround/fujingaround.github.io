@@ -265,7 +265,7 @@
     margin-bottom: 40px;
   }
 
-  /* "TECHNICAL" GALLERY HEADERS */
+  /* TECHNICAL HEADERS */
   .gallery-header {
       grid-column: 1 / -1; 
       display: flex;
@@ -274,7 +274,6 @@
       color: var(--text);
       break-inside: avoid;
       
-      /* Camera/Data Aesthetic */
       font-family: 'Courier New', Courier, monospace; 
       font-size: 1.2rem;
       font-weight: bold;
@@ -283,20 +282,17 @@
       opacity: 0.8;
   }
 
-  /* The Text Part */
   .gallery-header span {
       margin-right: 20px;
       white-space: nowrap;
       position: relative;
   }
   
-  /* The "Slash" before the text for style */
   .gallery-header span::before {
       content: '// ';
       opacity: 0.5;
   }
 
-  /* The Line Extending Right */
   .gallery-header::after {
       content: '';
       flex-grow: 1;
@@ -412,7 +408,6 @@
   }
   .color-swatch:hover .hex-tooltip { opacity: 1; }
 
-  /* UPDATED PALETTE LOADER + BAR */
   #palette-loader {
       display: none;
       position: absolute;
@@ -722,7 +717,7 @@
   .frame-matte { background-color: #fff; padding: 40px; border: 2px solid #222; box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.3); }
   .frame-white { border: 15px solid #f8f8f8; outline: 1px solid #e0e0e0; box-shadow: 0 15px 30px rgba(0,0,0,0.15), inset 0 0 10px rgba(0,0,0,0.05); }
 
-  /* --- LIGHTBOX (UPDATED) --- */
+  /* --- LIGHTBOX --- */
   #lightbox {
     position: fixed;
     inset: 0;
@@ -1149,7 +1144,7 @@ function openTrip(index) {
         const headerEl = document.createElement("h2");
         headerEl.className = "gallery-header";
         
-        // ARTSY HEADER HTML
+        // TECHNICAL HEADER
         const span = document.createElement("span");
         span.innerText = headerTxt;
         headerEl.appendChild(span);
@@ -1202,7 +1197,7 @@ function openTrip(index) {
 }
 
 // ================================
-// PALETTES LOGIC (BATCHED + ANTI-FREEZE)
+// PALETTES LOGIC (FAST QUEUE)
 // ================================
 function openPalettes() {
     menuView.style.display = "none";
@@ -1215,66 +1210,88 @@ function openPalettes() {
     if (existingStrips === 0) {
         paletteLoader.style.display = "block";
         paletteProgressBar.style.width = "0%";
-        generatePalettesBatched();
+        generatePalettesQueue();
     } else {
         animateRandomPopIn();
     }
     window.scrollTo(0, 0);
 }
 
-async function generatePalettesBatched() {
-    let loadedImages = 0;
+// QUEUE SYSTEM (6 Parallel Workers + Timeout)
+function generatePalettesQueue() {
+    let loadedCount = 0;
+    let index = 0;
     let generatedStrips = [];
-    const batchSize = 4; // Process 4 images at a time
-    
-    for (let i = 0; i < allImages.length; i += batchSize) {
-        const batch = allImages.slice(i, i + batchSize);
-        
-        await Promise.all(batch.map(src => {
-            return new Promise(resolve => {
-                const img = new Image();
-                // IMPORTANT: Use CORS or canvas will be tainted
-                img.crossOrigin = "Anonymous"; 
-                
-                const tryLoad = (path) => { img.src = path; };
-                
-                const done = () => {
-                    loadedImages++;
-                    const percent = (loadedImages / allImages.length) * 100;
-                    paletteProgressBar.style.width = percent + "%";
-                    resolve();
-                };
+    const concurrency = 6; 
+    let activeWorkers = 0;
 
-                img.onerror = function() {
-                    // If error, try lowercase extension, else fail gracefully
-                    if (this.src.endsWith(src)) {
-                         tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
-                    } else {
-                         done(); // Skip bad image
-                    }
-                };
-                
-                img.onload = function() {
-                    try {
-                        const colors = extractDistinctColors(img, 3);
-                        createStripData(colors, src, generatedStrips);
-                    } catch (e) {
-                        // If Tainted Canvas (Security Error), fall back to grey
-                        createStripData(['#333333', '#777777', '#cccccc'], src, generatedStrips); 
-                    }
-                    done();
-                }
-                
-                tryLoad("thumbnails/" + src);
-            });
-        }));
+    function next() {
+        if (index >= allImages.length) {
+            if (activeWorkers === 0) {
+                // All done
+                paletteLoader.style.display = "none";
+                appendStrips(generatedStrips);
+            }
+            return;
+        }
+
+        activeWorkers++;
+        const src = allImages[index++];
+        
+        processSingleImage(src).then((strip) => {
+            if (strip) generatedStrips.push(strip);
+            loadedCount++;
+            const percent = (loadedCount / allImages.length) * 100;
+            paletteProgressBar.style.width = percent + "%";
+            activeWorkers--;
+            next(); // Start next one immediately
+        });
     }
-    
-    paletteLoader.style.display = "none";
-    appendStrips(generatedStrips);
+
+    // Start initial workers
+    for (let i = 0; i < concurrency; i++) next();
 }
 
-function createStripData(colors, originalSrc, array) {
+function processSingleImage(src) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "Anonymous"; // CRITICAL FOR CANVAS
+
+        const tryLoad = (path) => { img.src = path; };
+
+        // 2-Second Timeout Kill Switch
+        const timeout = setTimeout(() => {
+            resolve(createStripData(['#333333', '#555555', '#777777'], src)); // Return grey strip
+        }, 2000);
+
+        img.onerror = function() {
+            if (this.src.endsWith(src)) {
+                 tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
+            } else {
+                 clearTimeout(timeout);
+                 resolve(null); // Fail gracefully
+            }
+        };
+        
+        img.onload = function() {
+            clearTimeout(timeout);
+            try {
+                const colors = extractDistinctColors(img, 3);
+                resolve(createStripData(colors, src));
+            } catch (e) {
+                resolve(createStripData(['#333333', '#555555', '#777777'], src));
+            }
+        }
+        
+        tryLoad("thumbnails/" + src);
+    });
+}
+
+function createStripData(colors, originalSrc) {
+    // Helper to return object or element, here we return DOM element directly
+    // This allows the Promise to pass it back
+    if(!colors) return null;
+
     const strip = document.createElement('div');
     strip.className = 'palette-strip';
     strip.classList.add('animate-hidden');
@@ -1296,7 +1313,7 @@ function createStripData(colors, originalSrc, array) {
         };
         strip.appendChild(swatch);
     });
-    array.push(strip);
+    return strip;
 }
 
 function appendStrips(strips) {
@@ -1367,7 +1384,6 @@ function extractDistinctColors(imgElement, count) {
         }
         return distinct;
     } catch (e) {
-        // If security error occurs, return grey
         return Array(count).fill('#cccccc');
     }
 }
