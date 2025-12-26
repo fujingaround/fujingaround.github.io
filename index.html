@@ -265,8 +265,7 @@
     margin-bottom: 40px;
   }
 
-  /* --- ARTSY HEADERS (UPDATED) --- */
-  /* This creates a line that extends to the right of the text */
+  /* "TECHNICAL" GALLERY HEADERS */
   .gallery-header {
       grid-column: 1 / -1; 
       display: flex;
@@ -274,23 +273,36 @@
       margin: 80px 0 40px 0;
       color: var(--text);
       break-inside: avoid;
+      
+      /* Camera/Data Aesthetic */
+      font-family: 'Courier New', Courier, monospace; 
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.2em; 
+      opacity: 0.8;
   }
 
+  /* The Text Part */
   .gallery-header span {
-      font-size: 2.5rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
       margin-right: 20px;
       white-space: nowrap;
+      position: relative;
+  }
+  
+  /* The "Slash" before the text for style */
+  .gallery-header span::before {
+      content: '// ';
+      opacity: 0.5;
   }
 
+  /* The Line Extending Right */
   .gallery-header::after {
       content: '';
       flex-grow: 1;
-      height: 2px;
+      height: 1px;
       background-color: var(--text);
-      opacity: 0.3;
+      opacity: 0.4;
   }
 
   .cell {
@@ -858,9 +870,9 @@
       .insta-link { left: 50%; transform: translateX(-50%) translateY(-40px); top: 0; }
       h1 { margin-top: 40px; font-size: 2.5rem; }
       
-      /* Artsy Header Mobile Adj */
-      .gallery-header { font-size: 1.5rem; margin: 40px 0 20px 0; }
-      .gallery-header span { font-size: 1.5rem; }
+      /* Updated header mobile text */
+      .gallery-header { font-size: 1.2rem; margin: 40px 0 20px 0; }
+      .gallery-header span { font-size: 1.2rem; margin-right: 15px; }
       
       .lightbox-nav-btn { font-size: 4rem; padding: 30px; }
       .lightbox-prev { left: 0; }
@@ -1190,7 +1202,7 @@ function openTrip(index) {
 }
 
 // ================================
-// PALETTES LOGIC (BATCHED)
+// PALETTES LOGIC (BATCHED + ANTI-FREEZE)
 // ================================
 function openPalettes() {
     menuView.style.display = "none";
@@ -1210,7 +1222,6 @@ function openPalettes() {
     window.scrollTo(0, 0);
 }
 
-// BATCHED PROCESSOR (Faster than 1-by-1, Safer than All-at-Once)
 async function generatePalettesBatched() {
     let loadedImages = 0;
     let generatedStrips = [];
@@ -1219,25 +1230,27 @@ async function generatePalettesBatched() {
     for (let i = 0; i < allImages.length; i += batchSize) {
         const batch = allImages.slice(i, i + batchSize);
         
-        // Wait for this batch to finish before starting next
         await Promise.all(batch.map(src => {
             return new Promise(resolve => {
                 const img = new Image();
+                // IMPORTANT: Use CORS or canvas will be tainted
+                img.crossOrigin = "Anonymous"; 
+                
                 const tryLoad = (path) => { img.src = path; };
                 
                 const done = () => {
                     loadedImages++;
-                    // Update Progress Bar
                     const percent = (loadedImages / allImages.length) * 100;
                     paletteProgressBar.style.width = percent + "%";
                     resolve();
                 };
 
                 img.onerror = function() {
+                    // If error, try lowercase extension, else fail gracefully
                     if (this.src.endsWith(src)) {
                          tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
                     } else {
-                         done(); 
+                         done(); // Skip bad image
                     }
                 };
                 
@@ -1246,6 +1259,7 @@ async function generatePalettesBatched() {
                         const colors = extractDistinctColors(img, 3);
                         createStripData(colors, src, generatedStrips);
                     } catch (e) {
+                        // If Tainted Canvas (Security Error), fall back to grey
                         createStripData(['#333333', '#777777', '#cccccc'], src, generatedStrips); 
                     }
                     done();
@@ -1256,7 +1270,6 @@ async function generatePalettesBatched() {
         }));
     }
     
-    // Finished
     paletteLoader.style.display = "none";
     appendStrips(generatedStrips);
 }
@@ -1354,6 +1367,7 @@ function extractDistinctColors(imgElement, count) {
         }
         return distinct;
     } catch (e) {
+        // If security error occurs, return grey
         return Array(count).fill('#cccccc');
     }
 }
@@ -1442,7 +1456,6 @@ function handleKeyInput(e) {
       if (e.key === "ArrowDown") changeFrame(-1);
   }
   
-  // Lightbox Keyboard Navigation
   if (lightbox.classList.contains('active')) {
       if (e.key === "ArrowRight") navigateLightbox(1);
       if (e.key === "ArrowLeft") navigateLightbox(-1);
@@ -1483,7 +1496,6 @@ function updateVisualizer() {
 // LIGHTBOX LOGIC
 // ================================
 function openLightbox(src) {
-  // Find current index for navigation
   const foundIndex = currentGalleryImages.indexOf(src);
   if(foundIndex !== -1) currentLightboxIndex = foundIndex;
   
@@ -1502,7 +1514,6 @@ function loadLightboxImage(src) {
            tryLoadBox("thumbnails/" + newFilename);
       }
     };
-    // Use thumbnails for lightbox too (Single Source)
     if (!src.includes('/')) src = "thumbnails/" + src;
     tryLoadBox(src);
 }
@@ -1515,7 +1526,6 @@ function navigateLightbox(direction, e) {
     loadLightboxImage(currentGalleryImages[currentLightboxIndex]);
 }
 
-// Swipe Support
 let touchStartX = 0;
 let touchEndX = 0;
 
@@ -1542,7 +1552,6 @@ toggleDarkBtn.addEventListener("click", (e) => {
   const currentTheme = document.body.dataset.theme;
   const newTheme = currentTheme === "dark" ? "light" : "dark";
   document.body.dataset.theme = newTheme;
-  // Update button text to show the option available
   toggleDarkBtn.innerText = newTheme === "dark" ? "Light Mode" : "Dark Mode";
 });
 
