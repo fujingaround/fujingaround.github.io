@@ -6,6 +6,8 @@
 <title>FujingAround</title>
 <style>
   /* --- GLOBAL RESETS --- */
+  * { box-sizing: border-box; } /* Fixes padding/width calculation issues */
+
   :root {
     --bg: #ffffff;
     --text: #000000;
@@ -50,8 +52,8 @@
     background: var(--bg);
     color: var(--text);
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    overflow-x: hidden;
-    width: 100vw;
+    overflow-x: hidden; /* Prevents side scroll */
+    width: 100%;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -81,7 +83,7 @@
     pointer-events: none;
   }
 
-  /* --- HEADER --- */
+  /* --- HEADER (FLEXBOX FIX) --- */
   header {
     text-align: center;
     padding: 4rem 1rem 2rem;
@@ -92,29 +94,32 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
   }
   
+  /* Container for Logo + Title */
   .title-wrapper {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 15px; /* Space between logo and text */
       position: relative;
-      display: inline-block;
   }
 
   h1 {
     font-size: 3rem;
-    margin: 0 0 10px 0;
+    margin: 0;
     letter-spacing: -0.05em;
     font-weight: 700;
     line-height: 1;
   }
 
+  /* INSTAGRAM LOGO */
   .insta-link {
-      position: absolute;
-      left: -60px; 
-      top: 50%;
-      transform: translateY(-50%);
+      display: block;
       width: 35px;
       height: 35px;
-      display: block;
       transition: opacity 0.2s;
   }
   .insta-link img {
@@ -122,6 +127,7 @@
       height: 100%;
       object-fit: contain;
       transition: filter 0.3s;
+      display: block;
   }
   .insta-link:hover { opacity: 0.6; }
   [data-theme="dark"] .insta-link img { filter: invert(1); }
@@ -129,7 +135,7 @@
   /* --- BACK BUTTON --- */
   #back-btn {
     display: none;
-    margin: 20px auto;
+    margin: 20px auto 0;
     padding: 10px 20px;
     background: transparent;
     border: 1px solid var(--text);
@@ -154,6 +160,7 @@
     max-width: 1000px; 
     margin: 0 auto;
     flex-grow: 1;
+    width: 100%;
   }
 
   .menu-item {
@@ -251,6 +258,7 @@
     max-width: 1600px;
     margin: 0 auto;
     flex-grow: 1;
+    width: 100%;
   }
   .grid {
     column-count: 3;
@@ -821,10 +829,6 @@
       
       #prints-view { padding-top: 80px; }
 
-      .title-wrapper { display: block; margin-bottom: 10px; }
-      .insta-link { left: 50%; transform: translateX(-50%) translateY(-40px); top: 0; }
-      h1 { margin-top: 40px; font-size: 2.5rem; }
-      
       .gallery-section-title { font-size: 2rem; margin: 40px 0 20px 0; }
       
       .lightbox-nav-btn { font-size: 4rem; padding: 30px; }
@@ -945,7 +949,7 @@
   </div>
 
   <div class="footer-controls">
-      <button id="toggle-dark" class="control-btn">Light Mode</button>
+      <button id="toggle-dark" class="control-btn">Dark Mode</button>
   </div>
 
 
@@ -955,24 +959,14 @@
 // ================================
 const trips = [
   {
-    title: "Italy, 2024",
-    coverImage: "thumbnails/image20.jpeg", 
-    images: ["image20.jpeg", "image21.jpg", "image22.jpg"]
+    title: "Summer 2024",
+    coverImage: "thumbnails/image1.jpeg", 
+    images: ["image1.jpeg", "image2.jpg", "image3.jpg"]
   },
   {
-    title: "Paris, 2024",
-    coverImage: "thumbnails/image30.jpeg", 
-    images: ["image30.jpeg", "image31.jpg", "image32.jpg"]
-  },
-  {
-    title: "London, 2024",
-    coverImage: "thumbnails/image40.jpeg", 
-    images: ["image40.jpeg", "image41.jpg", "image42.jpg"]
-  },
-  {
-    title: "USA, 2025",
-    coverImage: "thumbnails/image50.jpg", 
-    images: ["image50.jpg", "image51.jpg", "image52.jpg", "image53.jpg"]
+    title: "Winter 2023",
+    coverImage: "thumbnails/image5.jpg", 
+    images: ["image4.jpg", "image5.jpg", "image6.jpg", "image7.jpg"]
   },
   {
     title: "Balkans, 2025",
@@ -1008,6 +1002,11 @@ const trips = [
       "NYC19.jpg"
     ]
   },
+  {
+    title: "Spring 2026",
+    coverImage: "thumbnails/image2.jpg", 
+    images: ["image2.jpg"]
+  }
 ];
 
 // Filter headers out for analysis AND lightbox navigation
@@ -1045,6 +1044,7 @@ const menuView = document.getElementById("menu-view");
 const galleryView = document.getElementById("gallery-view");
 const printsView = document.getElementById("prints-view");
 const palettesView = document.getElementById("palettes-view");
+const grid = document.getElementById("grid");
 const backBtn = document.getElementById("back-btn");
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightbox-img");
@@ -1057,6 +1057,9 @@ const paletteLoader = document.getElementById("palette-loader");
 
 let currentLightboxIndex = 0;
 let currentGalleryImages = []; 
+
+// Add global listener once
+document.addEventListener('keydown', handleKeyInput);
 
 function initMenu() {
   const printsBtn = document.querySelector('.menu-item.action-btn'); 
@@ -1370,7 +1373,6 @@ function openPrints() {
   if (visualizerImg.getAttribute("src") === "") {
     updateVisualizer();
   }
-  document.addEventListener('keydown', handleKeyInput);
 }
 
 function showMenu() {
@@ -1381,7 +1383,6 @@ function showMenu() {
   spotlightSwitch.style.display = "none"; 
   toggleDarkBtn.style.display = "block"; 
   menuView.style.display = "grid"; 
-  document.removeEventListener('keydown', handleKeyInput);
   document.body.classList.remove('spotlight-mode');
   window.scrollTo(0, 0);
 }
@@ -1515,9 +1516,6 @@ document.addEventListener('contextmenu', function(e) {
 });
 document.addEventListener('dragstart', function(e) {
     if (e.target.tagName === 'IMG') { e.preventDefault(); }
-});
-window.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) { e.preventDefault(); }
 });
 </script>
 </body>
