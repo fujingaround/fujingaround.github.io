@@ -1058,7 +1058,6 @@ const trips = [
   }
 ];
 
-// Filter headers out for analysis AND lightbox navigation
 const allImages = trips.flatMap(t => t.images).filter(item => !item.startsWith("HEADER:"));
 
 const frames = [
@@ -1129,7 +1128,6 @@ function openTrip(index) {
   const trip = trips[index];
   galleryView.innerHTML = "";
   
-  // Navigation array (remove headers)
   currentGalleryImages = trip.images.filter(src => !src.startsWith("HEADER:"));
   
   const createGrid = () => {
@@ -1152,7 +1150,6 @@ function openTrip(index) {
         const headerEl = document.createElement("h2");
         headerEl.className = "gallery-header";
         
-        // TECHNICAL HEADER
         const span = document.createElement("span");
         span.innerText = headerTxt;
         headerEl.appendChild(span);
@@ -1225,7 +1222,6 @@ function openPalettes() {
     window.scrollTo(0, 0);
 }
 
-// QUEUE SYSTEM (6 Parallel Workers + Timeout)
 function generatePalettesQueue() {
     let loadedCount = 0;
     let index = 0;
@@ -1236,7 +1232,6 @@ function generatePalettesQueue() {
     function next() {
         if (index >= allImages.length) {
             if (activeWorkers === 0) {
-                // All done
                 paletteLoader.style.display = "none";
                 appendStrips(generatedStrips);
             }
@@ -1252,24 +1247,23 @@ function generatePalettesQueue() {
             const percent = (loadedCount / allImages.length) * 100;
             paletteProgressBar.style.width = percent + "%";
             activeWorkers--;
-            next(); // Start next one immediately
+            next(); 
         });
     }
 
-    // Start initial workers
     for (let i = 0; i < concurrency; i++) next();
 }
 
 function processSingleImage(src) {
     return new Promise((resolve) => {
         const img = new Image();
-        img.crossOrigin = "Anonymous"; // CRITICAL FOR CANVAS
+        img.crossOrigin = "Anonymous"; 
 
         const tryLoad = (path) => { img.src = path; };
 
-        // 4-Second Timeout Kill Switch -> Returns NULL
+        // 4-SECOND TIMEOUT KILL SWITCH
         const timeout = setTimeout(() => {
-            resolve(null);
+            resolve(null); // Return NULL (skip) on timeout
         }, 4000);
 
         img.onerror = function() {
@@ -1277,7 +1271,7 @@ function processSingleImage(src) {
                  tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
             } else {
                  clearTimeout(timeout);
-                 resolve(null); // Fail gracefully
+                 resolve(null); 
             }
         };
         
@@ -1285,9 +1279,10 @@ function processSingleImage(src) {
             clearTimeout(timeout);
             try {
                 const colors = extractDistinctColors(img, 3);
-                resolve(createStripData(colors, src));
+                // IF COLORS IS EMPTY/NULL, SKIP
+                if (!colors || colors.length < 1) resolve(null);
+                else resolve(createStripData(colors, src));
             } catch (e) {
-                // Failed analysis -> Return null (skip)
                 resolve(null);
             }
         }
@@ -1296,7 +1291,7 @@ function processSingleImage(src) {
     });
 }
 
-function createStripData(colors, originalSrc) {
+function createStripData(colors, originalSrc, array) {
     if(!colors) return null;
 
     const strip = document.createElement('div');
@@ -1364,9 +1359,13 @@ function extractDistinctColors(imgElement, count) {
             const g = Math.round(imgData[i+1] / 32) * 32;
             const b = Math.round(imgData[i+2] / 32) * 32;
             const { h, s, l } = rgbToHsl(r, g, b);
-            if (l < 0.1 || l > 0.9) continue;
+            
+            // IGNORE GREYSCALE / DULL COLORS
+            if (l < 0.1 || l > 0.9 || s < 0.15) continue;
+            
             const hex = rgbToHex(r, g, b);
-            const score = 1 + (s * 5); 
+            // BOOST SATURATION SCORE
+            const score = 1 + (s * 10); 
             colorCounts[hex] = (colorCounts[hex] || 0) + score;
         }
         let sortedColors = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]);
@@ -1382,16 +1381,13 @@ function extractDistinctColors(imgElement, count) {
             }
             if (isDistinct) distinct.push(hex);
         }
-        let i = 0;
-        while (distinct.length < count) {
-            if (i < sortedColors.length) {
-                 if (!distinct.includes(sortedColors[i])) distinct.push(sortedColors[i]);
-            } else { distinct.push("#cccccc"); }
-            i++;
-        }
+        
+        // NO FILLER - If less than 2 colors, return null
+        if (distinct.length < 2) return null;
+        
         return distinct;
     } catch (e) {
-        return Array(count).fill('#cccccc');
+        return null;
     }
 }
 
@@ -1479,7 +1475,6 @@ function handleKeyInput(e) {
       if (e.key === "ArrowDown") changeFrame(-1);
   }
   
-  // Lightbox Keyboard Navigation
   if (lightbox.classList.contains('active')) {
       if (e.key === "ArrowRight") navigateLightbox(1);
       if (e.key === "ArrowLeft") navigateLightbox(-1);
