@@ -207,7 +207,7 @@
     text-align: center;
   }
 
-  /* --- ACTION BUTTONS (CLEAN) --- */
+  /* --- ACTION BUTTONS --- */
   .menu-item.action-btn {
     aspect-ratio: auto;
     height: auto;
@@ -1352,56 +1352,41 @@ function extractDistinctColors(imgElement, count) {
     
     try {
         const imgData = ctx.getImageData(0, 0, 50, 50).data;
-        const colorBuckets = {};
-        let totalValidPixels = 0;
+        const colorCounts = {};
         
-        // STAGE 1: Data Gathering & Grouping
-        for (let i = 0; i < imgData.length; i += 4) {
+        // Group similar colors (Quantization) to calculate Area/Presence
+        for (let i = 0; i < imgData.length; i += 20) { // Step 4*5
             const r = imgData[i];
             const g = imgData[i+1];
             const b = imgData[i+2];
-            const { h, s, l } = rgbToHsl(r, g, b);
             
-            // Basic Greyscale Filter
-            if (l < 0.02 || l > 0.98 || s < 0.05) continue;
-            totalValidPixels++;
-            
-            // Quantize to group similar colors
+            // Round to nearest 20 to group pixels
             const rQ = Math.round(r / 20) * 20;
             const gQ = Math.round(g / 20) * 20;
             const bQ = Math.round(b / 20) * 20;
             const key = `${rQ},${gQ},${bQ}`;
             
-            if (!colorBuckets[key]) {
-                colorBuckets[key] = { r: rQ, g: gQ, b: bQ, count: 0, totalS: 0, hex: rgbToHex(rQ, gQ, bQ) };
+            const { h, s, l } = rgbToHsl(r, g, b);
+            
+            // Ignore extreme blacks/whites
+            if (l < 0.05 || l > 0.95) continue;
+            
+            // Score = Frequency (built by +=) * Vibrancy
+            // This allows dominant muted colors to win, but gives colorful ones a chance
+            const weight = 1 + (s * 1.5);
+            
+            if (!colorCounts[key]) {
+                colorCounts[key] = { r: rQ, g: gQ, b: bQ, score: 0, hex: rgbToHex(rQ, gQ, bQ) };
             }
-            colorBuckets[key].count++;
-            colorBuckets[key].totalS += s;
+            colorCounts[key].score += weight;
         }
-
-        // STAGE 2: The Noise Gate (Must be > 0.5% of image area)
-        const minThreshold = totalValidPixels * 0.005; 
-        let validBuckets = Object.values(colorBuckets).filter(b => b.count > minThreshold);
-
-        // STAGE 3: Scoring (Vibrancy Boost + Shadow Penalty)
-        validBuckets.forEach(bucket => {
-             const avgS = bucket.totalS / bucket.count;
-             const { l } = rgbToHsl(bucket.r, bucket.g, bucket.b);
-             
-             // Base score: Saturation is king, plus a small frequency bonus
-             let score = (avgS * 5) + (Math.sqrt(bucket.count) * 0.1);
-
-             // Shadow Penalty: If very dark, reduce score by 40%
-             if (l < 0.25) score *= 0.6;
-
-             bucket.finalScore = score;
-        });
         
-        // Sort by final weighted score
-        validBuckets.sort((a,b) => b.finalScore - a.finalScore);
+        // Sort buckets by Score (Frequency * Vibrancy)
+        const sortedBuckets = Object.values(colorCounts).sort((a,b) => b.score - a.score);
         
+        // Pick distinct colors from top buckets
         const distinct = [];
-        for (let c of validBuckets) {
+        for (let c of sortedBuckets) {
              if (distinct.length >= count) break;
              // Check color distance
              let valid = true;
@@ -1415,8 +1400,9 @@ function extractDistinctColors(imgElement, count) {
              if (valid) distinct.push(c.hex);
         }
         
-        if (distinct.length < 2) return null;
-        return distinct;
+        // IF we found distinct colors, return them. Even 2 is fine. 
+        // We do NOT pad with grey anymore.
+        return distinct.length > 0 ? distinct : null;
         
     } catch (e) {
         return null;
