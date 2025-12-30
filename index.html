@@ -408,6 +408,7 @@
   }
   .color-swatch:hover .hex-tooltip { opacity: 1; }
 
+  /* UPDATED PALETTE LOADER + BAR */
   #palette-loader {
       display: none;
       position: absolute;
@@ -861,8 +862,9 @@
       
       #prints-view { padding-top: 80px; }
 
-      /* MOBILE HEADER FIX: Let it inherit desktop flex styles */
-      h1 { font-size: 2.5rem; }
+      .title-wrapper { display: block; margin-bottom: 10px; }
+      .insta-link { left: 50%; transform: translateX(-50%) translateY(-40px); top: 0; }
+      h1 { margin-top: 40px; font-size: 2.5rem; }
       
       /* Updated header mobile text */
       .gallery-header { font-size: 1.2rem; margin: 40px 0 20px 0; }
@@ -969,7 +971,7 @@
 
     <div class="buy-section">
       <span class="photo-id" id="photo-id-display">Reference ID: ...</span>
-      <a href="https://buy.stripe.com/eVqaEQh1e8uH44h4D7fnO01" target="_blank" class="buy-btn">Order Print</a>
+      <a href="https://buy.stripe.com/4gM8wI5iw6mz44h0mRfnO00" target="_blank" class="buy-btn">Order Print</a>
       <p class="buy-note">Note: Copy the Reference ID above and paste it during checkout.</p>
     </div>
   </div>
@@ -1001,24 +1003,14 @@
 // ================================
 const trips = [
   {
-    title: "Italy, 2024",
+    title: "Summer 2024",
     coverImage: "thumbnails/image1.jpeg", 
     images: ["image1.jpeg", "image2.jpg", "image3.jpg"]
   },
   {
-    title: "Paris, 2024",
+    title: "Winter 2023",
     coverImage: "thumbnails/image5.jpg", 
     images: ["image4.jpg", "image5.jpg", "image6.jpg", "image7.jpg"]
-  },
-  {
-    title: "London, 2024",
-    coverImage: "thumbnails/image10.jpg", 
-    images: ["image11.jpg", "image12.jpg", "image13.jpg", "image14.jpg"]
-  },
-  {
-    title: "USA, 2025",
-    coverImage: "thumbnails/image15.jpg", 
-    images: ["image16.jpg", "image17.jpg", "image18.jpg", "image19.jpg"]
   },
   {
     title: "Balkans, 2025",
@@ -1053,9 +1045,15 @@ const trips = [
       "NYC13.jpg", "NYC14.jpg", "NYC15.jpg", "NYC16.jpg", "NYC17.jpg", "NYC18.jpg", 
       "NYC19.jpg"
     ]
+  },
+  {
+    title: "Spring 2026",
+    coverImage: "thumbnails/image2.jpg", 
+    images: ["image2.jpg"]
   }
 ];
 
+// Filter headers out for analysis AND lightbox navigation
 const allImages = trips.flatMap(t => t.images).filter(item => !item.startsWith("HEADER:"));
 
 const frames = [
@@ -1126,6 +1124,7 @@ function openTrip(index) {
   const trip = trips[index];
   galleryView.innerHTML = "";
   
+  // Navigation array (remove headers)
   currentGalleryImages = trip.images.filter(src => !src.startsWith("HEADER:"));
   
   const createGrid = () => {
@@ -1263,10 +1262,10 @@ function processSingleImage(src) {
 
         const tryLoad = (path) => { img.src = path; };
 
-        // 2-Second Timeout Kill Switch
+        // 4-Second Timeout Kill Switch -> Returns NULL
         const timeout = setTimeout(() => {
-            resolve(createStripData(['#333333', '#555555', '#777777'], src)); // Return grey strip
-        }, 2000);
+            resolve(null);
+        }, 4000);
 
         img.onerror = function() {
             if (this.src.endsWith(src)) {
@@ -1283,7 +1282,8 @@ function processSingleImage(src) {
                 const colors = extractDistinctColors(img, 3);
                 resolve(createStripData(colors, src));
             } catch (e) {
-                resolve(createStripData(['#333333', '#555555', '#777777'], src));
+                // Failed analysis -> Return null (skip)
+                resolve(null);
             }
         }
         
@@ -1292,8 +1292,6 @@ function processSingleImage(src) {
 }
 
 function createStripData(colors, originalSrc) {
-    // Helper to return object or element, here we return DOM element directly
-    // This allows the Promise to pass it back
     if(!colors) return null;
 
     const strip = document.createElement('div');
@@ -1476,6 +1474,7 @@ function handleKeyInput(e) {
       if (e.key === "ArrowDown") changeFrame(-1);
   }
   
+  // Lightbox Keyboard Navigation
   if (lightbox.classList.contains('active')) {
       if (e.key === "ArrowRight") navigateLightbox(1);
       if (e.key === "ArrowLeft") navigateLightbox(-1);
