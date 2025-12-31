@@ -1128,7 +1128,6 @@ function openTrip(index) {
   const trip = trips[index];
   galleryView.innerHTML = "";
   
-  // Navigation array (remove headers)
   currentGalleryImages = trip.images.filter(src => !src.startsWith("HEADER:"));
   
   const createGrid = () => {
@@ -1151,7 +1150,6 @@ function openTrip(index) {
         const headerEl = document.createElement("h2");
         headerEl.className = "gallery-header";
         
-        // TECHNICAL HEADER
         const span = document.createElement("span");
         span.innerText = headerTxt;
         headerEl.appendChild(span);
@@ -1204,7 +1202,7 @@ function openTrip(index) {
 }
 
 // ================================
-// PALETTES LOGIC (FAST QUEUE)
+// PALETTES LOGIC (FAST QUEUE + NO NAV)
 // ================================
 function openPalettes() {
     menuView.style.display = "none";
@@ -1263,9 +1261,8 @@ function processSingleImage(src) {
 
         const tryLoad = (path) => { img.src = path; };
 
-        // 4-SECOND TIMEOUT KILL SWITCH
         const timeout = setTimeout(() => {
-            resolve(null); // Return NULL (skip) on timeout
+            resolve(null); 
         }, 4000);
 
         img.onerror = function() {
@@ -1281,7 +1278,6 @@ function processSingleImage(src) {
             clearTimeout(timeout);
             try {
                 const colors = extractDistinctColors(img, 3);
-                // IF COLORS IS EMPTY/NULL, SKIP
                 if (!colors || colors.length < 1) resolve(null);
                 else resolve(createStripData(colors, src));
             } catch (e) {
@@ -1312,8 +1308,8 @@ function createStripData(colors, originalSrc, array) {
         
         swatch.onclick = (e) => {
             e.stopPropagation();
-            currentGalleryImages = allImages; 
-            openLightbox(originalSrc);
+            // DISABLE NAV: Pass false
+            openLightbox(originalSrc, false); 
         };
         strip.appendChild(swatch);
     });
@@ -1345,6 +1341,9 @@ function animateRandomPopIn() {
     });
 }
 
+// BANNED COLORS (NEON ARTIFACTS)
+const bannedHex = ["#04f0dc", "#04f0c8"];
+
 function extractDistinctColors(imgElement, count) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -1354,61 +1353,42 @@ function extractDistinctColors(imgElement, count) {
     
     try {
         const imgData = ctx.getImageData(0, 0, 50, 50).data;
-        const colorBuckets = {};
-        let totalValidPixels = 0;
+        const colorCounts = {};
         
-        // STAGE 1: Data Gathering & Grouping
-        for (let i = 0; i < imgData.length; i += 4) {
+        for (let i = 0; i < imgData.length; i += 20) { 
             const r = imgData[i];
             const g = imgData[i+1];
             const b = imgData[i+2];
-            const { h, s, l } = rgbToHsl(r, g, b);
             
-            // Ignore strict blacks/whites for counting purposes
-            if (l < 0.05 || l > 0.95) continue;
-            totalValidPixels++;
-            
-            // Quantize to group similar colors
             const rQ = Math.round(r / 20) * 20;
             const gQ = Math.round(g / 20) * 20;
             const bQ = Math.round(b / 20) * 20;
             const key = `${rQ},${gQ},${bQ}`;
+            const hex = rgbToHex(rQ, gQ, bQ);
+
+            // 1. NEON BAN
+            if (bannedHex.includes(hex)) continue;
+
+            const { h, s, l } = rgbToHsl(r, g, b);
             
-            if (!colorBuckets[key]) {
-                colorBuckets[key] = { r: rQ, g: gQ, b: bQ, count: 0, totalS: 0, hex: rgbToHex(rQ, gQ, bQ) };
+            // 2. IGNORE EXTREMES
+            if (l < 0.05 || l > 0.95) continue;
+            
+            // 3. WEIGHTED SCORE: Frequency * (1 + Saturation)
+            // This favors AREA first, but gives colorful areas a bonus.
+            const weight = 1 + s; 
+            
+            if (!colorCounts[key]) {
+                colorCounts[key] = { r: rQ, g: gQ, b: bQ, score: 0, hex: hex };
             }
-            colorBuckets[key].count++;
-            colorBuckets[key].totalS += s;
+            colorCounts[key].score += weight;
         }
-
-        // STAGE 2: The Noise Gate
-        // A color must represent at least 0.5% of the valid image area to count
-        // This removes 1-pixel "neon" errors
-        const minThreshold = totalValidPixels * 0.005; 
-        let validBuckets = Object.values(colorBuckets).filter(b => b.count > minThreshold);
-
-        // STAGE 3: Scoring (Vibrancy + Shadow Penalty)
-        validBuckets.forEach(bucket => {
-             const avgS = bucket.totalS / bucket.count;
-             const { l } = rgbToHsl(bucket.r, bucket.g, bucket.b);
-             
-             // Base score: Priority to Saturation (s*5) but grounded in Area (sqrt of count)
-             let score = (avgS * 5) + (Math.sqrt(bucket.count) * 0.1);
-
-             // Shadow Penalty: If color is dark (< 25% lightness), reduce its score by 40%
-             // It can still win if it's huge, but medium-sized saturated colors will beat it.
-             if (l < 0.25) score *= 0.6;
-
-             bucket.finalScore = score;
-        });
         
-        // Sort by final score
-        validBuckets.sort((a,b) => b.finalScore - a.finalScore);
+        const sortedBuckets = Object.values(colorCounts).sort((a,b) => b.score - a.score);
         
         const distinct = [];
-        for (let c of validBuckets) {
+        for (let c of sortedBuckets) {
              if (distinct.length >= count) break;
-             // Check color distance
              let valid = true;
              for (let existing of distinct) {
                  const r1 = parseInt(existing.substring(1,3), 16);
@@ -1551,12 +1531,22 @@ function updateVisualizer() {
 // ================================
 // LIGHTBOX LOGIC
 // ================================
-function openLightbox(src) {
+// Accepts optional enableNav argument (default true)
+function openLightbox(src, enableNav = true) {
+  // Always find index in case we are in gallery mode
   const foundIndex = currentGalleryImages.indexOf(src);
   if(foundIndex !== -1) currentLightboxIndex = foundIndex;
   
   loadLightboxImage(src);
   
+  // HIDE ARROWS IF NAV DISABLED
+  const navBtns = document.querySelectorAll('.lightbox-nav-btn');
+  navBtns.forEach(btn => btn.style.display = enableNav ? 'block' : 'none');
+  
+  // Disable keyboard listener flag if needed (simplified: just visual hide for now)
+  // The keyboard listener checks class 'active', we can add a data attr if needed,
+  // but for now hiding buttons is the main UI request.
+
   lightbox.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
@@ -1576,6 +1566,11 @@ function loadLightboxImage(src) {
 
 function navigateLightbox(direction, e) {
     if(e) e.stopPropagation();
+    
+    // Safety check: if arrows are hidden, don't nav
+    const navBtns = document.querySelector('.lightbox-nav-btn');
+    if (navBtns && navBtns.style.display === 'none') return;
+
     currentLightboxIndex += direction;
     if (currentLightboxIndex >= currentGalleryImages.length) currentLightboxIndex = 0;
     if (currentLightboxIndex < 0) currentLightboxIndex = currentGalleryImages.length - 1;
@@ -1588,6 +1583,10 @@ let touchEndX = 0;
 lightbox.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
 lightbox.addEventListener('touchend', e => {
     touchEndX = e.changedTouches[0].screenX;
+    // Only swipe if nav is enabled
+    const navBtns = document.querySelector('.lightbox-nav-btn');
+    if (navBtns && navBtns.style.display === 'none') return;
+    
     if (touchEndX < touchStartX - 50) navigateLightbox(1);
     if (touchEndX > touchStartX + 50) navigateLightbox(-1);
 });
