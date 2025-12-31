@@ -1150,6 +1150,7 @@ function openTrip(index) {
         const headerEl = document.createElement("h2");
         headerEl.className = "gallery-header";
         
+        // TECHNICAL HEADER
         const span = document.createElement("span");
         span.innerText = headerTxt;
         headerEl.appendChild(span);
@@ -1202,7 +1203,7 @@ function openTrip(index) {
 }
 
 // ================================
-// PALETTES LOGIC (FAST QUEUE + NO NAV)
+// PALETTES LOGIC (FAST QUEUE)
 // ================================
 function openPalettes() {
     menuView.style.display = "none";
@@ -1261,6 +1262,7 @@ function processSingleImage(src) {
 
         const tryLoad = (path) => { img.src = path; };
 
+        // 4-SECOND TIMEOUT KILL SWITCH
         const timeout = setTimeout(() => {
             resolve(null); 
         }, 4000);
@@ -1353,9 +1355,8 @@ function extractDistinctColors(imgElement, count) {
     
     try {
         const imgData = ctx.getImageData(0, 0, 50, 50).data;
-        const colorBuckets = {};
+        const colorCounts = {};
         
-        // Pass 1: Data Gathering
         for (let i = 0; i < imgData.length; i += 20) { 
             const r = imgData[i];
             const g = imgData[i+1];
@@ -1374,34 +1375,28 @@ function extractDistinctColors(imgElement, count) {
             
             // 2. IGNORE EXTREMES
             if (l < 0.02 || l > 0.98) continue;
+            
+            // 3. WEIGHTED SCORE: Pure Frequency
+            let weight = 1;
 
-            if (!colorBuckets[key]) {
-                colorBuckets[key] = { r: rQ, g: gQ, b: bQ, count: 0, totalS: 0, hex: hex };
+            // 4. "BORING HANDICAP"
+            // If color is Dark (<15%) or Grey (Sat < 10%), divide score by 4.
+            // This lets one colorful pixel beat 4 shadow/grey pixels.
+            // This avoids neon (no sat boost) but solves black dominance.
+            if (l < 0.15 || (l < 0.8 && s < 0.1)) {
+                weight = 0.25; 
             }
-            colorBuckets[key].count++;
-            colorBuckets[key].totalS += s;
+            
+            if (!colorCounts[key]) {
+                colorCounts[key] = { r: rQ, g: gQ, b: bQ, score: 0, hex: hex };
+            }
+            colorCounts[key].score += weight;
         }
-
-        // Pass 2: Scoring & Shadow Tax
-        const scoredBuckets = Object.values(colorBuckets).map(bucket => {
-            const avgS = bucket.totalS / bucket.count;
-            const { l } = rgbToHsl(bucket.r, bucket.g, bucket.b);
-
-            // Base Score: Area * (1 + Saturation Boost)
-            let finalScore = bucket.count * (1 + (avgS * 1.5));
-
-            // THE SHADOW TAX: If lightness < 25%, heavily penalize the score.
-            if (l < 0.25) {
-                finalScore *= 0.35; 
-            }
-            bucket.finalScore = finalScore;
-            return bucket;
-        });
         
-        scoredBuckets.sort((a,b) => b.finalScore - a.finalScore);
+        const sortedBuckets = Object.values(colorCounts).sort((a,b) => b.score - a.score);
         
         const distinct = [];
-        for (let c of scoredBuckets) {
+        for (let c of sortedBuckets) {
              if (distinct.length >= count) break;
              let valid = true;
              for (let existing of distinct) {
@@ -1483,6 +1478,7 @@ function openPrints() {
   if (visualizerImg.getAttribute("src") === "") {
     updateVisualizer();
   }
+  document.addEventListener('keydown', handleKeyInput);
 }
 
 function showMenu() {
@@ -1493,6 +1489,7 @@ function showMenu() {
   spotlightSwitch.style.display = "none"; 
   toggleDarkBtn.style.display = "block"; 
   menuView.style.display = "grid"; 
+  document.removeEventListener('keydown', handleKeyInput);
   document.body.classList.remove('spotlight-mode');
   window.scrollTo(0, 0);
 }
@@ -1545,22 +1542,15 @@ function updateVisualizer() {
 // ================================
 // LIGHTBOX LOGIC
 // ================================
-// Accepts optional enableNav argument (default true)
 function openLightbox(src, enableNav = true) {
-  // Always find index in case we are in gallery mode
   const foundIndex = currentGalleryImages.indexOf(src);
   if(foundIndex !== -1) currentLightboxIndex = foundIndex;
   
   loadLightboxImage(src);
   
-  // HIDE ARROWS IF NAV DISABLED
   const navBtns = document.querySelectorAll('.lightbox-nav-btn');
   navBtns.forEach(btn => btn.style.display = enableNav ? 'block' : 'none');
   
-  // Disable keyboard listener flag if needed (simplified: just visual hide for now)
-  // The keyboard listener checks class 'active', we can add a data attr if needed,
-  // but for now hiding buttons is the main UI request.
-
   lightbox.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
@@ -1581,7 +1571,6 @@ function loadLightboxImage(src) {
 function navigateLightbox(direction, e) {
     if(e) e.stopPropagation();
     
-    // Safety check: if arrows are hidden, don't nav
     const navBtns = document.querySelector('.lightbox-nav-btn');
     if (navBtns && navBtns.style.display === 'none') return;
 
@@ -1597,7 +1586,6 @@ let touchEndX = 0;
 lightbox.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
 lightbox.addEventListener('touchend', e => {
     touchEndX = e.changedTouches[0].screenX;
-    // Only swipe if nav is enabled
     const navBtns = document.querySelector('.lightbox-nav-btn');
     if (navBtns && navBtns.style.display === 'none') return;
     
