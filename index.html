@@ -1353,8 +1353,9 @@ function extractDistinctColors(imgElement, count) {
     
     try {
         const imgData = ctx.getImageData(0, 0, 50, 50).data;
-        const colorCounts = {};
+        const colorBuckets = {};
         
+        // Pass 1: Data Gathering
         for (let i = 0; i < imgData.length; i += 20) { 
             const r = imgData[i];
             const g = imgData[i+1];
@@ -1372,22 +1373,35 @@ function extractDistinctColors(imgElement, count) {
             const { h, s, l } = rgbToHsl(r, g, b);
             
             // 2. IGNORE EXTREMES
-            if (l < 0.05 || l > 0.95) continue;
-            
-            // 3. WEIGHTED SCORE: Frequency * (1 + Saturation)
-            // This favors AREA first, but gives colorful areas a bonus.
-            const weight = 1 + s; 
-            
-            if (!colorCounts[key]) {
-                colorCounts[key] = { r: rQ, g: gQ, b: bQ, score: 0, hex: hex };
+            if (l < 0.02 || l > 0.98) continue;
+
+            if (!colorBuckets[key]) {
+                colorBuckets[key] = { r: rQ, g: gQ, b: bQ, count: 0, totalS: 0, hex: hex };
             }
-            colorCounts[key].score += weight;
+            colorBuckets[key].count++;
+            colorBuckets[key].totalS += s;
         }
+
+        // Pass 2: Scoring & Shadow Tax
+        const scoredBuckets = Object.values(colorBuckets).map(bucket => {
+            const avgS = bucket.totalS / bucket.count;
+            const { l } = rgbToHsl(bucket.r, bucket.g, bucket.b);
+
+            // Base Score: Area * (1 + Saturation Boost)
+            let finalScore = bucket.count * (1 + (avgS * 1.5));
+
+            // THE SHADOW TAX: If lightness < 25%, heavily penalize the score.
+            if (l < 0.25) {
+                finalScore *= 0.35; 
+            }
+            bucket.finalScore = finalScore;
+            return bucket;
+        });
         
-        const sortedBuckets = Object.values(colorCounts).sort((a,b) => b.score - a.score);
+        scoredBuckets.sort((a,b) => b.finalScore - a.finalScore);
         
         const distinct = [];
-        for (let c of sortedBuckets) {
+        for (let c of scoredBuckets) {
              if (distinct.length >= count) break;
              let valid = true;
              for (let existing of distinct) {
