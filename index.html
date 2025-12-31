@@ -718,7 +718,7 @@
   .frame-matte { background-color: #fff; padding: 40px; border: 2px solid #222; box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.3); }
   .frame-white { border: 15px solid #f8f8f8; outline: 1px solid #e0e0e0; box-shadow: 0 15px 30px rgba(0,0,0,0.15), inset 0 0 10px rgba(0,0,0,0.05); }
 
-  /* --- LIGHTBOX --- */
+  /* --- LIGHTBOX (UPDATED) --- */
   #lightbox {
     position: fixed;
     inset: 0;
@@ -1262,7 +1262,7 @@ function processSingleImage(src) {
 
         const tryLoad = (path) => { img.src = path; };
 
-        // 4-SECOND TIMEOUT KILL SWITCH
+        // 4-SECOND TIMEOUT KILL SWITCH (User Request)
         const timeout = setTimeout(() => {
             resolve(null); 
         }, 4000);
@@ -1343,7 +1343,7 @@ function animateRandomPopIn() {
     });
 }
 
-// BANNED COLORS (NEON ARTIFACTS)
+// BANNED COLORS (User Request)
 const bannedHex = ["#04f0dc", "#04f0c8"];
 
 function extractDistinctColors(imgElement, count) {
@@ -1374,18 +1374,12 @@ function extractDistinctColors(imgElement, count) {
             const { h, s, l } = rgbToHsl(r, g, b);
             
             // 2. IGNORE EXTREMES
-            if (l < 0.02 || l > 0.98) continue;
+            if (l < 0.05 || l > 0.95) continue;
             
-            // 3. WEIGHTED SCORE: Pure Frequency
-            let weight = 1;
-
-            // 4. "BORING HANDICAP"
-            // If color is Dark (<15%) or Grey (Sat < 10%), divide score by 4.
-            // This lets one colorful pixel beat 4 shadow/grey pixels.
-            // This avoids neon (no sat boost) but solves black dominance.
-            if (l < 0.15 || (l < 0.8 && s < 0.1)) {
-                weight = 0.25; 
-            }
+            // 3. REVERTED SCORE LOGIC (Back to simple saturation bias)
+            // This is the "Fast Queue" logic the user liked, 
+            // but with the specific hex bans above.
+            const weight = 1 + (s * 5); 
             
             if (!colorCounts[key]) {
                 colorCounts[key] = { r: rQ, g: gQ, b: bQ, score: 0, hex: hex };
@@ -1478,7 +1472,6 @@ function openPrints() {
   if (visualizerImg.getAttribute("src") === "") {
     updateVisualizer();
   }
-  document.addEventListener('keydown', handleKeyInput);
 }
 
 function showMenu() {
@@ -1489,7 +1482,6 @@ function showMenu() {
   spotlightSwitch.style.display = "none"; 
   toggleDarkBtn.style.display = "block"; 
   menuView.style.display = "grid"; 
-  document.removeEventListener('keydown', handleKeyInput);
   document.body.classList.remove('spotlight-mode');
   window.scrollTo(0, 0);
 }
@@ -1503,6 +1495,7 @@ function handleKeyInput(e) {
       if (e.key === "ArrowDown") changeFrame(-1);
   }
   
+  // Lightbox Keyboard Navigation
   if (lightbox.classList.contains('active')) {
       if (e.key === "ArrowRight") navigateLightbox(1);
       if (e.key === "ArrowLeft") navigateLightbox(-1);
@@ -1542,15 +1535,18 @@ function updateVisualizer() {
 // ================================
 // LIGHTBOX LOGIC
 // ================================
+// Accepts optional enableNav argument (default true)
 function openLightbox(src, enableNav = true) {
+  // Always find index in case we are in gallery mode
   const foundIndex = currentGalleryImages.indexOf(src);
   if(foundIndex !== -1) currentLightboxIndex = foundIndex;
   
   loadLightboxImage(src);
   
+  // HIDE ARROWS IF NAV DISABLED (User Request)
   const navBtns = document.querySelectorAll('.lightbox-nav-btn');
   navBtns.forEach(btn => btn.style.display = enableNav ? 'block' : 'none');
-  
+
   lightbox.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
@@ -1571,6 +1567,7 @@ function loadLightboxImage(src) {
 function navigateLightbox(direction, e) {
     if(e) e.stopPropagation();
     
+    // Safety check: if arrows are hidden, don't nav
     const navBtns = document.querySelector('.lightbox-nav-btn');
     if (navBtns && navBtns.style.display === 'none') return;
 
