@@ -73,6 +73,7 @@
     z-index: 9999;
     transition: opacity 1s ease;
     cursor: pointer;
+    touch-action: manipulation; /* Improves touch response */
   }
   #intro h1 {
     font-size: 12vw;
@@ -120,9 +121,9 @@
       width: 35px;
       height: 35px;
       transition: opacity 0.2s;
-      /* Ensure no absolute positioning messes this up */
       position: relative; 
       top: auto; left: auto; transform: none;
+      flex-shrink: 0; /* Prevents squishing */
   }
   .insta-link img {
       width: 100%;
@@ -867,23 +868,22 @@
       #prints-view { padding-top: 80px; }
 
       /* FIXED HEADER ON MOBILE */
-      h1 { 
-        font-size: 2.5rem; 
-        margin-top: 0; /* Ensures no extra top space */
-      }
+      h1 { font-size: 2.5rem; margin-top: 0; }
+      
       .title-wrapper {
-        display: flex; /* Enforce flex */
-        flex-direction: row; /* Ensure row */
+        display: flex; 
+        flex-direction: row; /* Force side-by-side */
         align-items: center;
         justify-content: center;
-        gap: 15px; /* Maintain gap */
+        gap: 15px; 
         margin-bottom: 10px; 
       }
+      
+      /* Ensure logo is not absolutely positioned on mobile */
       .insta-link {
-        /* Reset any potential absolute positioning from old cache */
         position: relative; 
         top: auto; left: auto; transform: none;
-        margin: 0; /* Controlled by gap in wrapper */
+        margin: 0; 
       }
       
       /* Updated header mobile text */
@@ -1117,7 +1117,7 @@ const frames = [
 ];
 
 // ================================
-// INTRO ANIMATION
+// INTRO ANIMATION (MOVED TO TOP)
 // ================================
 const intro = document.getElementById("intro");
 let unlocked = false;
@@ -1130,6 +1130,7 @@ function dismissIntro() {
   }
 }
 
+// Global listeners
 window.addEventListener("scroll", dismissIntro);
 window.addEventListener("wheel", dismissIntro);
 window.addEventListener("touchmove", dismissIntro);
@@ -1178,7 +1179,6 @@ function openTrip(index) {
   const trip = trips[index];
   galleryView.innerHTML = "";
   
-  // Navigation array (remove headers)
   currentGalleryImages = trip.images.filter(src => !src.startsWith("HEADER:"));
   
   const createGrid = () => {
@@ -1201,7 +1201,6 @@ function openTrip(index) {
         const headerEl = document.createElement("h2");
         headerEl.className = "gallery-header";
         
-        // TECHNICAL HEADER
         const span = document.createElement("span");
         span.innerText = headerTxt;
         headerEl.appendChild(span);
@@ -1394,7 +1393,7 @@ function animateRandomPopIn() {
     });
 }
 
-// BANNED COLORS (NEON ARTIFACTS)
+// BANNED COLORS (User Request)
 const bannedHex = ["#04f0dc", "#04f0c8", "#04f08c", "dcf104", "04f078", "0504dc", "f104f0" "04f0f0", "f0f104", "f10504"];
 
 function extractDistinctColors(imgElement, count) {
@@ -1425,7 +1424,7 @@ function extractDistinctColors(imgElement, count) {
             const { h, s, l } = rgbToHsl(r, g, b);
             
             // 2. IGNORE EXTREMES
-            if (l < 0.02 || l > 0.98) continue;
+            if (l < 0.05 || l > 0.95) continue;
             
             // 3. WEIGHTED SCORE: Pure Frequency
             let weight = 1;
@@ -1598,10 +1597,10 @@ function openLightbox(src, enableNav = true) {
   
   loadLightboxImage(src);
   
-  // HIDE ARROWS IF NAV DISABLED
+  // HIDE ARROWS IF NAV DISABLED (User Request)
   const navBtns = document.querySelectorAll('.lightbox-nav-btn');
   navBtns.forEach(btn => btn.style.display = enableNav ? 'block' : 'none');
-  
+
   lightbox.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
@@ -1638,7 +1637,6 @@ let touchEndX = 0;
 lightbox.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
 lightbox.addEventListener('touchend', e => {
     touchEndX = e.changedTouches[0].screenX;
-    // Only swipe if nav is enabled
     const navBtns = document.querySelector('.lightbox-nav-btn');
     if (navBtns && navBtns.style.display === 'none') return;
     
