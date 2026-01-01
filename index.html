@@ -1044,12 +1044,52 @@
 // ================================
 const trips = [
   {
-    title: "Summer 2024",
-    coverImage: "thumbnails/image1.jpeg", 
-    images: ["image1.jpeg", "image2.jpg", "image3.jpg"]
+    title: "Italy, 2024",
+    coverImage: "thumbnails/RM18.jpg", 
+    images: [
+      "HEADER:Rome",
+      "RM1.jpg", "RM2.jpg", "RM3.jpg", "RM4.jpg", "RM5.jpg", "RM6.jpg",
+      "RM7.jpg", "RM8.jpg", "RM9.jpg", "RM10.jpg", "RM11.jpg", "RM12.jpg",
+      "RM13.jpg", "RM14.jpg", "RM15.jpg", "RM16.jpg", "RM17.jpg", "RM18.jpg",
+      "RM19.jpg", "RM20.jpg", "RM21.jpg", "RM22.jpg", "RM23.jpg", "RM24.jpg",
+      "RM25.jpg", "RM26.jpg", "RM27.jpg", "RM28.jpg", "RM29.jpg", "RM30.jpg",
+      "RM31.jpg", "RM32.jpg",
+      "HEADER:Tuscany",
+      "TUS1.jpg", "TUS2.jpg", "TUS3.jpg", "TUS4.jpg", "TUS5.jpg", "TUS6.jpg", 
+      "TUS7.jpg", "TUS8.jpg", "TUS9.jpg", "TUS10.jpg", "TUS11.jpg", "TUS12.jpg",
+      "TUS13.jpg", "TUS14.jpg", "TUS15.jpg", "TUS16.jpg", "TUS17.jpg",
+      "TUS18.jpg", "TUS19.jpg", "TUS20.jpg", "TUS21.jpg", "TUS22.jpg", "TUS23.jpg",
+      "TUS24.jpg", "TUS25.jpg", "TUS26.jpg", "TUS27.jpg", "TUS28.jpg", "TUS29.jpg",
+      "TUS30.jpg", "TUS31.jpg", "TUS32.jpg", "TUS33.jpg", "TUS34.jpg", "TUS35.jpg",
+      "TUS36.jpg", "TUS37.jpg", "TUS38.jpg", "TUS39.jpg", "TUS40.jpg", "TUS41.jpg"
+    ]
   },
   {
-    title: "Winter 2023",
+    title: "Paris, 2024",
+    coverImage: "thumbnails/PAR28.jpg", 
+    images: [
+      "PAR1.jpg", "PAR2.jpg", "PAR3.jpg", "PAR4.jpg", "PAR5.jpg", "PAR6.jpg", "PAR7.jpg",
+      "PAR8.jpg", "PAR9.jpg", "PAR10.jpg", "PAR11.jpg", "PAR12.jpg", "PAR13.jpg", "PAR14.jpg",
+      "PAR15.jpg", "PAR16.jpg", "PAR17.jpg", "PAR18.jpg", "PAR19.jpg", "PAR20.jpg", "PAR21.jpg",
+      "PAR22.jpg", "PAR23.jpg", "PAR24.jpg", "PAR25.jpg", "PAR26.jpg", "PAR27.jpg", "PAR28.jpg",
+      "PAR29.jpg", "PAR30.jpg", "PAR31.jpg", "PAR32.jpg", "PAR33.jpg", "PAR34.jpg", "PAR35.jpg"
+    ]
+  },
+  {
+    title: "London, 2024",
+    coverImage: "thumbnails/LON42.jpg", 
+    images: [
+      "LON1.jpg", "LON2.jpg", "LON3.jpg", "LON4.jpg", "LON5.jpg", "LON6.jpg", "LON7.jpg", "LON8.jpg", "LON9.jpg",
+      "LON10.jpg", "LON11.jpg", "LON12.jpg", "LON13.jpg", "LON14.jpg", "LON15.jpg", "LON16.jpg", "LON17.jpg", "LON18.jpg",
+      "LON19.jpg", "LON20.jpg", "LON21.jpg", "LON22.jpg", "LON23.jpg", "LON24.jpg", "LON25.jpg", "LON26.jpg", "LON27.jpg",
+      "LON28.jpg", "LON29.jpg", "LON30.jpg", "LON31.jpg", "LON32.jpg", "LON33.jpg", "LON34.jpg", "LON35.jpg", "LON36.jpg", 
+      "LON37.jpg", "LON38.jpg", "LON39.jpg", "LON40.jpg", "LON41.jpg", "LON42.jpg", "LON43.jpg", "LON44.jpg", "LON45.jpg", 
+      "LON46.jpg", "LON47.jpg", "LON48.jpg", "LON49.jpg", "LON50.jpg", "LON52.jpg", "LON53.jpg", "LON54.jpg", "LON55.jpg",
+      "LON56.jpg", "LON57.jpg", "LON58.jpg", "LON59.jpg", "LON60.jpg", "LON61.jpg"
+    ]
+  },
+  {
+    title: "USA, 2025",
     coverImage: "thumbnails/image5.jpg", 
     images: ["image4.jpg", "image5.jpg", "image6.jpg", "image7.jpg"]
   },
@@ -1087,11 +1127,6 @@ const trips = [
       "NYC19.jpg"
     ]
   },
-  {
-    title: "Spring 2026",
-    coverImage: "thumbnails/image2.jpg", 
-    images: ["image2.jpg"]
-  }
 ];
 
 const allImages = trips.flatMap(t => t.images).filter(item => !item.startsWith("HEADER:"));
