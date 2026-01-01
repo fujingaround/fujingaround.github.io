@@ -53,7 +53,7 @@
     color: var(--text);
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     overflow-x: hidden;
-    width: 100%;
+    width: 100vw;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -73,7 +73,6 @@
     z-index: 9999;
     transition: opacity 1s ease;
     cursor: pointer;
-    touch-action: manipulation; /* Improves touch response */
   }
   #intro h1 {
     font-size: 12vw;
@@ -84,7 +83,7 @@
     pointer-events: none;
   }
 
-  /* --- HEADER --- */
+  /* --- HEADER (FLEXBOX FIXED) --- */
   header {
     text-align: center;
     padding: 4rem 1rem 2rem;
@@ -95,17 +94,15 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
   }
   
-  /* FLEX CONTAINER FOR LOGO & TEXT */
+  /* This ensures the logo and title are always side-by-side */
   .title-wrapper {
-      display: flex;
-      flex-direction: row;
+      position: relative;
+      display: flex; 
       align-items: center;
       justify-content: center;
-      gap: 15px; 
-      position: relative;
+      gap: 15px; /* Spacing between logo and text */
   }
 
   h1 {
@@ -117,13 +114,11 @@
   }
 
   .insta-link {
+      /* Removed absolute positioning */
       display: block;
       width: 35px;
       height: 35px;
       transition: opacity 0.2s;
-      position: relative; 
-      top: auto; left: auto; transform: none;
-      flex-shrink: 0; /* Prevents squishing */
   }
   .insta-link img {
       width: 100%;
@@ -163,7 +158,6 @@
     max-width: 1000px; 
     margin: 0 auto;
     flex-grow: 1;
-    width: 100%;
   }
 
   .menu-item {
@@ -261,7 +255,6 @@
     max-width: 1600px;
     margin: 0 auto;
     flex-grow: 1;
-    width: 100%;
   }
   .grid {
     column-count: 3;
@@ -870,25 +863,8 @@
       /* FIXED HEADER ON MOBILE */
       h1 { font-size: 2.5rem; margin-top: 0; }
       
-      .title-wrapper {
-        display: flex; 
-        flex-direction: row; /* Force side-by-side */
-        align-items: center;
-        justify-content: center;
-        gap: 15px; 
-        margin-bottom: 10px; 
-      }
-      
-      /* Ensure logo is not absolutely positioned on mobile */
-      .insta-link {
-        position: relative; 
-        top: auto; left: auto; transform: none;
-        margin: 0; 
-      }
-      
-      /* Updated header mobile text */
-      .gallery-header { font-size: 1.2rem; margin: 40px 0 20px 0; }
-      .gallery-header span { font-size: 1.2rem; margin-right: 15px; }
+      .gallery-section-title { font-size: 1.2rem; margin: 40px 0 20px 0; }
+      .gallery-section-title span { font-size: 1.2rem; margin-right: 15px; }
       
       .lightbox-nav-btn { font-size: 4rem; padding: 30px; }
       .lightbox-prev { left: 0; }
@@ -1117,7 +1093,7 @@ const frames = [
 ];
 
 // ================================
-// INTRO ANIMATION (MOVED TO TOP)
+// INTRO ANIMATION
 // ================================
 const intro = document.getElementById("intro");
 let unlocked = false;
@@ -1130,7 +1106,6 @@ function dismissIntro() {
   }
 }
 
-// Global listeners
 window.addEventListener("scroll", dismissIntro);
 window.addEventListener("wheel", dismissIntro);
 window.addEventListener("touchmove", dismissIntro);
@@ -1179,6 +1154,7 @@ function openTrip(index) {
   const trip = trips[index];
   galleryView.innerHTML = "";
   
+  // Navigation array (remove headers)
   currentGalleryImages = trip.images.filter(src => !src.startsWith("HEADER:"));
   
   const createGrid = () => {
@@ -1201,6 +1177,7 @@ function openTrip(index) {
         const headerEl = document.createElement("h2");
         headerEl.className = "gallery-header";
         
+        // TECHNICAL HEADER
         const span = document.createElement("span");
         span.innerText = headerTxt;
         headerEl.appendChild(span);
@@ -1312,7 +1289,7 @@ function processSingleImage(src) {
 
         const tryLoad = (path) => { img.src = path; };
 
-        // 4-SECOND TIMEOUT KILL SWITCH
+        // 4-SECOND TIMEOUT KILL SWITCH (User Request)
         const timeout = setTimeout(() => {
             resolve(null); 
         }, 4000);
@@ -1426,15 +1403,10 @@ function extractDistinctColors(imgElement, count) {
             // 2. IGNORE EXTREMES
             if (l < 0.05 || l > 0.95) continue;
             
-            // 3. WEIGHTED SCORE: Pure Frequency
-            let weight = 1;
-
-            // 4. "BORING HANDICAP"
-            // If color is Dark (<15%) or Grey (Sat < 10%), divide score by 4.
-            // This lets one colorful pixel beat 4 shadow/grey pixels.
-            if (l < 0.15 || (l < 0.8 && s < 0.1)) {
-                weight = 0.25; 
-            }
+            // 3. REVERTED SCORE LOGIC (Back to simple saturation bias)
+            // This is the "Fast Queue" logic the user liked, 
+            // but with the specific hex bans above.
+            const weight = 1 + (s * 5); 
             
             if (!colorCounts[key]) {
                 colorCounts[key] = { r: rQ, g: gQ, b: bQ, score: 0, hex: hex };
@@ -1527,6 +1499,7 @@ function openPrints() {
   if (visualizerImg.getAttribute("src") === "") {
     updateVisualizer();
   }
+  document.addEventListener('keydown', handleKeyInput);
 }
 
 function showMenu() {
@@ -1537,6 +1510,7 @@ function showMenu() {
   spotlightSwitch.style.display = "none"; 
   toggleDarkBtn.style.display = "block"; 
   menuView.style.display = "grid"; 
+  document.removeEventListener('keydown', handleKeyInput);
   document.body.classList.remove('spotlight-mode');
   window.scrollTo(0, 0);
 }
@@ -1637,6 +1611,7 @@ let touchEndX = 0;
 lightbox.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
 lightbox.addEventListener('touchend', e => {
     touchEndX = e.changedTouches[0].screenX;
+    // Only swipe if nav is enabled
     const navBtns = document.querySelector('.lightbox-nav-btn');
     if (navBtns && navBtns.style.display === 'none') return;
     
