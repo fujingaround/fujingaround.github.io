@@ -62,7 +62,7 @@
     -webkit-user-select: none;
   }
 
-  /* --- INTRO SCREEN --- */
+  /* --- INTRO SCREEN (WITH CSS FAILSAFE) --- */
   #intro {
     position: fixed;
     inset: 0;
@@ -70,9 +70,18 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 99999; /* Max Z-Index */
+    z-index: 99999;
     transition: opacity 0.8s ease;
     cursor: pointer;
+    /* CSS Failsafe: If JS fails, this auto-hides intro after 6s */
+    animation: autoHide 0.1s linear 6s forwards;
+  }
+  @keyframes autoHide {
+      to { opacity: 0; pointer-events: none; visibility: hidden; }
+  }
+  #intro.hidden {
+      opacity: 0;
+      pointer-events: none;
   }
   #intro h1 {
     font-size: 12vw;
@@ -867,6 +876,21 @@
       /* FIXED HEADER ON MOBILE */
       h1 { font-size: 2.5rem; margin-top: 0; }
       
+      .title-wrapper {
+        display: flex; 
+        flex-direction: row; /* Force side-by-side */
+        align-items: center;
+        justify-content: center;
+        gap: 15px; 
+        margin-bottom: 10px; 
+      }
+      
+      .insta-link {
+        position: relative; 
+        top: auto; left: auto; transform: none;
+        margin: 0; 
+      }
+      
       /* Updated header mobile text */
       .gallery-header { font-size: 1.2rem; margin: 40px 0 20px 0; }
       .gallery-header span { font-size: 1.2rem; margin-right: 15px; }
@@ -904,6 +928,22 @@
 <body>
 
   <div id="intro" onclick="dismissIntro()"><h1>FujingAround</h1></div>
+  
+  <script>
+      function dismissIntro() {
+          const intro = document.getElementById("intro");
+          if (intro) {
+              intro.classList.add('hidden');
+              setTimeout(() => { intro.style.display = "none"; }, 800);
+          }
+      }
+      // Immediate listeners for instant reaction
+      document.addEventListener("DOMContentLoaded", () => {
+          document.body.addEventListener("click", dismissIntro);
+          document.body.addEventListener("touchstart", dismissIntro);
+          document.body.addEventListener("wheel", dismissIntro);
+      });
+  </script>
 
   <header>
     <div class="title-wrapper">
@@ -1000,81 +1040,18 @@
 
 <script>
 // ================================
-// INTRO ANIMATION (CRITICAL FIX: AT TOP)
-// ================================
-const intro = document.getElementById("intro");
-let unlocked = false;
-
-function dismissIntro() {
-  if (!unlocked && intro) {
-    intro.style.opacity = "0";
-    setTimeout(() => { intro.style.display = "none"; }, 800);
-    unlocked = true;
-  }
-}
-
-// Global listeners
-window.addEventListener("scroll", dismissIntro);
-window.addEventListener("wheel", dismissIntro);
-window.addEventListener("touchmove", dismissIntro);
-document.body.addEventListener("click", dismissIntro);
-
-// Failsafe: Automatically unlock after 4 seconds if stuck
-setTimeout(dismissIntro, 4000);
-
-// ================================
 // CONFIGURATION
 // ================================
 const trips = [
   {
-    title: "Italy, 2024",
-    coverImage: "thumbnails/RM18.jpg", 
-    images: [
-      "HEADER:Rome",
-      "RM1.jpg", "RM2.jpg", "RM3.jpg", "RM4.jpg", "RM5.jpg", "RM6.jpg",
-      "RM7.jpg", "RM8.jpg", "RM9.jpg", "RM10.jpg", "RM11.jpg", "RM12.jpg",
-      "RM13.jpg", "RM14.jpg", "RM15.jpg", "RM16.jpg", "RM17.jpg", "RM18.jpg",
-      "RM19.jpg", "RM20.jpg", "RM21.jpg", "RM22.jpg", "RM23.jpg", "RM24.jpg",
-      "RM25.jpg", "RM26.jpg", "RM27.jpg", "RM28.jpg", "RM29.jpg", "RM30.jpg",
-      "RM31.jpg", "RM32.jpg",
-      "HEADER:Tuscany",
-      "TUS1.jpg", "TUS2.jpg", "TUS3.jpg", "TUS4.jpg", "TUS5.jpg", "TUS6.jpg", 
-      "TUS7.jpg", "TUS8.jpg", "TUS9.jpg", "TUS10.jpg", "TUS11.jpg", "TUS12.jpg",
-      "TUS13.jpg", "TUS14.jpg", "TUS15.jpg", "TUS16.jpg", "TUS17.jpg",
-      "TUS18.jpg", "TUS19.jpg", "TUS20.jpg", "TUS21.jpg", "TUS22.jpg", "TUS23.jpg",
-      "TUS24.jpg", "TUS25.jpg", "TUS26.jpg", "TUS27.jpg", "TUS28.jpg", "TUS29.jpg",
-      "TUS30.jpg", "TUS31.jpg", "TUS32.jpg", "TUS33.jpg", "TUS34.jpg", "TUS35.jpg",
-      "TUS36.jpg", "TUS37.jpg", "TUS38.jpg", "TUS39.jpg", "TUS40.jpg", "TUS41.jpg"
-    ]
+    title: "Summer 2024",
+    coverImage: "thumbnails/image1.jpeg", 
+    images: ["image1.jpeg", "image2.jpg", "image3.jpg"]
   },
   {
-    title: "Paris, 2024",
-    coverImage: "thumbnails/PAR28.jpg", 
-    images: [
-      "PAR1.jpg", "PAR2.jpg", "PAR3.jpg", "PAR4.jpg", "PAR5.jpg", "PAR6.jpg", "PAR7.jpg",
-      "PAR8.jpg", "PAR9.jpg", "PAR10.jpg", "PAR11.jpg", "PAR12.jpg", "PAR13.jpg", "PAR14.jpg",
-      "PAR15.jpg", "PAR16.jpg", "PAR17.jpg", "PAR18.jpg", "PAR19.jpg", "PAR20.jpg", "PAR21.jpg",
-      "PAR22.jpg", "PAR23.jpg", "PAR24.jpg", "PAR25.jpg", "PAR26.jpg", "PAR27.jpg", "PAR28.jpg",
-      "PAR29.jpg", "PAR30.jpg", "PAR31.jpg", "PAR32.jpg", "PAR33.jpg", "PAR34.jpg", "PAR35.jpg"
-    ]
-  },
-  {
-    title: "London, 2024",
-    coverImage: "thumbnails/LON42.jpg", 
-    images: [
-      "LON1.jpg", "LON2.jpg", "LON3.jpg", "LON4.jpg", "LON5.jpg", "LON6.jpg", "LON7.jpg", "LON8.jpg", "LON9.jpg",
-      "LON10.jpg", "LON11.jpg", "LON12.jpg", "LON13.jpg", "LON14.jpg", "LON15.jpg", "LON16.jpg", "LON17.jpg", "LON18.jpg",
-      "LON19.jpg", "LON20.jpg", "LON21.jpg", "LON22.jpg", "LON23.jpg", "LON24.jpg", "LON25.jpg", "LON26.jpg", "LON27.jpg",
-      "LON28.jpg", "LON29.jpg", "LON30.jpg", "LON31.jpg", "LON32.jpg", "LON33.jpg", "LON34.jpg", "LON35.jpg", "LON36.jpg", 
-      "LON37.jpg", "LON38.jpg", "LON39.jpg", "LON40.jpg", "LON41.jpg", "LON42.jpg", "LON43.jpg", "LON44.jpg", "LON45.jpg", 
-      "LON46.jpg", "LON47.jpg", "LON48.jpg", "LON49.jpg", "LON50.jpg", "LON52.jpg", "LON53.jpg", "LON54.jpg", "LON55.jpg",
-      "LON56.jpg", "LON57.jpg", "LON58.jpg", "LON59.jpg", "LON60.jpg", "LON61.jpg"
-    ]
-  },
-  {
-    title: "USA, 2025",
-    coverImage: "thumbnails/image15.jpg", 
-    images: ["image16.jpg", "image17.jpg", "image18.jpg", "image19.jpg"]
+    title: "Winter 2023",
+    coverImage: "thumbnails/image5.jpg", 
+    images: ["image4.jpg", "image5.jpg", "image6.jpg", "image7.jpg"]
   },
   {
     title: "Balkans, 2025",
@@ -1109,335 +1086,340 @@ const trips = [
       "NYC13.jpg", "NYC14.jpg", "NYC15.jpg", "NYC16.jpg", "NYC17.jpg", "NYC18.jpg", 
       "NYC19.jpg"
     ]
+  },
+  {
+    title: "Spring 2026",
+    coverImage: "thumbnails/image2.jpg", 
+    images: ["image2.jpg"]
   }
 ];
 
-    const allImages = trips.flatMap(t => t.images).filter(item => !item.startsWith("HEADER:"));
+const allImages = trips.flatMap(t => t.images).filter(item => !item.startsWith("HEADER:"));
 
-    const frames = [
-      { class: "frame-black", name: "Classic Black" },
-      { class: "frame-matte", name: "Museum Matte" },
-      { class: "frame-white", name: "Modern White" }
-    ];
+const frames = [
+  { class: "frame-black", name: "Classic Black" },
+  { class: "frame-matte", name: "Museum Matte" },
+  { class: "frame-white", name: "Modern White" }
+];
 
-    // ================================
-    // APP LOGIC
-    // ================================
-    const menuView = document.getElementById("menu-view");
-    const galleryView = document.getElementById("gallery-view");
-    const printsView = document.getElementById("prints-view");
-    const palettesView = document.getElementById("palettes-view");
-    const grid = document.getElementById("grid");
-    const backBtn = document.getElementById("back-btn");
-    const lightbox = document.getElementById("lightbox");
-    const lightboxImg = document.getElementById("lightbox-img");
-    const footerContainer = document.getElementById("footer-container");
-    const spotlightSwitch = document.getElementById("spotlight-switch");
-    const toggleDarkBtn = document.getElementById("toggle-dark");
-    const hexOverlay = document.getElementById("hex-overlay");
-    const hexText = document.getElementById("hex-text");
-    const paletteLoader = document.getElementById("palette-loader");
-    const paletteProgressBar = document.getElementById("palette-progress-bar");
+// ================================
+// APP LOGIC
+// ================================
+const menuView = document.getElementById("menu-view");
+const galleryView = document.getElementById("gallery-view");
+const printsView = document.getElementById("prints-view");
+const palettesView = document.getElementById("palettes-view");
+const grid = document.getElementById("grid");
+const backBtn = document.getElementById("back-btn");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightbox-img");
+const footerContainer = document.getElementById("footer-container");
+const spotlightSwitch = document.getElementById("spotlight-switch");
+const toggleDarkBtn = document.getElementById("toggle-dark");
+const hexOverlay = document.getElementById("hex-overlay");
+const hexText = document.getElementById("hex-text");
+const paletteLoader = document.getElementById("palette-loader");
+const paletteProgressBar = document.getElementById("palette-progress-bar");
 
-    let currentLightboxIndex = 0;
-    let currentGalleryImages = []; 
+let currentLightboxIndex = 0;
+let currentGalleryImages = []; 
 
-    document.addEventListener('keydown', handleKeyInput);
+document.addEventListener('keydown', handleKeyInput);
 
-    function initMenu() {
-      const printsBtn = document.querySelector('.menu-item.action-btn'); 
-      trips.forEach((trip, index) => {
-        const btn = document.createElement("div");
-        btn.className = "menu-item";
-        btn.style.backgroundImage = `url('${trip.coverImage}')`;
-        btn.innerHTML = `<h3>${trip.title}</h3>`;
-        btn.onclick = (e) => {
-          e.stopPropagation();
-          openTrip(index);
-        };
-        menuView.insertBefore(btn, printsBtn);
-      });
+function initMenu() {
+  const printsBtn = document.querySelector('.menu-item.action-btn'); 
+  trips.forEach((trip, index) => {
+    const btn = document.createElement("div");
+    btn.className = "menu-item";
+    btn.style.backgroundImage = `url('${trip.coverImage}')`;
+    btn.innerHTML = `<h3>${trip.title}</h3>`;
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      openTrip(index);
+    };
+    menuView.insertBefore(btn, printsBtn);
+  });
+}
+
+function openTrip(index) {
+  const trip = trips[index];
+  galleryView.innerHTML = "";
+  
+  // Navigation array (remove headers)
+  currentGalleryImages = trip.images.filter(src => !src.startsWith("HEADER:"));
+  
+  const createGrid = () => {
+      const g = document.createElement("div");
+      g.className = "grid";
+      return g;
+  };
+
+  let currentGrid = createGrid();
+  let hasPhotos = false; 
+
+  trip.images.forEach(src => {
+    if (src.startsWith("HEADER:")) {
+        if (hasPhotos) {
+            galleryView.appendChild(currentGrid);
+            currentGrid = createGrid();
+            hasPhotos = false;
+        }
+        const headerTxt = src.split(":")[1];
+        const headerEl = document.createElement("h2");
+        headerEl.className = "gallery-header";
+        
+        // TECHNICAL HEADER
+        const span = document.createElement("span");
+        span.innerText = headerTxt;
+        headerEl.appendChild(span);
+        
+        galleryView.appendChild(headerEl);
+        return; 
     }
 
-    function openTrip(index) {
-      const trip = trips[index];
-      galleryView.innerHTML = "";
-      
-      // Navigation array (remove headers)
-      currentGalleryImages = trip.images.filter(src => !src.startsWith("HEADER:"));
-      
-      const createGrid = () => {
-          const g = document.createElement("div");
-          g.className = "grid";
-          return g;
-      };
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    
+    const img = document.createElement("img");
+    img.loading = "lazy";
+    
+    const tryLoad = (path) => { img.src = path; };
+    
+    img.onerror = function() {
+        if (this.src.endsWith(src)) {
+             tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
+        }
+    };
+    
+    img.onload = () => {
+        img.classList.add('fade-in');
+        cell.classList.add('loaded');
+    };
+    
+    tryLoad("thumbnails/" + src);
+    
+    if (img.complete) {
+        img.classList.add('fade-in');
+        cell.classList.add('loaded');
+    }
 
-      let currentGrid = createGrid();
-      let hasPhotos = false; 
+    cell.onclick = () => openLightbox(src);
+    
+    cell.appendChild(img);
+    currentGrid.appendChild(cell); 
+    hasPhotos = true;
+  });
 
-      trip.images.forEach(src => {
-        if (src.startsWith("HEADER:")) {
-            if (hasPhotos) {
-                galleryView.appendChild(currentGrid);
-                currentGrid = createGrid();
-                hasPhotos = false;
+  if (hasPhotos) {
+      galleryView.appendChild(currentGrid);
+  }
+
+  menuView.style.display = "none";
+  galleryView.style.display = "block";
+  backBtn.style.display = "block"; 
+  window.scrollTo(0, 0);
+}
+
+// ================================
+// PALETTES LOGIC (FAST QUEUE)
+// ================================
+function openPalettes() {
+    menuView.style.display = "none";
+    galleryView.style.display = "none";
+    printsView.style.display = "none";
+    palettesView.style.display = "grid"; 
+    backBtn.style.display = "block";
+    
+    const existingStrips = palettesView.querySelectorAll('.palette-strip').length;
+    if (existingStrips === 0) {
+        paletteLoader.style.display = "block";
+        paletteProgressBar.style.width = "0%";
+        generatePalettesQueue();
+    } else {
+        animateRandomPopIn();
+    }
+    window.scrollTo(0, 0);
+}
+
+function generatePalettesQueue() {
+    let loadedCount = 0;
+    let index = 0;
+    let generatedStrips = [];
+    const concurrency = 6; 
+    let activeWorkers = 0;
+
+    function next() {
+        if (index >= allImages.length) {
+            if (activeWorkers === 0) {
+                paletteLoader.style.display = "none";
+                appendStrips(generatedStrips);
             }
-            const headerTxt = src.split(":")[1];
-            const headerEl = document.createElement("h2");
-            headerEl.className = "gallery-header";
-            
-            // TECHNICAL HEADER
-            const span = document.createElement("span");
-            span.innerText = headerTxt;
-            headerEl.appendChild(span);
-            
-            galleryView.appendChild(headerEl);
-            return; 
+            return;
         }
 
-        const cell = document.createElement("div");
-        cell.className = "cell";
+        activeWorkers++;
+        const src = allImages[index++];
         
-        const img = document.createElement("img");
-        img.loading = "lazy";
-        
+        processSingleImage(src).then((strip) => {
+            if (strip) generatedStrips.push(strip);
+            loadedCount++;
+            const percent = (loadedCount / allImages.length) * 100;
+            paletteProgressBar.style.width = percent + "%";
+            activeWorkers--;
+            next(); 
+        });
+    }
+
+    for (let i = 0; i < concurrency; i++) next();
+}
+
+function processSingleImage(src) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "Anonymous"; 
+
         const tryLoad = (path) => { img.src = path; };
-        
+
+        // 4-SECOND TIMEOUT KILL SWITCH (User Request)
+        const timeout = setTimeout(() => {
+            resolve(null); 
+        }, 4000);
+
         img.onerror = function() {
             if (this.src.endsWith(src)) {
                  tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
+            } else {
+                 clearTimeout(timeout);
+                 resolve(null); 
             }
         };
         
-        img.onload = () => {
-            img.classList.add('fade-in');
-            cell.classList.add('loaded');
-        };
+        img.onload = function() {
+            clearTimeout(timeout);
+            try {
+                const colors = extractDistinctColors(img, 3);
+                if (!colors || colors.length < 1) resolve(null);
+                else resolve(createStripData(colors, src));
+            } catch (e) {
+                resolve(null);
+            }
+        }
         
         tryLoad("thumbnails/" + src);
+    });
+}
+
+function createStripData(colors, originalSrc, array) {
+    if(!colors) return null;
+
+    const strip = document.createElement('div');
+    strip.className = 'palette-strip';
+    strip.classList.add('animate-hidden');
+    
+    colors.forEach(hex => {
+        const swatch = document.createElement('div');
+        swatch.className = 'color-swatch';
+        swatch.style.backgroundColor = hex;
         
-        if (img.complete) {
-            img.classList.add('fade-in');
-            cell.classList.add('loaded');
-        }
-
-        cell.onclick = () => openLightbox(src);
+        const tt = document.createElement('span');
+        tt.className = 'hex-tooltip';
+        tt.innerText = hex;
+        swatch.appendChild(tt);
         
-        cell.appendChild(img);
-        currentGrid.appendChild(cell); 
-        hasPhotos = true;
-      });
+        swatch.onclick = (e) => {
+            e.stopPropagation();
+            // DISABLE NAV: Pass false
+            openLightbox(originalSrc, false); 
+        };
+        strip.appendChild(swatch);
+    });
+    return strip;
+}
 
-      if (hasPhotos) {
-          galleryView.appendChild(currentGrid);
-      }
+function appendStrips(strips) {
+    const shuffled = strips.sort(() => Math.random() - 0.5);
+    shuffled.forEach(strip => palettesView.appendChild(strip));
+    animateRandomPopIn();
+}
 
-      menuView.style.display = "none";
-      galleryView.style.display = "block";
-      backBtn.style.display = "block"; 
-      window.scrollTo(0, 0);
-    }
-
-    // ================================
-    // PALETTES LOGIC (FAST QUEUE)
-    // ================================
-    function openPalettes() {
-        menuView.style.display = "none";
-        galleryView.style.display = "none";
-        printsView.style.display = "none";
-        palettesView.style.display = "grid"; 
-        backBtn.style.display = "block";
-        
-        const existingStrips = palettesView.querySelectorAll('.palette-strip').length;
-        if (existingStrips === 0) {
-            paletteLoader.style.display = "block";
-            paletteProgressBar.style.width = "0%";
-            generatePalettesQueue();
-        } else {
-            animateRandomPopIn();
-        }
-        window.scrollTo(0, 0);
-    }
-
-    function generatePalettesQueue() {
-        let loadedCount = 0;
-        let index = 0;
-        let generatedStrips = [];
-        const concurrency = 6; 
-        let activeWorkers = 0;
-
-        function next() {
-            if (index >= allImages.length) {
-                if (activeWorkers === 0) {
-                    paletteLoader.style.display = "none";
-                    appendStrips(generatedStrips);
-                }
-                return;
-            }
-
-            activeWorkers++;
-            const src = allImages[index++];
-            
-            processSingleImage(src).then((strip) => {
-                if (strip) generatedStrips.push(strip);
-                loadedCount++;
-                const percent = (loadedCount / allImages.length) * 100;
-                paletteProgressBar.style.width = percent + "%";
-                activeWorkers--;
-                next(); 
-            });
-        }
-
-        for (let i = 0; i < concurrency; i++) next();
-    }
-
-    function processSingleImage(src) {
-        return new Promise((resolve) => {
-            const img = new Image();
-            img.crossOrigin = "Anonymous"; 
-
-            const tryLoad = (path) => { img.src = path; };
-
-            // 4-SECOND TIMEOUT KILL SWITCH
-            const timeout = setTimeout(() => {
-                resolve(null); 
-            }, 4000);
-
-            img.onerror = function() {
-                if (this.src.endsWith(src)) {
-                     tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
-                } else {
-                     clearTimeout(timeout);
-                     resolve(null); 
-                }
-            };
-            
-            img.onload = function() {
-                clearTimeout(timeout);
-                try {
-                    const colors = extractDistinctColors(img, 3);
-                    if (!colors || colors.length < 1) resolve(null);
-                    else resolve(createStripData(colors, src));
-                } catch (e) {
-                    resolve(null);
-                }
-            }
-            
-            tryLoad("thumbnails/" + src);
-        });
-    }
-
-    function createStripData(colors, originalSrc, array) {
-        if(!colors) return null;
-
-        const strip = document.createElement('div');
-        strip.className = 'palette-strip';
+function animateRandomPopIn() {
+    const strips = document.querySelectorAll('.palette-strip');
+    strips.forEach(strip => {
+        strip.classList.remove('animate-visible');
         strip.classList.add('animate-hidden');
-        
-        colors.forEach(hex => {
-            const swatch = document.createElement('div');
-            swatch.className = 'color-swatch';
-            swatch.style.backgroundColor = hex;
-            
-            const tt = document.createElement('span');
-            tt.className = 'hex-tooltip';
-            tt.innerText = hex;
-            swatch.appendChild(tt);
-            
-            swatch.onclick = (e) => {
-                e.stopPropagation();
-                // DISABLE NAV: Pass false
-                openLightbox(originalSrc, false); 
-            };
-            strip.appendChild(swatch);
-        });
-        return strip;
-    }
-
-    function appendStrips(strips) {
-        const shuffled = strips.sort(() => Math.random() - 0.5);
-        shuffled.forEach(strip => palettesView.appendChild(strip));
-        animateRandomPopIn();
-    }
-
-    function animateRandomPopIn() {
-        const strips = document.querySelectorAll('.palette-strip');
-        strips.forEach(strip => {
-            strip.classList.remove('animate-visible');
-            strip.classList.add('animate-hidden');
-        });
-        
-        const indices = Array.from(strips.keys()).sort(() => Math.random() - 0.5);
-        
-        indices.forEach((index, i) => {
-            setTimeout(() => {
-                if(strips[index]) {
-                    strips[index].classList.remove('animate-hidden');
-                    strips[index].classList.add('animate-visible');
-                }
-            }, i * 50);
-        });
-    }
-
-    // BANNED COLORS (User Request)
-    const bannedHex = ["#04f0dc", "#04f0c8", "#04f08c", "dcf104", "04f078", "0504dc", "f104f0" "04f0f0", "f0f104", "f10504"];
-
-    function extractDistinctColors(imgElement, count) {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = 50;
-        canvas.height = 50;
-        ctx.drawImage(imgElement, 0, 0, 50, 50);
-        
-        try {
-            const imgData = ctx.getImageData(0, 0, 50, 50).data;
-            const colorCounts = {};
-            
-            for (let i = 0; i < imgData.length; i += 20) { 
-                const r = imgData[i];
-                const g = imgData[i+1];
-                const b = imgData[i+2];
-                
-                const rQ = Math.round(r / 20) * 20;
-                const gQ = Math.round(g / 20) * 20;
-                const bQ = Math.round(b / 20) * 20;
-                const key = `${rQ},${gQ},${bQ}`;
-                const hex = rgbToHex(rQ, gQ, bQ);
-
-                // 1. NEON BAN
-                if (bannedHex.includes(hex)) continue;
-
-                const { h, s, l } = rgbToHsl(r, g, b);
-                
-                // 2. IGNORE EXTREMES
-                if (l < 0.05 || l > 0.95) continue;
-                
-                // 3. REVERTED SCORE LOGIC + SHADOW HANDICAP
-                let weight = 1 + (s * 5); 
-                
-                // SHADOW HANDICAP: If very dark, reduce weight
-                if (l < 0.2) weight *= 0.5;
-
-                if (!colorCounts[key]) {
-                    colorCounts[key] = { r: rQ, g: gQ, b: bQ, score: 0, hex: hex };
-                }
-                colorCounts[key].score += weight;
+    });
+    
+    const indices = Array.from(strips.keys()).sort(() => Math.random() - 0.5);
+    
+    indices.forEach((index, i) => {
+        setTimeout(() => {
+            if(strips[index]) {
+                strips[index].classList.remove('animate-hidden');
+                strips[index].classList.add('animate-visible');
             }
+        }, i * 50);
+    });
+}
+
+// BANNED COLORS (User Request)
+const bannedHex = ["#04f0dc", "#04f0c8"];
+
+function extractDistinctColors(imgElement, count) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 50;
+    canvas.height = 50;
+    ctx.drawImage(imgElement, 0, 0, 50, 50);
+    
+    try {
+        const imgData = ctx.getImageData(0, 0, 50, 50).data;
+        const colorCounts = {};
+        
+        for (let i = 0; i < imgData.length; i += 20) { 
+            const r = imgData[i];
+            const g = imgData[i+1];
+            const b = imgData[i+2];
             
-            const sortedBuckets = Object.values(colorCounts).sort((a,b) => b.score - a.score);
+            const rQ = Math.round(r / 20) * 20;
+            const gQ = Math.round(g / 20) * 20;
+            const bQ = Math.round(b / 20) * 20;
+            const key = `${rQ},${gQ},${bQ}`;
+            const hex = rgbToHex(rQ, gQ, bQ);
+
+            // 1. NEON BAN
+            if (bannedHex.includes(hex)) continue;
+
+            const { h, s, l } = rgbToHsl(r, g, b);
             
-            const distinct = [];
-            for (let c of sortedBuckets) {
-                 if (distinct.length >= count) break;
-                 let valid = true;
-                 for (let existing of distinct) {
-                     const r1 = parseInt(existing.substring(1,3), 16);
-                     const g1 = parseInt(existing.substring(3,5), 16);
-                     const b1 = parseInt(existing.substring(5,7), 16);
-                     const dist = Math.sqrt((c.r-r1)**2 + (c.g-g1)**2 + (c.b-b1)**2);
-                     if (dist < 60) { valid = false; break; }
-                 }
-                 if (valid) distinct.push(c.hex);
+            // 2. IGNORE EXTREMES
+            if (l < 0.05 || l > 0.95) continue;
+            
+            // 3. REVERTED SCORE LOGIC + SHADOW HANDICAP
+            let weight = 1 + (s * 5); 
+            
+            // SHADOW HANDICAP: If very dark, reduce weight
+            if (l < 0.2) weight *= 0.5;
+
+            if (!colorCounts[key]) {
+                colorCounts[key] = { r: rQ, g: gQ, b: bQ, score: 0, hex: hex };
+            }
+            colorCounts[key].score += weight;
+        }
+        
+        const sortedBuckets = Object.values(colorCounts).sort((a,b) => b.score - a.score);
+        
+        const distinct = [];
+        for (let c of sortedBuckets) {
+             if (distinct.length >= count) break;
+             let valid = true;
+             for (let existing of distinct) {
+                 const r1 = parseInt(existing.substring(1,3), 16);
+                 const g1 = parseInt(existing.substring(3,5), 16);
+                 const b1 = parseInt(existing.substring(5,7), 16);
+                 const dist = Math.sqrt((c.r-r1)**2 + (c.g-g1)**2 + (c.b-b1)**2);
+                 if (dist < 60) { valid = false; break; }
+             }
+             if (valid) distinct.push(c.hex);
         }
         
         if (distinct.length < 2) return null;
@@ -1509,6 +1491,7 @@ function openPrints() {
   if (visualizerImg.getAttribute("src") === "") {
     updateVisualizer();
   }
+  document.addEventListener('keydown', handleKeyInput);
 }
 
 function showMenu() {
@@ -1519,6 +1502,7 @@ function showMenu() {
   spotlightSwitch.style.display = "none"; 
   toggleDarkBtn.style.display = "block"; 
   menuView.style.display = "grid"; 
+  document.removeEventListener('keydown', handleKeyInput);
   document.body.classList.remove('spotlight-mode');
   window.scrollTo(0, 0);
 }
@@ -1578,7 +1562,6 @@ function openLightbox(src, enableNav = true) {
   
   loadLightboxImage(src);
   
-  // HIDE ARROWS IF NAV DISABLED
   const navBtns = document.querySelectorAll('.lightbox-nav-btn');
   navBtns.forEach(btn => btn.style.display = enableNav ? 'block' : 'none');
 
@@ -1602,7 +1585,6 @@ function loadLightboxImage(src) {
 function navigateLightbox(direction, e) {
     if(e) e.stopPropagation();
     
-    // Safety check: if arrows are hidden, don't nav
     const navBtns = document.querySelector('.lightbox-nav-btn');
     if (navBtns && navBtns.style.display === 'none') return;
 
@@ -1664,11 +1646,6 @@ document.addEventListener('dragstart', function(e) {
 window.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) { e.preventDefault(); }
 });
-
-// Closing bracket for try-catch block
-} catch (error) {
-    console.error("Critical error in gallery initialization:", error);
-}
 </script>
 </body>
 </html>
