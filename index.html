@@ -53,7 +53,7 @@
     color: var(--text);
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     overflow-x: hidden;
-    width: 100vw;
+    width: 100%;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -71,8 +71,12 @@
     justify-content: center;
     align-items: center;
     z-index: 9999;
-    transition: opacity 1s ease;
+    transition: opacity 0.8s ease;
     cursor: pointer;
+  }
+  #intro.hidden {
+      opacity: 0;
+      pointer-events: none; /* INSTANTLY allows clicking through */
   }
   #intro h1 {
     font-size: 12vw;
@@ -83,7 +87,7 @@
     pointer-events: none;
   }
 
-  /* --- HEADER (FLEXBOX FIXED) --- */
+  /* --- HEADER --- */
   header {
     text-align: center;
     padding: 4rem 1rem 2rem;
@@ -94,15 +98,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
   }
   
-  /* This ensures the logo and title are always side-by-side */
+  /* FLEX CONTAINER: Holds Logo and Text Side-by-Side */
   .title-wrapper {
-      position: relative;
-      display: flex; 
+      display: flex;
+      flex-direction: row;
       align-items: center;
       justify-content: center;
-      gap: 15px; /* Spacing between logo and text */
+      gap: 15px; 
+      position: relative;
   }
 
   h1 {
@@ -114,11 +120,11 @@
   }
 
   .insta-link {
-      /* Removed absolute positioning */
       display: block;
       width: 35px;
       height: 35px;
       transition: opacity 0.2s;
+      flex-shrink: 0;
   }
   .insta-link img {
       width: 100%;
@@ -158,6 +164,7 @@
     max-width: 1000px; 
     margin: 0 auto;
     flex-grow: 1;
+    width: 100%;
   }
 
   .menu-item {
@@ -255,6 +262,7 @@
     max-width: 1600px;
     margin: 0 auto;
     flex-grow: 1;
+    width: 100%;
   }
   .grid {
     column-count: 3;
@@ -716,7 +724,7 @@
   .frame-matte { background-color: #fff; padding: 40px; border: 2px solid #222; box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.3); }
   .frame-white { border: 15px solid #f8f8f8; outline: 1px solid #e0e0e0; box-shadow: 0 15px 30px rgba(0,0,0,0.15), inset 0 0 10px rgba(0,0,0,0.05); }
 
-  /* --- LIGHTBOX --- */
+  /* --- LIGHTBOX (UPDATED) --- */
   #lightbox {
     position: fixed;
     inset: 0;
@@ -860,11 +868,12 @@
       
       #prints-view { padding-top: 80px; }
 
-      /* FIXED HEADER ON MOBILE */
+      /* FIXED HEADER ON MOBILE: Flex is default, we only tweak font */
       h1 { font-size: 2.5rem; margin-top: 0; }
       
-      .gallery-section-title { font-size: 1.2rem; margin: 40px 0 20px 0; }
-      .gallery-section-title span { font-size: 1.2rem; margin-right: 15px; }
+      /* Updated header mobile text */
+      .gallery-header { font-size: 1.2rem; margin: 40px 0 20px 0; }
+      .gallery-header span { font-size: 1.2rem; margin-right: 15px; }
       
       .lightbox-nav-btn { font-size: 4rem; padding: 30px; }
       .lightbox-prev { left: 0; }
@@ -898,7 +907,7 @@
 
 <body>
 
-  <div id="intro" onclick="dismissIntro()"><h1>FujingAround</h1></div>
+  <div id="intro"><h1>FujingAround</h1></div>
 
   <header>
     <div class="title-wrapper">
@@ -1093,23 +1102,28 @@ const frames = [
 ];
 
 // ================================
-// INTRO ANIMATION
+// INTRO ANIMATION (NUCLEAR FIX)
 // ================================
 const intro = document.getElementById("intro");
 let unlocked = false;
 
 function dismissIntro() {
   if (!unlocked) {
-    intro.style.opacity = "0";
-    setTimeout(() => { intro.style.display = "none"; }, 1000);
+    // Add CSS class to handle opacity AND pointer-events
+    intro.classList.add('hidden');
+    // Remove from DOM entirely after transition
+    setTimeout(() => { intro.style.display = "none"; }, 800);
     unlocked = true;
   }
 }
 
+// Global listeners attached to WINDOW and INTRO specifically
 window.addEventListener("scroll", dismissIntro);
 window.addEventListener("wheel", dismissIntro);
 window.addEventListener("touchmove", dismissIntro);
-document.body.addEventListener("click", dismissIntro);
+window.addEventListener("click", dismissIntro);
+// Specific fallback for the element itself
+if(intro) intro.addEventListener("click", dismissIntro);
 
 // ================================
 // APP LOGIC
@@ -1230,7 +1244,7 @@ function openTrip(index) {
 }
 
 // ================================
-// PALETTES LOGIC (FAST QUEUE)
+// PALETTES LOGIC (FAST QUEUE + NO NAV)
 // ================================
 function openPalettes() {
     menuView.style.display = "none";
@@ -1611,7 +1625,6 @@ let touchEndX = 0;
 lightbox.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
 lightbox.addEventListener('touchend', e => {
     touchEndX = e.changedTouches[0].screenX;
-    // Only swipe if nav is enabled
     const navBtns = document.querySelector('.lightbox-nav-btn');
     if (navBtns && navBtns.style.display === 'none') return;
     
