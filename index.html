@@ -707,7 +707,36 @@
     z-index: 20;
     position: relative;
   }
+  
+  .size-dropdown-container {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .size-select-label {
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+  }
+  
+  #size-select {
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    background-color: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--text);
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+  }
+  
   .photo-id { font-size: 0.8rem; margin-bottom: 10px; display: block; font-weight: bold; }
+  
   .buy-btn {
     display: inline-block;
     background-color: var(--buy-btn-bg);
@@ -873,7 +902,7 @@
       
       #prints-view { padding-top: 80px; }
 
-      /* FIXED HEADER ON MOBILE */
+      /* FIXED HEADER ON MOBILE: Flex is default, we only tweak font */
       h1 { font-size: 2.5rem; margin-top: 0; }
       
       .title-wrapper {
@@ -885,6 +914,7 @@
         margin-bottom: 10px; 
       }
       
+      /* Ensure logo is not absolutely positioned on mobile */
       .insta-link {
         position: relative; 
         top: auto; left: auto; transform: none;
@@ -1012,7 +1042,16 @@
 
     <div class="buy-section">
       <span class="photo-id" id="photo-id-display">Reference ID: ...</span>
-      <a href="https://buy.stripe.com/4gM8wI5iw6mz44h0mRfnO00" target="_blank" class="buy-btn">Order Print</a>
+      
+      <div class="size-dropdown-container">
+          <label for="size-select" class="size-select-label">Size:</label>
+          <select id="size-select" onchange="updateBuyLink()">
+              <option value="https://buy.stripe.com/eVqaEQh1e8uH44h4D7fnO01">12 x 18 ($50)</option>
+              <option value="https://buy.stripe.com/aFa8wIfXa5iv44h0mRfnO02">20 x 30 ($85)</option>
+          </select>
+      </div>
+
+      <a id="buy-btn-link" href="https://buy.stripe.com/4gM8wI5iw6mz44h0mRfnO00" target="_blank" class="buy-btn">Order Print</a>
       <p class="buy-note">Note: Copy the Reference ID above and paste it during checkout.</p>
     </div>
   </div>
@@ -1042,8 +1081,11 @@
 // ================================
 // CONFIGURATION
 // ================================
-const trips = [
-  {
+const bannedHex = ["#04f0dc", "#04f0c8", "#04f08c", "dcf104", "04f078", "0504dc", "f104f0", "04f0f0", "f0f104", "f10504"];
+
+try {
+    const trips = [
+      {
     title: "Italy, 2024",
     coverImage: "thumbnails/RM18.jpg", 
     images: [
@@ -1129,332 +1171,329 @@ const trips = [
   },
 ];
 
-const allImages = trips.flatMap(t => t.images).filter(item => !item.startsWith("HEADER:"));
+    const allImages = trips.flatMap(t => t.images).filter(item => !item.startsWith("HEADER:"));
 
-const frames = [
-  { class: "frame-black", name: "Classic Black" },
-  { class: "frame-matte", name: "Museum Matte" },
-  { class: "frame-white", name: "Modern White" }
-];
+    const frames = [
+      { class: "frame-black", name: "Classic Black" },
+      { class: "frame-matte", name: "Museum Matte" },
+      { class: "frame-white", name: "Modern White" }
+    ];
 
-// ================================
-// APP LOGIC
-// ================================
-const menuView = document.getElementById("menu-view");
-const galleryView = document.getElementById("gallery-view");
-const printsView = document.getElementById("prints-view");
-const palettesView = document.getElementById("palettes-view");
-const grid = document.getElementById("grid");
-const backBtn = document.getElementById("back-btn");
-const lightbox = document.getElementById("lightbox");
-const lightboxImg = document.getElementById("lightbox-img");
-const footerContainer = document.getElementById("footer-container");
-const spotlightSwitch = document.getElementById("spotlight-switch");
-const toggleDarkBtn = document.getElementById("toggle-dark");
-const hexOverlay = document.getElementById("hex-overlay");
-const hexText = document.getElementById("hex-text");
-const paletteLoader = document.getElementById("palette-loader");
-const paletteProgressBar = document.getElementById("palette-progress-bar");
+    // ================================
+    // APP LOGIC
+    // ================================
+    const menuView = document.getElementById("menu-view");
+    const galleryView = document.getElementById("gallery-view");
+    const printsView = document.getElementById("prints-view");
+    const palettesView = document.getElementById("palettes-view");
+    const grid = document.getElementById("grid");
+    const backBtn = document.getElementById("back-btn");
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightbox-img");
+    const footerContainer = document.getElementById("footer-container");
+    const spotlightSwitch = document.getElementById("spotlight-switch");
+    const toggleDarkBtn = document.getElementById("toggle-dark");
+    const hexOverlay = document.getElementById("hex-overlay");
+    const hexText = document.getElementById("hex-text");
+    const paletteLoader = document.getElementById("palette-loader");
+    const paletteProgressBar = document.getElementById("palette-progress-bar");
 
-let currentLightboxIndex = 0;
-let currentGalleryImages = []; 
+    let currentLightboxIndex = 0;
+    let currentGalleryImages = []; 
 
-document.addEventListener('keydown', handleKeyInput);
+    document.addEventListener('keydown', handleKeyInput);
 
-function initMenu() {
-  const printsBtn = document.querySelector('.menu-item.action-btn'); 
-  trips.forEach((trip, index) => {
-    const btn = document.createElement("div");
-    btn.className = "menu-item";
-    btn.style.backgroundImage = `url('${trip.coverImage}')`;
-    btn.innerHTML = `<h3>${trip.title}</h3>`;
-    btn.onclick = (e) => {
-      e.stopPropagation();
-      openTrip(index);
-    };
-    menuView.insertBefore(btn, printsBtn);
-  });
-}
-
-function openTrip(index) {
-  const trip = trips[index];
-  galleryView.innerHTML = "";
-  
-  // Navigation array (remove headers)
-  currentGalleryImages = trip.images.filter(src => !src.startsWith("HEADER:"));
-  
-  const createGrid = () => {
-      const g = document.createElement("div");
-      g.className = "grid";
-      return g;
-  };
-
-  let currentGrid = createGrid();
-  let hasPhotos = false; 
-
-  trip.images.forEach(src => {
-    if (src.startsWith("HEADER:")) {
-        if (hasPhotos) {
-            galleryView.appendChild(currentGrid);
-            currentGrid = createGrid();
-            hasPhotos = false;
-        }
-        const headerTxt = src.split(":")[1];
-        const headerEl = document.createElement("h2");
-        headerEl.className = "gallery-header";
-        
-        // TECHNICAL HEADER
-        const span = document.createElement("span");
-        span.innerText = headerTxt;
-        headerEl.appendChild(span);
-        
-        galleryView.appendChild(headerEl);
-        return; 
+    function initMenu() {
+      const printsBtn = document.querySelector('.menu-item.action-btn'); 
+      trips.forEach((trip, index) => {
+        const btn = document.createElement("div");
+        btn.className = "menu-item";
+        btn.style.backgroundImage = `url('${trip.coverImage}')`;
+        btn.innerHTML = `<h3>${trip.title}</h3>`;
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          openTrip(index);
+        };
+        menuView.insertBefore(btn, printsBtn);
+      });
     }
 
-    const cell = document.createElement("div");
-    cell.className = "cell";
-    
-    const img = document.createElement("img");
-    img.loading = "lazy";
-    
-    const tryLoad = (path) => { img.src = path; };
-    
-    img.onerror = function() {
-        if (this.src.endsWith(src)) {
-             tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
-        }
-    };
-    
-    img.onload = () => {
-        img.classList.add('fade-in');
-        cell.classList.add('loaded');
-    };
-    
-    tryLoad("thumbnails/" + src);
-    
-    if (img.complete) {
-        img.classList.add('fade-in');
-        cell.classList.add('loaded');
-    }
+    function openTrip(index) {
+      const trip = trips[index];
+      galleryView.innerHTML = "";
+      
+      // Navigation array (remove headers)
+      currentGalleryImages = trip.images.filter(src => !src.startsWith("HEADER:"));
+      
+      const createGrid = () => {
+          const g = document.createElement("div");
+          g.className = "grid";
+          return g;
+      };
 
-    cell.onclick = () => openLightbox(src);
-    
-    cell.appendChild(img);
-    currentGrid.appendChild(cell); 
-    hasPhotos = true;
-  });
+      let currentGrid = createGrid();
+      let hasPhotos = false; 
 
-  if (hasPhotos) {
-      galleryView.appendChild(currentGrid);
-  }
-
-  menuView.style.display = "none";
-  galleryView.style.display = "block";
-  backBtn.style.display = "block"; 
-  window.scrollTo(0, 0);
-}
-
-// ================================
-// PALETTES LOGIC (FAST QUEUE)
-// ================================
-function openPalettes() {
-    menuView.style.display = "none";
-    galleryView.style.display = "none";
-    printsView.style.display = "none";
-    palettesView.style.display = "grid"; 
-    backBtn.style.display = "block";
-    
-    const existingStrips = palettesView.querySelectorAll('.palette-strip').length;
-    if (existingStrips === 0) {
-        paletteLoader.style.display = "block";
-        paletteProgressBar.style.width = "0%";
-        generatePalettesQueue();
-    } else {
-        animateRandomPopIn();
-    }
-    window.scrollTo(0, 0);
-}
-
-function generatePalettesQueue() {
-    let loadedCount = 0;
-    let index = 0;
-    let generatedStrips = [];
-    const concurrency = 6; 
-    let activeWorkers = 0;
-
-    function next() {
-        if (index >= allImages.length) {
-            if (activeWorkers === 0) {
-                paletteLoader.style.display = "none";
-                appendStrips(generatedStrips);
+      trip.images.forEach(src => {
+        if (src.startsWith("HEADER:")) {
+            if (hasPhotos) {
+                galleryView.appendChild(currentGrid);
+                currentGrid = createGrid();
+                hasPhotos = false;
             }
-            return;
+            const headerTxt = src.split(":")[1];
+            const headerEl = document.createElement("h2");
+            headerEl.className = "gallery-header";
+            
+            // TECHNICAL HEADER
+            const span = document.createElement("span");
+            span.innerText = headerTxt;
+            headerEl.appendChild(span);
+            
+            galleryView.appendChild(headerEl);
+            return; 
         }
 
-        activeWorkers++;
-        const src = allImages[index++];
+        const cell = document.createElement("div");
+        cell.className = "cell";
         
-        processSingleImage(src).then((strip) => {
-            if (strip) generatedStrips.push(strip);
-            loadedCount++;
-            const percent = (loadedCount / allImages.length) * 100;
-            paletteProgressBar.style.width = percent + "%";
-            activeWorkers--;
-            next(); 
-        });
-    }
-
-    for (let i = 0; i < concurrency; i++) next();
-}
-
-function processSingleImage(src) {
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.crossOrigin = "Anonymous"; 
-
+        const img = document.createElement("img");
+        img.loading = "lazy";
+        
         const tryLoad = (path) => { img.src = path; };
-
-        // 4-SECOND TIMEOUT KILL SWITCH (User Request)
-        const timeout = setTimeout(() => {
-            resolve(null); 
-        }, 4000);
-
+        
         img.onerror = function() {
             if (this.src.endsWith(src)) {
                  tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
-            } else {
-                 clearTimeout(timeout);
-                 resolve(null); 
             }
         };
         
-        img.onload = function() {
-            clearTimeout(timeout);
-            try {
-                const colors = extractDistinctColors(img, 3);
-                if (!colors || colors.length < 1) resolve(null);
-                else resolve(createStripData(colors, src));
-            } catch (e) {
-                resolve(null);
-            }
-        }
+        img.onload = () => {
+            img.classList.add('fade-in');
+            cell.classList.add('loaded');
+        };
         
         tryLoad("thumbnails/" + src);
-    });
-}
-
-function createStripData(colors, originalSrc, array) {
-    if(!colors) return null;
-
-    const strip = document.createElement('div');
-    strip.className = 'palette-strip';
-    strip.classList.add('animate-hidden');
-    
-    colors.forEach(hex => {
-        const swatch = document.createElement('div');
-        swatch.className = 'color-swatch';
-        swatch.style.backgroundColor = hex;
         
-        const tt = document.createElement('span');
-        tt.className = 'hex-tooltip';
-        tt.innerText = hex;
-        swatch.appendChild(tt);
-        
-        swatch.onclick = (e) => {
-            e.stopPropagation();
-            // DISABLE NAV: Pass false
-            openLightbox(originalSrc, false); 
-        };
-        strip.appendChild(swatch);
-    });
-    return strip;
-}
-
-function appendStrips(strips) {
-    const shuffled = strips.sort(() => Math.random() - 0.5);
-    shuffled.forEach(strip => palettesView.appendChild(strip));
-    animateRandomPopIn();
-}
-
-function animateRandomPopIn() {
-    const strips = document.querySelectorAll('.palette-strip');
-    strips.forEach(strip => {
-        strip.classList.remove('animate-visible');
-        strip.classList.add('animate-hidden');
-    });
-    
-    const indices = Array.from(strips.keys()).sort(() => Math.random() - 0.5);
-    
-    indices.forEach((index, i) => {
-        setTimeout(() => {
-            if(strips[index]) {
-                strips[index].classList.remove('animate-hidden');
-                strips[index].classList.add('animate-visible');
-            }
-        }, i * 50);
-    });
-}
-
-// BANNED COLORS (User Request)
-const bannedHex = ["#04f0dc", "#04f0c8", "#04f08c", "dcf104", "04f078", "0504dc", "f104f0", "04f0f0", "f0f104", "f10504"];
-
-function extractDistinctColors(imgElement, count) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = 50;
-    canvas.height = 50;
-    ctx.drawImage(imgElement, 0, 0, 50, 50);
-    
-    try {
-        const imgData = ctx.getImageData(0, 0, 50, 50).data;
-        const colorCounts = {};
-        
-        for (let i = 0; i < imgData.length; i += 20) { 
-            const r = imgData[i];
-            const g = imgData[i+1];
-            const b = imgData[i+2];
-            
-            const rQ = Math.round(r / 20) * 20;
-            const gQ = Math.round(g / 20) * 20;
-            const bQ = Math.round(b / 20) * 20;
-            const key = `${rQ},${gQ},${bQ}`;
-            const hex = rgbToHex(rQ, gQ, bQ);
-
-            // 1. NEON BAN
-            if (bannedHex.includes(hex)) continue;
-
-            const { h, s, l } = rgbToHsl(r, g, b);
-            
-            // 2. IGNORE EXTREMES
-            if (l < 0.05 || l > 0.95) continue;
-            
-            // 3. REVERTED SCORE LOGIC + SHADOW HANDICAP
-            let weight = 1 + (s * 5); 
-            
-            // SHADOW HANDICAP: If very dark, reduce weight
-            if (l < 0.2) weight *= 0.5;
-
-            if (!colorCounts[key]) {
-                colorCounts[key] = { r: rQ, g: gQ, b: bQ, score: 0, hex: hex };
-            }
-            colorCounts[key].score += weight;
+        if (img.complete) {
+            img.classList.add('fade-in');
+            cell.classList.add('loaded');
         }
+
+        cell.onclick = () => openLightbox(src);
         
-        const sortedBuckets = Object.values(colorCounts).sort((a,b) => b.score - a.score);
+        cell.appendChild(img);
+        currentGrid.appendChild(cell); 
+        hasPhotos = true;
+      });
+
+      if (hasPhotos) {
+          galleryView.appendChild(currentGrid);
+      }
+
+      menuView.style.display = "none";
+      galleryView.style.display = "block";
+      backBtn.style.display = "block"; 
+      window.scrollTo(0, 0);
+    }
+
+    // ================================
+    // PALETTES LOGIC (FAST QUEUE)
+    // ================================
+    function openPalettes() {
+        menuView.style.display = "none";
+        galleryView.style.display = "none";
+        printsView.style.display = "none";
+        palettesView.style.display = "grid"; 
+        backBtn.style.display = "block";
         
-        const distinct = [];
-        for (let c of sortedBuckets) {
-             if (distinct.length >= count) break;
-             let valid = true;
-             for (let existing of distinct) {
-                 const r1 = parseInt(existing.substring(1,3), 16);
-                 const g1 = parseInt(existing.substring(3,5), 16);
-                 const b1 = parseInt(existing.substring(5,7), 16);
-                 const dist = Math.sqrt((c.r-r1)**2 + (c.g-g1)**2 + (c.b-b1)**2);
-                 if (dist < 60) { valid = false; break; }
-             }
-             if (valid) distinct.push(c.hex);
+        const existingStrips = palettesView.querySelectorAll('.palette-strip').length;
+        if (existingStrips === 0) {
+            paletteLoader.style.display = "block";
+            paletteProgressBar.style.width = "0%";
+            generatePalettesQueue();
+        } else {
+            animateRandomPopIn();
+        }
+        window.scrollTo(0, 0);
+    }
+
+    function generatePalettesQueue() {
+        let loadedCount = 0;
+        let index = 0;
+        let generatedStrips = [];
+        const concurrency = 6; 
+        let activeWorkers = 0;
+
+        function next() {
+            if (index >= allImages.length) {
+                if (activeWorkers === 0) {
+                    paletteLoader.style.display = "none";
+                    appendStrips(generatedStrips);
+                }
+                return;
+            }
+
+            activeWorkers++;
+            const src = allImages[index++];
+            
+            processSingleImage(src).then((strip) => {
+                if (strip) generatedStrips.push(strip);
+                loadedCount++;
+                const percent = (loadedCount / allImages.length) * 100;
+                paletteProgressBar.style.width = percent + "%";
+                activeWorkers--;
+                next(); 
+            });
+        }
+
+        for (let i = 0; i < concurrency; i++) next();
+    }
+
+    function processSingleImage(src) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = "Anonymous"; 
+
+            const tryLoad = (path) => { img.src = path; };
+
+            // 4-SECOND TIMEOUT KILL SWITCH (User Request)
+            const timeout = setTimeout(() => {
+                resolve(null); 
+            }, 4000);
+
+            img.onerror = function() {
+                if (this.src.endsWith(src)) {
+                     tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
+                } else {
+                     clearTimeout(timeout);
+                     resolve(null); 
+                }
+            };
+            
+            img.onload = function() {
+                clearTimeout(timeout);
+                try {
+                    const colors = extractDistinctColors(img, 3);
+                    if (!colors || colors.length < 1) resolve(null);
+                    else resolve(createStripData(colors, src));
+                } catch (e) {
+                    resolve(null);
+                }
+            }
+            
+            tryLoad("thumbnails/" + src);
+        });
+    }
+
+    function createStripData(colors, originalSrc, array) {
+        if(!colors) return null;
+
+        const strip = document.createElement('div');
+        strip.className = 'palette-strip';
+        strip.classList.add('animate-hidden');
+        
+        colors.forEach(hex => {
+            const swatch = document.createElement('div');
+            swatch.className = 'color-swatch';
+            swatch.style.backgroundColor = hex;
+            
+            const tt = document.createElement('span');
+            tt.className = 'hex-tooltip';
+            tt.innerText = hex;
+            swatch.appendChild(tt);
+            
+            swatch.onclick = (e) => {
+                e.stopPropagation();
+                // DISABLE NAV: Pass false
+                openLightbox(originalSrc, false); 
+            };
+            strip.appendChild(swatch);
+        });
+        return strip;
+    }
+
+    function appendStrips(strips) {
+        const shuffled = strips.sort(() => Math.random() - 0.5);
+        shuffled.forEach(strip => palettesView.appendChild(strip));
+        animateRandomPopIn();
+    }
+
+    function animateRandomPopIn() {
+        const strips = document.querySelectorAll('.palette-strip');
+        strips.forEach(strip => {
+            strip.classList.remove('animate-visible');
+            strip.classList.add('animate-hidden');
+        });
+        
+        const indices = Array.from(strips.keys()).sort(() => Math.random() - 0.5);
+        
+        indices.forEach((index, i) => {
+            setTimeout(() => {
+                if(strips[index]) {
+                    strips[index].classList.remove('animate-hidden');
+                    strips[index].classList.add('animate-visible');
+                }
+            }, i * 50);
+        });
+    }
+
+    function extractDistinctColors(imgElement, count) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 50;
+        canvas.height = 50;
+        ctx.drawImage(imgElement, 0, 0, 50, 50);
+        
+        try {
+            const imgData = ctx.getImageData(0, 0, 50, 50).data;
+            const colorCounts = {};
+            
+            for (let i = 0; i < imgData.length; i += 20) { 
+                const r = imgData[i];
+                const g = imgData[i+1];
+                const b = imgData[i+2];
+                
+                const rQ = Math.round(r / 20) * 20;
+                const gQ = Math.round(g / 20) * 20;
+                const bQ = Math.round(b / 20) * 20;
+                const key = `${rQ},${gQ},${bQ}`;
+                const hex = rgbToHex(rQ, gQ, bQ);
+
+                // 1. NEON BAN
+                if (bannedHex.includes(hex)) continue;
+
+                const { h, s, l } = rgbToHsl(r, g, b);
+                
+                // 2. IGNORE EXTREMES
+                if (l < 0.05 || l > 0.95) continue;
+                
+                // 3. REVERTED SCORE LOGIC + SHADOW HANDICAP
+                let weight = 1 + (s * 5); 
+                
+                // SHADOW HANDICAP: If very dark, reduce weight
+                if (l < 0.2) weight *= 0.5;
+
+                if (!colorCounts[key]) {
+                    colorCounts[key] = { r: rQ, g: gQ, b: bQ, score: 0, hex: hex };
+                }
+                colorCounts[key].score += weight;
+            }
+            
+            const sortedBuckets = Object.values(colorCounts).sort((a,b) => b.score - a.score);
+            
+            const distinct = [];
+            for (let c of sortedBuckets) {
+                 if (distinct.length >= count) break;
+                 let valid = true;
+                 for (let existing of distinct) {
+                     const r1 = parseInt(existing.substring(1,3), 16);
+                     const g1 = parseInt(existing.substring(3,5), 16);
+                     const b1 = parseInt(existing.substring(5,7), 16);
+                     const dist = Math.sqrt((c.r-r1)**2 + (c.g-g1)**2 + (c.b-b1)**2);
+                     if (dist < 60) { valid = false; break; }
+                 }
+                 if (valid) distinct.push(c.hex);
         }
         
         if (distinct.length < 2) return null;
@@ -1505,6 +1544,17 @@ function closeHex() {
     hexOverlay.classList.remove('active');
 }
 
+// ================================
+// DYNAMIC LINK UPDATE
+// ================================
+function updateBuyLink() {
+    const selector = document.getElementById("size-select");
+    const btn = document.getElementById("buy-btn-link");
+    if(selector && btn) {
+        btn.href = selector.value;
+    }
+}
+window.updateBuyLink = updateBuyLink; // Make global
 
 // ================================
 // PRINTS LOGIC
@@ -1590,7 +1640,6 @@ function updateVisualizer() {
 // ================================
 // LIGHTBOX LOGIC
 // ================================
-// Accepts optional enableNav argument (default true)
 function openLightbox(src, enableNav = true) {
   const foundIndex = currentGalleryImages.indexOf(src);
   if(foundIndex !== -1) currentLightboxIndex = foundIndex;
@@ -1681,6 +1730,11 @@ document.addEventListener('dragstart', function(e) {
 window.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) { e.preventDefault(); }
 });
+
+// Closing bracket for try-catch block
+} catch (error) {
+    console.error("Critical error in gallery initialization:", error);
+}
 </script>
 </body>
 </html>
