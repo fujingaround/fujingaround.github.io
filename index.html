@@ -56,7 +56,7 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    /* UPDATED: Force items to pack to the top */
+    /* FIX: Force items to pack to the top */
     justify-content: flex-start;
     min-height: 100vh;
     transition: background 0.8s ease, color 0.5s ease;
@@ -167,10 +167,11 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 30px;
-    /* UPDATED: Remove bottom padding (was 20px) */
+    /* FIX: 0 padding bottom */
     padding: 20px 20px 0 20px;
     max-width: 1000px; 
-    margin: 0 auto;
+    /* FIX: 0 Margin bottom */
+    margin: 0 auto 0 auto;
     flex-grow: 0;
     width: 100%;
   }
@@ -248,15 +249,16 @@
   #footer-container {
     position: relative; 
     width: 100%;
-    /* UPDATED: Remove top padding (was 20px) */
-    padding: 0 40px 40px 40px; 
+    /* FIX: 10px top padding (buffer), 0px bottom */
+    padding: 10px 40px 40px 40px; 
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: var(--text);
     opacity: 0.7;
     font-size: 0.8rem;
     line-height: 1.5;
     text-align: left; 
-    margin-top: 0; 
+    /* FIX: Negative margin to pull footer up against any phantom space */
+    margin-top: -10px; 
     box-sizing: border-box;
     z-index: 10;
     transition: opacity 0.5s;
@@ -937,11 +939,13 @@
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
     .grid { column-count: 1; }
-    #menu-view { padding: 20px; }
+    
+    /* FIX: Force 0 bottom padding even on mobile */
+    #menu-view { padding: 20px 20px 0 20px; } 
+    
     .menu-item h3 { font-size: 2.5rem; }
 
     #footer-container { 
-        /* UPDATED: Reduce padding for mobile as well to match desktop tightness */
         padding: 10px 20px 40px 20px;
         font-size: 0.65rem;
     }
