@@ -952,7 +952,32 @@
     .vertical-center-column { order: 1; width: 100%; gap: 10px; }
     
     .light-switch-container { top: 10px; left: 10px; right: auto; transform: scale(0.7); }
-  }
+  } 
+    /* 1. Stop the page from forcing itself to be full screen height */
+    body {
+        min-height: auto !important; 
+        height: auto !important;
+    }
+    
+    /* 2. Stop the Menu from stretching to fill empty space */
+    #menu-view {
+        flex-grow: 0 !important;
+        padding-bottom: 20px !important; /* Tighten bottom spacing */
+    }
+    
+    /* 3. Pull the Footer up */
+    #footer-container {
+        margin-top: 0 !important;
+        padding-top: 10px !important; /* Reduce gap between buttons and text */
+    }
+    
+    /* 4. Fix the Footer Text Spacing */
+    #compression-info {
+        font-weight: 300;
+        margin-top: 15px;       /* Adds the gap between copyright and this line */
+        font-size: 0.7rem;      /* Matches other footer text size */
+        opacity: 0.6;
+    }
 </style>
 </head>
 
