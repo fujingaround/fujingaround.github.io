@@ -5,11 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>FujingAround</title>
 <style>
-  /* --- DEBUG MODE (DELETE THIS SECTION LATER) --- */
-  #menu-view { border: 5px solid red !important; }
-  #footer-container { border: 5px solid blue !important; }
-  /* ------------------------------------------- */
-
   /* --- GLOBAL RESETS --- */
   * { box-sizing: border-box; } 
 
@@ -60,7 +55,7 @@
     overflow-x: hidden;
     width: 100%;
     
-    /* LAYOUT FIX: Block display stacks items tightly */
+    /* Layout: Block display stacks items tightly */
     display: block;
     min-height: 100vh;
     
@@ -170,9 +165,9 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 30px;
     
-    /* GAP FIX: Forced 0 bottom padding/margin */
+    /* PADDING: Only top and side. Bottom is 0. */
     padding: 20px 20px 0 20px !important;
-    margin: 0 auto 0 auto !important;
+    margin: 0 auto !important;
     
     max-width: 1000px; 
     width: 100%;
@@ -252,9 +247,10 @@
     position: relative; 
     width: 100%;
     
-    /* GAP FIX: Forced 0 top padding/margin */
+    /* FORCE-PULL: This negative margin pulls the footer UP to cover the gap. */
+    margin-top: -20px !important;
+    
     padding: 0 40px 40px 40px !important;
-    margin-top: 0 !important;
     
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: var(--text);
@@ -948,7 +944,7 @@
     /* NUCLEAR FIX: Force footer up on mobile too */
     #footer-container { 
         padding: 0 40px 40px 40px !important;
-        margin-top: 0 !important;
+        margin-top: -20px !important;
         font-size: 0.65rem;
     }
     
