@@ -54,9 +54,13 @@
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     overflow-x: hidden;
     width: 100%;
-    /* FIX: Switched to block to force elements to stack tightly */
-    display: block;
-    min-height: 100vh;
+    
+    /* FIX 1: Switched to BLOCK. Elements now stack tightly like bricks. */
+    display: block; 
+    
+    /* FIX 2: Removed min-height: 100vh. The page now ends exactly where content ends. */
+    height: auto;
+    
     transition: background 0.8s ease, color 0.5s ease;
     user-select: none;
     -webkit-user-select: none;
@@ -162,10 +166,10 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 30px;
-    /* FIX: Strict 0 bottom padding */
+    /* FIX 3: Strict ZERO padding at the bottom */
     padding: 20px 20px 0 20px;
     max-width: 1000px; 
-    /* FIX: Strict 0 bottom margin */
+    /* FIX 4: Strict ZERO margin at the bottom */
     margin: 0 auto 0 auto;
     width: 100%;
   }
@@ -243,15 +247,15 @@
   #footer-container {
     position: relative; 
     width: 100%;
-    /* FIX: Tiny top padding just for text clearance */
-    padding: 10px 40px 40px 40px; 
+    /* FIX 5: Zero top padding */
+    padding: 0 40px 40px 40px; 
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: var(--text);
     opacity: 0.7;
     font-size: 0.8rem;
     line-height: 1.5;
     text-align: left; 
-    /* FIX: Strict 0 top margin */
+    /* FIX 6: Zero top margin */
     margin-top: 0; 
     box-sizing: border-box;
     z-index: 10;
