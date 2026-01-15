@@ -54,17 +54,15 @@
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     overflow-x: hidden;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    /* FIX: Force items to pack to the top */
-    justify-content: flex-start;
+    /* FIX: Switched to block to force elements to stack tightly */
+    display: block;
     min-height: 100vh;
     transition: background 0.8s ease, color 0.5s ease;
     user-select: none;
     -webkit-user-select: none;
   }
 
-  /* --- INTRO SCREEN (WITH CSS FAILSAFE) --- */
+  /* --- INTRO SCREEN --- */
   #intro {
     position: fixed;
     inset: 0;
@@ -75,7 +73,6 @@
     z-index: 99999;
     transition: opacity 0.8s ease;
     cursor: pointer;
-    /* CSS Failsafe: If JS fails, this auto-hides intro after 6s */
     animation: autoHide 0.1s linear 6s forwards;
   }
   @keyframes autoHide {
@@ -99,7 +96,6 @@
     text-align: center;
     padding: 4rem 1rem 2rem;
     position: relative;
-    flex-shrink: 0;
     z-index: 20; 
     transition: opacity 0.5s;
     display: flex;
@@ -108,7 +104,6 @@
     width: 100%;
   }
   
-  /* FLEX CONTAINER: Holds Logo and Text Side-by-Side */
   .title-wrapper {
       display: flex;
       flex-direction: row;
@@ -167,12 +162,11 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 30px;
-    /* FIX: 0 padding bottom */
+    /* FIX: Strict 0 bottom padding */
     padding: 20px 20px 0 20px;
     max-width: 1000px; 
-    /* FIX: 0 Margin bottom */
+    /* FIX: Strict 0 bottom margin */
     margin: 0 auto 0 auto;
-    flex-grow: 0;
     width: 100%;
   }
 
@@ -249,7 +243,7 @@
   #footer-container {
     position: relative; 
     width: 100%;
-    /* FIX: 10px top padding (buffer), 0px bottom */
+    /* FIX: Tiny top padding just for text clearance */
     padding: 10px 40px 40px 40px; 
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: var(--text);
@@ -257,8 +251,8 @@
     font-size: 0.8rem;
     line-height: 1.5;
     text-align: left; 
-    /* FIX: Negative margin to pull footer up against any phantom space */
-    margin-top: -10px; 
+    /* FIX: Strict 0 top margin */
+    margin-top: 0; 
     box-sizing: border-box;
     z-index: 10;
     transition: opacity 0.5s;
@@ -273,7 +267,6 @@
     padding: 20px;
     max-width: 1600px;
     margin: 0 auto;
-    flex-grow: 1;
     width: 100%;
   }
   .grid {
@@ -291,7 +284,6 @@
       margin: 80px 0 40px 0;
       color: var(--text);
       break-inside: avoid;
-      
       font-family: 'Courier New', Courier, monospace; 
       font-size: 1.2rem;
       font-weight: bold;
@@ -366,7 +358,6 @@
       justify-content: center;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 20px; 
-      flex-grow: 1;
       align-content: start;
       position: relative;
       min-height: 50vh;
@@ -511,7 +502,7 @@
     min-height: 60vh;
     padding: 20px;
     position: relative;
-    flex-grow: 1;
+    /* Removed flex-grow */
   }
 
   .visualizer-main-wrapper {
@@ -939,10 +930,7 @@
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
     .grid { column-count: 1; }
-    
-    /* FIX: Force 0 bottom padding even on mobile */
-    #menu-view { padding: 20px 20px 0 20px; } 
-    
+    #menu-view { padding: 20px 20px 0 20px; }
     .menu-item h3 { font-size: 2.5rem; }
 
     #footer-container { 
