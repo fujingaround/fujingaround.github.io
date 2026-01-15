@@ -246,10 +246,6 @@
   #footer-container {
     position: relative; 
     width: 100%;
-    
-    /* FORCE-PULL: This negative margin pulls the footer UP to cover the gap. */
-    margin-top: -160px !important;
-    
     padding: 0 40px 40px 40px !important;
     
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -944,7 +940,7 @@
     /* NUCLEAR FIX: Force footer up on mobile too */
     #footer-container { 
         padding: 0 40px 40px 40px !important;
-        margin-top: -160px !important;
+        margin-top: -20px !important;
         font-size: 0.65rem;
     }
     
@@ -994,7 +990,7 @@
     <button id="back-btn" onclick="showMenu()">← Back to Menu</button>
   </header>
 
-  <div id="menu-view">
+  <div id="menu-view" style="padding-bottom: 0 !important; margin-bottom: 0 !important;">
     <div class="menu-item action-btn" onclick="openPrints()">
       <h3>Prints</h3>
     </div>
@@ -1075,7 +1071,7 @@
     <button class="lightbox-nav-btn lightbox-next" onclick="navigateLightbox(1, event)">❯</button>
   </div>
 
-  <div id="footer-container">
+  <div id="footer-container" style="margin-top: -5px !important; padding-top: 0 !important;">
       <div id="gear-info">Fujifilm X-T3 with the Fujinon XF 18-55mm f/2.8-4</div>
       <div id="copyright-info">© 2025, Alexander Smith, All rights reserved.</div>
       <div id="compression-info">All photos on website compressed for viewing efficiency.</div>
