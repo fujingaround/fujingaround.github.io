@@ -55,11 +55,12 @@
     overflow-x: hidden;
     width: 100%;
     
-    /* FIX 1: Switched to BLOCK. Elements now stack tightly like bricks. */
-    display: block; 
+    /* NUCLEAR FIX 1: Switch to Block. Stacks items like bricks. No Flex gaps. */
+    display: block;
     
-    /* FIX 2: Removed min-height: 100vh. The page now ends exactly where content ends. */
+    /* NUCLEAR FIX 2: Height adjusts to content. No full-screen forcing. */
     height: auto;
+    min-height: 0;
     
     transition: background 0.8s ease, color 0.5s ease;
     user-select: none;
@@ -166,11 +167,12 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 30px;
-    /* FIX 3: Strict ZERO padding at the bottom */
-    padding: 20px 20px 0 20px;
+    
+    /* NUCLEAR FIX 3: Force 0 bottom padding/margin with !important */
+    padding: 20px 20px 0 20px !important;
+    margin: 0 auto 0 auto !important;
+    
     max-width: 1000px; 
-    /* FIX 4: Strict ZERO margin at the bottom */
-    margin: 0 auto 0 auto;
     width: 100%;
   }
 
@@ -247,16 +249,17 @@
   #footer-container {
     position: relative; 
     width: 100%;
-    /* FIX 5: Zero top padding */
-    padding: 0 40px 40px 40px; 
+    
+    /* NUCLEAR FIX 4: Zero top padding/margin with !important */
+    padding: 0 40px 40px 40px !important;
+    margin-top: 0 !important;
+    
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: var(--text);
     opacity: 0.7;
     font-size: 0.8rem;
     line-height: 1.5;
     text-align: left; 
-    /* FIX 6: Zero top margin */
-    margin-top: 0; 
     box-sizing: border-box;
     z-index: 10;
     transition: opacity 0.5s;
@@ -934,11 +937,14 @@
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
     .grid { column-count: 1; }
-    #menu-view { padding: 20px 20px 0 20px; }
+    
+    /* NUCLEAR FIX 5: Explicitly override mobile padding which was forcing the gap back */
+    #menu-view { padding: 20px 20px 0 20px !important; }
+    
     .menu-item h3 { font-size: 2.5rem; }
 
     #footer-container { 
-        padding: 10px 20px 40px 20px;
+        padding: 0 40px 40px 40px !important;
         font-size: 0.65rem;
     }
     
