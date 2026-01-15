@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>FujingAround</title>
 <style>
+  /* --- DEBUG MODE (DELETE THIS SECTION LATER) --- */
+  #menu-view { border: 5px solid red !important; }
+  #footer-container { border: 5px solid blue !important; }
+  /* ------------------------------------------- */
+
   /* --- GLOBAL RESETS --- */
   * { box-sizing: border-box; } 
 
@@ -55,12 +60,9 @@
     overflow-x: hidden;
     width: 100%;
     
-    /* NUCLEAR FIX 1: Switch to Block. Stacks items like bricks. No Flex gaps. */
+    /* LAYOUT FIX: Block display stacks items tightly */
     display: block;
-    
-    /* NUCLEAR FIX 2: Height adjusts to content. No full-screen forcing. */
-    height: auto;
-    min-height: 0;
+    min-height: 100vh;
     
     transition: background 0.8s ease, color 0.5s ease;
     user-select: none;
@@ -168,7 +170,7 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 30px;
     
-    /* NUCLEAR FIX 3: Force 0 bottom padding/margin with !important */
+    /* GAP FIX: Forced 0 bottom padding/margin */
     padding: 20px 20px 0 20px !important;
     margin: 0 auto 0 auto !important;
     
@@ -250,7 +252,7 @@
     position: relative; 
     width: 100%;
     
-    /* NUCLEAR FIX 4: Zero top padding/margin with !important */
+    /* GAP FIX: Forced 0 top padding/margin */
     padding: 0 40px 40px 40px !important;
     margin-top: 0 !important;
     
@@ -938,13 +940,15 @@
     h1 { font-size: 2rem; }
     .grid { column-count: 1; }
     
-    /* NUCLEAR FIX 5: Explicitly override mobile padding which was forcing the gap back */
+    /* NUCLEAR FIX: Override mobile specific settings */
     #menu-view { padding: 20px 20px 0 20px !important; }
     
     .menu-item h3 { font-size: 2.5rem; }
 
+    /* NUCLEAR FIX: Force footer up on mobile too */
     #footer-container { 
         padding: 0 40px 40px 40px !important;
+        margin-top: 0 !important;
         font-size: 0.65rem;
     }
     
