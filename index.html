@@ -246,6 +246,9 @@
   #footer-container {
     position: relative; 
     width: 100%;
+    
+    /* FORCE-PULL: Keep this negative margin */
+    margin-top: -20px !important;
     padding: 0 40px 40px 40px !important;
     
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -999,9 +1002,9 @@
     </div>
   </div>
 
-  <div id="gallery-view"></div>
+  <div id="gallery-view" style="display: none;"></div>
 
-  <div id="palettes-view">
+  <div id="palettes-view" style="display: none;">
       <div id="palette-loader">
           Analyzing Colors...
           <div class="progress-container">
@@ -1016,7 +1019,7 @@
       </div>
   </div>
 
-  <div id="prints-view">
+  <div id="prints-view" style="display: none;">
     <div class="light-switch-container" id="spotlight-switch">
         <div class="click-me-text">Click me! &#8595;</div>
         <div class="light-switch-plate">
@@ -1071,7 +1074,7 @@
     <button class="lightbox-nav-btn lightbox-next" onclick="navigateLightbox(1, event)">❯</button>
   </div>
 
-  <div id="footer-container" style="margin-top: -5px !important; padding-top: 0 !important;">
+  <div id="footer-container" style="margin-top: -20px !important; padding-top: 0 !important;">
       <div id="gear-info">Fujifilm X-T3 with the Fujinon XF 18-55mm f/2.8-4</div>
       <div id="copyright-info">© 2025, Alexander Smith, All rights reserved.</div>
       <div id="compression-info">All photos on website compressed for viewing efficiency.</div>
