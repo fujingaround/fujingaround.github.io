@@ -247,9 +247,9 @@
     position: relative; 
     width: 100%;
     
-    /* FORCE-PULL: Keep this negative margin */
-    margin-top: -20px !important;
-    padding: 0 40px 40px 40px !important;
+    /* These will be overridden by the inline style at the bottom */
+    padding: 0 40px 40px 40px;
+    margin-top: 0;
     
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: var(--text);
@@ -943,7 +943,7 @@
     /* NUCLEAR FIX: Force footer up on mobile too */
     #footer-container { 
         padding: 0 40px 40px 40px !important;
-        margin-top: -20px !important;
+        margin-top: 0 !important;
         font-size: 0.65rem;
     }
     
@@ -1074,7 +1074,7 @@
     <button class="lightbox-nav-btn lightbox-next" onclick="navigateLightbox(1, event)">❯</button>
   </div>
 
-  <div id="footer-container" style="margin-top: -20px !important; padding-top: 0 !important;">
+  <div id="footer-container" style="margin-top: 0px !important; padding-top: 30px !important;">
       <div id="gear-info">Fujifilm X-T3 with the Fujinon XF 18-55mm f/2.8-4</div>
       <div id="copyright-info">© 2025, Alexander Smith, All rights reserved.</div>
       <div id="compression-info">All photos on website compressed for viewing efficiency.</div>
