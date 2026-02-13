@@ -4,6 +4,19 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>FujingAround</title>
+
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://fujingaround.com/" />
+<meta property="og:title" content="FujingAround" />
+<meta property="og:description" content="Travel photography portfolio by Alexander Smith. Shot on Fujifilm." />
+<meta property="og:image" content="https://fujingaround.com/thumbnails/og-image.jpg" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content="https://fujingaround.com/" />
+<meta name="twitter:title" content="FujingAround" />
+<meta name="twitter:description" content="Travel photography portfolio by Alexander Smith. Shot on Fujifilm." />
+<meta name="twitter:image" content="https://fujingaround.com/thumbnails/og-image.jpg" />
+
 <style>
   /* --- GLOBAL RESETS --- */
   * { box-sizing: border-box; } 
@@ -64,7 +77,7 @@
     -webkit-user-select: none;
   }
 
-  /* --- INTRO SCREEN --- */
+  /* --- INTRO SCREEN (UPDATED FOR SMOOTHNESS) --- */
   #intro {
     position: fixed;
     inset: 0;
@@ -73,17 +86,30 @@
     justify-content: center;
     align-items: center;
     z-index: 99999;
-    transition: opacity 0.8s ease;
+    
+    /* SMOOTHNESS MAGIC: Slower fade + transform support */
+    transition: opacity 1.5s ease-in-out, visibility 1.5s, transform 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+    
     cursor: pointer;
-    animation: autoHide 0.1s linear 6s forwards;
+    
+    /* Optional: Keeps the auto-hide failsafe but pushes it to 8 seconds */
+    animation: autoHide 0.1s linear 8s forwards;
   }
+  
+  /* The "Hidden" State */
+  #intro.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      
+      /* SMOOTHNESS MAGIC: Gently zooms out while fading */
+      transform: scale(1.1); 
+  }
+
   @keyframes autoHide {
       to { opacity: 0; pointer-events: none; visibility: hidden; }
   }
-  #intro.hidden {
-      opacity: 0;
-      pointer-events: none;
-  }
+
   #intro h1 {
     font-size: 12vw;
     font-weight: 900;
@@ -91,6 +117,13 @@
     color: #ffffff;
     margin: 0;
     pointer-events: none;
+    
+    /* Optional: Makes the text itself feel lighter */
+    transition: letter-spacing 1.5s ease-out;
+  }
+  
+  #intro.hidden h1 {
+      letter-spacing: 0.05em; /* Text spreads out slightly as it vanishes */
   }
 
   /* --- HEADER --- */
@@ -967,18 +1000,36 @@
   <div id="intro" onclick="dismissIntro()"><h1>FujingAround</h1></div>
   
   <script>
-      function dismissIntro() {
+      let isDismissing = false;
+
+      function dismissIntro(e) {
+          // If already fading, ignore
+          if (isDismissing) return;
+          
+          // Optional: If scrolling up, don't dismiss (feels more natural)
+          if (e && e.type === 'wheel' && e.deltaY < 0) return;
+
+          isDismissing = true;
           const intro = document.getElementById("intro");
           if (intro) {
               intro.classList.add('hidden');
-              setTimeout(() => { intro.style.display = "none"; }, 800);
+              // Wait for the transition (1.5s) before removing from display flow
+              setTimeout(() => { intro.style.display = "none"; }, 1500);
           }
       }
-      // Immediate listeners for instant reaction
+
+      // Immediate listeners
       document.addEventListener("DOMContentLoaded", () => {
-          document.body.addEventListener("click", dismissIntro);
-          document.body.addEventListener("touchstart", dismissIntro);
-          document.body.addEventListener("wheel", dismissIntro);
+          const intro = document.getElementById("intro");
+          
+          // Click always dismisses
+          intro.addEventListener("click", dismissIntro);
+          
+          // Scroll events
+          // Using { passive: true } for better performance
+          window.addEventListener("wheel", dismissIntro, { passive: true });
+          window.addEventListener("touchstart", dismissIntro, { passive: true });
+          window.addEventListener("keydown", dismissIntro); // Any key dismisses
       });
   </script>
 
