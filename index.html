@@ -1251,7 +1251,7 @@ try {
 
     let currentLightboxIndex = 0;
     let currentGalleryImages = []; 
-    let currentTripIndex = null; // Track current trip for resize events
+    let currentTripIndex = null; 
 
     document.addEventListener('keydown', handleKeyInput);
     window.addEventListener('resize', debounce(handleResize, 150));
@@ -1266,7 +1266,7 @@ try {
 
     function handleResize() {
         if (currentTripIndex !== null && galleryView.style.display !== 'none') {
-            openTrip(currentTripIndex); // Re-render grid on resize to adjust columns
+            openTrip(currentTripIndex); 
         }
     }
 
@@ -1286,7 +1286,7 @@ try {
     }
 
     // ================================
-    // UPDATED: SMART MASONRY LAYOUT
+    // SMART MASONRY (PIXEL BALANCED)
     // ================================
     function openTrip(index) {
       currentTripIndex = index;
@@ -1295,13 +1295,12 @@ try {
       
       currentGalleryImages = trip.images.filter(src => !src.startsWith("HEADER:"));
       
-      // DETERMINE COLUMNS BASED ON WIDTH
       const width = window.innerWidth;
       let colCount = 3;
       if (width <= 600) colCount = 1;
       else if (width <= 900) colCount = 2;
 
-      // Helper to create a new grid block
+      // Create new grid system
       const createGridBlock = () => {
           const wrapper = document.createElement("div");
           wrapper.className = "grid";
@@ -1317,19 +1316,71 @@ try {
       };
 
       let currentBlock = createGridBlock();
+      let pendingImages = [];
       let hasPhotos = false;
 
-      // Track the "approximate height" of each column using a simple counter.
-      // 1.0 = landscape, 1.5 = portrait estimate
-      let colHeights = new Array(colCount).fill(0);
+      // Function to process the image queue for the current block
+      const processQueue = (block, imagesSrcList) => {
+          // Add to DOM first (hidden)
+          if(imagesSrcList.length === 0) return;
+          
+          let loadedCount = 0;
+          const total = imagesSrcList.length;
+          
+          // First few images: Round Robin (Instant display for Above the Fold)
+          const INSTANT_LOAD_COUNT = 4; 
+          
+          imagesSrcList.forEach((src, idx) => {
+              const cell = document.createElement("div");
+              cell.className = "cell";
+              const img = document.createElement("img");
+              img.loading = "lazy";
+              
+              // On Load: Balance Logic
+              img.onload = () => {
+                  img.classList.add('fade-in');
+                  cell.classList.add('loaded');
+              };
+              
+              // Error Handling
+              img.onerror = function() {
+                  if (this.src.endsWith(src)) {
+                       this.src = "thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg");
+                  }
+              };
+              
+              cell.onclick = () => openLightbox(src);
+              cell.appendChild(img);
+              img.src = "thumbnails/" + src;
+
+              // PLACEMENT LOGIC
+              if (idx < INSTANT_LOAD_COUNT || colCount === 1) {
+                  // Instant placement for top images (Round Robin)
+                  block.columns[idx % colCount].appendChild(cell);
+              } else {
+                  // Smart placement for the rest: Wait for image metadata if possible
+                  // Since we are lazy loading, we simply check CURRENT column height
+                  // We add to the column that is currently shortest in PIXELS
+                  let shortest = 0;
+                  let minH = block.columns[0].offsetHeight;
+                  
+                  for(let c=1; c<colCount; c++) {
+                      if(block.columns[c].offsetHeight < minH) {
+                          minH = block.columns[c].offsetHeight;
+                          shortest = c;
+                      }
+                  }
+                  block.columns[shortest].appendChild(cell);
+              }
+          });
+      };
 
       trip.images.forEach(src => {
         if (src.startsWith("HEADER:")) {
             if (hasPhotos) {
                 galleryView.appendChild(currentBlock.wrapper);
-                currentBlock = createGridBlock(); 
-                colHeights = new Array(colCount).fill(0); // Reset heights for new section
-                hasPhotos = false;
+                // We don't need complex queue processing here because we append immediately
+                // but relying on offsetHeight requires the element to be in DOM.
             }
             
             const headerTxt = src.split(":")[1];
@@ -1339,38 +1390,24 @@ try {
             span.innerText = headerTxt;
             headerEl.appendChild(span);
             galleryView.appendChild(headerEl);
+            
+            // Start new block
+            currentBlock = createGridBlock();
+            hasPhotos = false;
             return; 
         }
-
-        const cell = document.createElement("div");
-        cell.className = "cell";
         
-        const img = document.createElement("img");
-        img.loading = "lazy";
-        
-        const tryLoad = (path) => { img.src = path; };
-        
-        // --- SMART DISTRIBUTION LOGIC ---
-        // Find the column index with the lowest "height" score
-        let shortestColIndex = 0;
-        let minHeight = colHeights[0];
-        
-        for(let i = 1; i < colCount; i++) {
-            if(colHeights[i] < minHeight) {
-                minHeight = colHeights[i];
-                shortestColIndex = i;
-            }
+        // Collect photos for this section
+        if(!hasPhotos) {
+            galleryView.appendChild(currentBlock.wrapper); // Attach wrapper to DOM so offsetHeight works
         }
         
-        // Append to the shortest column
-        currentBlock.columns[shortestColIndex].appendChild(cell);
+        // Create Cell
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        const img = document.createElement("img");
         
-        // Increment that column's height. 
-        // Since we don't know true height yet, we just add 1.
-        // This distributes by COUNT, which is safer than Round Robin for mixed flows.
-        colHeights[shortestColIndex] += 1;
-        // --------------------------------
-
+        const tryLoad = (path) => { img.src = path; };
         img.onerror = function() {
             if (this.src.endsWith(src)) {
                  tryLoad("thumbnails/" + src.replace(/\.[^/.]+$/, ".jpg"));
@@ -1382,21 +1419,27 @@ try {
             cell.classList.add('loaded');
         };
         
-        tryLoad("thumbnails/" + src);
-        
-        if (img.complete) {
-            img.classList.add('fade-in');
-            cell.classList.add('loaded');
-        }
-
         cell.onclick = () => openLightbox(src);
         cell.appendChild(img);
+        
+        // --- PIXEL BALANCING MAGIC ---
+        // We attach immediately to the DOM so we can measure.
+        // But we pick the column based on PIXEL HEIGHT, not count.
+        let shortest = 0;
+        let minH = currentBlock.columns[0].offsetHeight;
+        
+        // Loop through columns to find the shortest one in pixels
+        for(let c=1; c<colCount; c++) {
+            if(currentBlock.columns[c].offsetHeight < minH) {
+                minH = currentBlock.columns[c].offsetHeight;
+                shortest = c;
+            }
+        }
+        currentBlock.columns[shortest].appendChild(cell);
+        tryLoad("thumbnails/" + src);
+        
         hasPhotos = true;
       });
-
-      if (hasPhotos) {
-          galleryView.appendChild(currentBlock.wrapper);
-      }
 
       menuView.style.display = "none";
       galleryView.style.display = "block";
