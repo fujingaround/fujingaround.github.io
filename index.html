@@ -86,20 +86,16 @@
     justify-content: center;
     align-items: center;
     z-index: 99999;
-    
-    /* SMOOTHNESS MAGIC: Slower fade + transform support */
     transition: opacity 1.5s ease-in-out, visibility 1.5s, transform 1.5s cubic-bezier(0.19, 1, 0.22, 1);
-    
     cursor: pointer;
     animation: autoHide 0.1s linear 8s forwards;
   }
   
-  /* The "Hidden" State */
   #intro.hidden {
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      transform: scale(1.1); /* Gently zooms out while fading */
+      transform: scale(1.1); 
   }
 
   @keyframes autoHide {
@@ -191,7 +187,6 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 30px;
-    /* Explicit padding/margin overrides to prevent gaps */
     padding: 20px 20px 0 20px !important;
     margin: 0 auto !important;
     max-width: 1000px; 
@@ -244,7 +239,6 @@
     text-align: center;
   }
 
-  /* --- ACTION BUTTONS --- */
   .menu-item.action-btn {
     aspect-ratio: auto;
     height: auto;
@@ -271,7 +265,6 @@
   #footer-container {
     position: relative; 
     width: 100%;
-    /* These will be overridden by the inline style at the bottom */
     padding: 0 40px 40px 40px;
     margin-top: 0;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -288,7 +281,7 @@
   #compression-info { font-weight: 300; margin-top: 5px; opacity: 0.6; }
   #copyright-info { font-weight: 300; margin-top: 5px; }
 
-  /* --- GALLERY VIEW (REVERTED TO CSS COLUMNS) --- */
+  /* --- GALLERY VIEW --- */
   #gallery-view {
     display: none;
     padding: 20px;
@@ -306,7 +299,6 @@
     margin-bottom: 40px;
   }
 
-  /* TECHNICAL HEADERS */
   .gallery-header {
       grid-column: 1 / -1; 
       display: flex;
@@ -365,17 +357,29 @@
   @keyframes loading { 100% { transform: translateX(100%); } }
   .cell.loaded::before { display: none; animation: none; }
   .cell.loaded { background-color: transparent; min-height: auto; }
+  
+  /* --- NEW FEATURE #1: DEVELOPING EFFECT --- */
   .cell img {
     width: 100%;
     height: auto;
     display: block;
-    opacity: 0; 
-    transition: opacity 0.6s ease-in; 
     pointer-events: none;
     position: relative;
     z-index: 2;
+    
+    /* Start State: Negative + Transparent */
+    opacity: 0; 
+    filter: invert(1) hue-rotate(180deg); 
+    
+    /* Animation Timing */
+    transition: opacity 0.6s ease-in, filter 2s ease-out; 
   }
-  .cell img.fade-in { opacity: 1; }
+  
+  /* End State: Positive + Visible */
+  .cell img.fade-in { 
+      opacity: 1; 
+      filter: invert(0) hue-rotate(0deg);
+  }
 
   /* --- PALETTES VIEW --- */
   #palettes-view {
@@ -532,6 +536,8 @@
     min-height: 60vh;
     padding: 20px;
     position: relative;
+    /* IMPORTANT: Smooth transition for wall color */
+    transition: background-color 0.5s ease;
   }
 
   .visualizer-main-wrapper {
@@ -722,6 +728,24 @@
   .visualizer-controls h4 { margin: 0 0 15px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem; }
   .visualizer-controls span { display: inline-block; margin: 0 10px; border: 1px solid var(--text); padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; }
   
+  /* --- NEW FEATURE #2: WALL PICKER --- */
+  .wall-picker {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 15px;
+  }
+  
+  .wall-swatch {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: transform 0.2s, border 0.2s;
+  }
+  .wall-swatch:hover { transform: scale(1.2); border: 1px solid #000; }
+
   /* --- BUY SECTION --- */
   .buy-section {
     margin-top: 20px;
@@ -995,33 +1019,23 @@
       let isDismissing = false;
 
       function dismissIntro(e) {
-          // If already fading, ignore
           if (isDismissing) return;
-          
-          // Optional: If scrolling up, don't dismiss (feels more natural)
           if (e && e.type === 'wheel' && e.deltaY < 0) return;
 
           isDismissing = true;
           const intro = document.getElementById("intro");
           if (intro) {
               intro.classList.add('hidden');
-              // Wait for the transition (1.5s) before removing from display flow
               setTimeout(() => { intro.style.display = "none"; }, 1500);
           }
       }
 
-      // Immediate listeners
       document.addEventListener("DOMContentLoaded", () => {
           const intro = document.getElementById("intro");
-          
-          // Click always dismisses
           intro.addEventListener("click", dismissIntro);
-          
-          // Scroll events
-          // Using { passive: true } for better performance
           window.addEventListener("wheel", dismissIntro, { passive: true });
           window.addEventListener("touchstart", dismissIntro, { passive: true });
-          window.addEventListener("keydown", dismissIntro); // Any key dismisses
+          window.addEventListener("keydown", dismissIntro);
       });
   </script>
 
@@ -1088,6 +1102,15 @@
       <p><span>←</span> Photos <span>→</span></p>
       <p><span>↑</span> Frames <span>↓</span></p>
       <p id="frame-name">Current Frame: Museum Matte</p>
+      
+      <div class="wall-picker">
+          <div class="wall-swatch" style="background-color: transparent;" onclick="changeWallColor('transparent')" title="Default"></div>
+          <div class="wall-swatch" style="background-color: #f5f5f5;" onclick="changeWallColor('#f5f5f5')" title="Off-White"></div>
+          <div class="wall-swatch" style="background-color: #e8e6df;" onclick="changeWallColor('#e8e6df')" title="Cream"></div>
+          <div class="wall-swatch" style="background-color: #8fb3a6;" onclick="changeWallColor('#8fb3a6')" title="Sage"></div>
+          <div class="wall-swatch" style="background-color: #7a8fa3;" onclick="changeWallColor('#7a8fa3')" title="Slate"></div>
+          <div class="wall-swatch" style="background-color: #333333;" onclick="changeWallColor('#333333')" title="Charcoal"></div>
+      </div>
     </div>
 
     <div class="buy-section">
@@ -1101,7 +1124,7 @@
           </select>
       </div>
 
-      <a id="buy-btn-link" href="https://buy.stripe.com/3cI3co7qEbGT6cpglPfnO03" target="_blank" class="buy-btn">Order Print</a>
+      <a id="buy-btn-link" href="https://buy.stripe.com/4gM8wI5iw6mz44h0mRfnO00" target="_blank" class="buy-btn">Order Print</a>
       <p class="buy-note">Note: Copy the Reference ID above and paste it during checkout.</p>
     </div>
   </div>
@@ -1617,6 +1640,16 @@ function updateBuyLink() {
 window.updateBuyLink = updateBuyLink; // Make global
 
 // ================================
+// WALL COLOR PICKER
+// ================================
+function changeWallColor(color) {
+    const printsView = document.getElementById("prints-view");
+    if(printsView) {
+        printsView.style.backgroundColor = color;
+    }
+}
+
+// ================================
 // PRINTS LOGIC
 // ================================
 let currentImgIndex = 0;
@@ -1650,6 +1683,10 @@ function showMenu() {
   document.removeEventListener('keydown', handleKeyInput);
   document.body.classList.remove('spotlight-mode');
   window.scrollTo(0, 0);
+  
+  // RESET WALL COLOR
+  const pv = document.getElementById("prints-view");
+  if(pv) pv.style.backgroundColor = "transparent";
 }
 
 function handleKeyInput(e) {
