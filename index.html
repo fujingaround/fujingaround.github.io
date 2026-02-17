@@ -27,8 +27,12 @@
     --accent: #000000;
     --btn-hover: #f0f0f0;
     --lightbox-bg: rgba(0, 0, 0, 0.98); 
-    --buy-btn-bg: #2e8b57;
+    
+    /* UPDATED: Monochrome Buy Button Colors */
+    --buy-btn-bg: #000000;
     --buy-btn-text: #ffffff;
+    --buy-btn-border: #000000;
+    
     --menu-item-overlay: rgba(0, 0, 0, 0.2); 
     --menu-border: 1px solid transparent; 
     --loading-bg: #e0e0e0;
@@ -39,7 +43,12 @@
     --text: #ffffff;
     --accent: #ffffff;
     --btn-hover: #1a1a1a;
-    --buy-btn-bg: #3cb371;
+    
+    /* UPDATED: Dark Mode Button Flip */
+    --buy-btn-bg: #ffffff;
+    --buy-btn-text: #000000;
+    --buy-btn-border: #ffffff;
+    
     --menu-item-overlay: rgba(0, 0, 0, 0.4);
     --menu-border: 1px solid #ffffff; 
     --loading-bg: #1a1a1a;
@@ -52,7 +61,8 @@
       --text: #cccccc; 
   }
   body.spotlight-mode .nav-arrow,
-  body.spotlight-mode .visualizer-controls {
+  body.spotlight-mode .visualizer-controls,
+  body.spotlight-mode .print-filter-container { /* Hides filter in spotlight mode */
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.5s ease;
@@ -67,11 +77,8 @@
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     overflow-x: hidden;
     width: 100%;
-    
-    /* Layout: Block display stacks items tightly */
     display: block;
     min-height: 100vh;
-    
     transition: background 0.8s ease, color 0.5s ease;
     user-select: none;
     -webkit-user-select: none;
@@ -86,20 +93,16 @@
     justify-content: center;
     align-items: center;
     z-index: 99999;
-    
-    /* SMOOTHNESS MAGIC: Slower fade + transform support */
     transition: opacity 1.5s ease-in-out, visibility 1.5s, transform 1.5s cubic-bezier(0.19, 1, 0.22, 1);
-    
     cursor: pointer;
     animation: autoHide 0.1s linear 8s forwards;
   }
   
-  /* The "Hidden" State */
   #intro.hidden {
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      transform: scale(1.1); /* Gently zooms out while fading */
+      transform: scale(1.1); 
   }
 
   @keyframes autoHide {
@@ -191,7 +194,6 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 30px;
-    /* Explicit padding/margin overrides to prevent gaps */
     padding: 20px 20px 0 20px !important;
     margin: 0 auto !important;
     max-width: 1000px; 
@@ -244,7 +246,6 @@
     text-align: center;
   }
 
-  /* --- ACTION BUTTONS --- */
   .menu-item.action-btn {
     aspect-ratio: auto;
     height: auto;
@@ -271,7 +272,6 @@
   #footer-container {
     position: relative; 
     width: 100%;
-    /* These will be overridden by the inline style at the bottom */
     padding: 0 40px 40px 40px;
     margin-top: 0;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -288,7 +288,7 @@
   #compression-info { font-weight: 300; margin-top: 5px; opacity: 0.6; }
   #copyright-info { font-weight: 300; margin-top: 5px; }
 
-  /* --- GALLERY VIEW (REVERTED TO CSS COLUMNS) --- */
+  /* --- GALLERY VIEW --- */
   #gallery-view {
     display: none;
     padding: 20px;
@@ -298,7 +298,6 @@
     width: 100%;
   }
   
-  /* OLD LOGIC RESTORED: CSS Columns */
   .grid {
     column-count: 3;
     column-gap: 20px;
@@ -306,7 +305,6 @@
     margin-bottom: 40px;
   }
 
-  /* TECHNICAL HEADERS */
   .gallery-header {
       grid-column: 1 / -1; 
       display: flex;
@@ -366,7 +364,7 @@
   .cell.loaded::before { display: none; animation: none; }
   .cell.loaded { background-color: transparent; min-height: auto; }
   
-  /* --- FEATURE: DEVELOPING EFFECT --- */
+  /* DEVELOPING EFFECT */
   .cell img {
     width: 100%;
     height: auto;
@@ -374,20 +372,11 @@
     pointer-events: none;
     position: relative;
     z-index: 2;
-    
-    /* Start State: Negative + Transparent */
     opacity: 0; 
     filter: invert(1) hue-rotate(180deg); 
-    
-    /* Animation Timing */
     transition: opacity 0.6s ease-in, filter 2s ease-out; 
   }
-  
-  /* End State: Positive + Visible */
-  .cell img.fade-in { 
-      opacity: 1; 
-      filter: invert(0) hue-rotate(0deg);
-  }
+  .cell img.fade-in { opacity: 1; filter: invert(0) hue-rotate(0deg); }
 
   /* --- PALETTES VIEW --- */
   #palettes-view {
@@ -544,6 +533,39 @@
     min-height: 60vh;
     padding: 20px;
     position: relative;
+  }
+  
+  /* --- NEW: TRIP FILTER STYLES --- */
+  .print-filter-container {
+      margin-bottom: 20px;
+      z-index: 50;
+      position: relative;
+      text-align: center;
+  }
+  
+  .print-filter-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-right: 10px;
+      font-weight: bold;
+  }
+  
+  #print-filter {
+      padding: 8px 12px;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 0.9rem;
+      background-color: transparent;
+      color: var(--text);
+      border: 1px solid var(--text);
+      border-radius: 4px;
+      cursor: pointer;
+      outline: none;
+      min-width: 150px;
+  }
+  #print-filter option {
+      background-color: var(--bg);
+      color: var(--text);
   }
 
   .visualizer-main-wrapper {
@@ -776,20 +798,32 @@
   
   .photo-id { font-size: 0.8rem; margin-bottom: 10px; display: block; font-weight: bold; }
   
+  /* --- REDESIGNED BUY BUTTON (MONOCHROME COOL) --- */
   .buy-btn {
     display: inline-block;
     background-color: var(--buy-btn-bg);
     color: var(--buy-btn-text);
-    padding: 12px 30px;
+    border: 2px solid var(--buy-btn-border);
+    padding: 12px 40px; /* Wider for better look */
     text-decoration: none;
-    font-weight: bold;
+    font-weight: 800; /* Bolder text */
     border-radius: 4px;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: background 0.2s, transform 0.2s;
+    letter-spacing: 2px; /* Spaced out text */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
   }
-  .buy-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+  
+  /* Invert colors on hover */
+  .buy-btn:hover { 
+      background-color: var(--bg); 
+      color: var(--text);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  }
+  
   .buy-note { font-size: 0.7rem; margin-top: 8px; opacity: 0.6; max-width: 300px; margin-left: auto; margin-right: auto; }
 
   /* --- FRAMES CSS --- */
@@ -1065,6 +1099,13 @@
   </div>
 
   <div id="prints-view" style="display: none;">
+    <div class="print-filter-container">
+        <label for="print-filter" class="print-filter-label">Filter:</label>
+        <select id="print-filter" onchange="filterPrints()">
+            <option value="all">All Photos</option>
+            </select>
+    </div>
+
     <div class="light-switch-container" id="spotlight-switch">
         <div class="click-me-text">Click me! &#8595;</div>
         <div class="light-switch-plate">
@@ -1233,7 +1274,11 @@ try {
   },
 ];
 
+    // Master list of all images (used for "All" filter)
     const allImages = trips.flatMap(t => t.images).filter(item => !item.startsWith("HEADER:"));
+    
+    // Active list currently being viewed (filtered or full)
+    let activeVisualizerImages = [...allImages];
 
     const frames = [
       { class: "frame-black", name: "Classic Black" },
@@ -1248,7 +1293,6 @@ try {
     const galleryView = document.getElementById("gallery-view");
     const printsView = document.getElementById("prints-view");
     const palettesView = document.getElementById("palettes-view");
-    const grid = document.getElementById("grid");
     const backBtn = document.getElementById("back-btn");
     const lightbox = document.getElementById("lightbox");
     const lightboxImg = document.getElementById("lightbox-img");
@@ -1259,6 +1303,7 @@ try {
     const hexText = document.getElementById("hex-text");
     const paletteLoader = document.getElementById("palette-loader");
     const paletteProgressBar = document.getElementById("palette-progress-bar");
+    const printFilterSelect = document.getElementById("print-filter");
 
     let currentLightboxIndex = 0;
     let currentGalleryImages = []; 
@@ -1267,6 +1312,15 @@ try {
 
     function initMenu() {
       const printsBtn = document.querySelector('.menu-item.action-btn'); 
+      
+      // Populate Filter Options
+      trips.forEach((trip) => {
+          const opt = document.createElement("option");
+          opt.value = trip.title;
+          opt.innerText = trip.title;
+          printFilterSelect.appendChild(opt);
+      });
+
       trips.forEach((trip, index) => {
         const btn = document.createElement("div");
         btn.className = "menu-item";
@@ -1641,6 +1695,24 @@ function openPrints() {
   document.addEventListener('keydown', handleKeyInput);
 }
 
+// NEW FILTER FUNCTION
+function filterPrints() {
+    const selected = document.getElementById("print-filter").value;
+    currentImgIndex = 0; // Reset index to start
+    
+    if (selected === "all") {
+        activeVisualizerImages = [...allImages];
+    } else {
+        // Find the trip
+        const trip = trips.find(t => t.title === selected);
+        if (trip) {
+            // Get just the images from that trip (no headers)
+            activeVisualizerImages = trip.images.filter(src => !src.startsWith("HEADER:"));
+        }
+    }
+    updateVisualizer();
+}
+
 function showMenu() {
   galleryView.style.display = "none";
   printsView.style.display = "none";
@@ -1672,8 +1744,9 @@ function handleKeyInput(e) {
 
 function changeImage(direction) {
   currentImgIndex += direction;
-  if (currentImgIndex >= allImages.length) currentImgIndex = 0;
-  if (currentImgIndex < 0) currentImgIndex = allImages.length - 1;
+  // Use activeVisualizerImages instead of allImages
+  if (currentImgIndex >= activeVisualizerImages.length) currentImgIndex = 0;
+  if (currentImgIndex < 0) currentImgIndex = activeVisualizerImages.length - 1;
   updateVisualizer();
 }
 
@@ -1685,7 +1758,9 @@ function changeFrame(direction) {
 }
 
 function updateVisualizer() {
-  const currentSrc = allImages[currentImgIndex];
+  // Use activeVisualizerImages
+  const currentSrc = activeVisualizerImages[currentImgIndex];
+  
   const tryLoadVis = (path) => { visualizerImg.src = path; };
   visualizerImg.onerror = function() {
       if (this.src.endsWith(currentSrc)) {
