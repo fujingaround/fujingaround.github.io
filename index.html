@@ -28,7 +28,7 @@
     --btn-hover: #f0f0f0;
     --lightbox-bg: rgba(0, 0, 0, 0.98); 
     
-    /* UPDATED: Monochrome Buy Button Colors */
+    /* Monochrome Buy Button Colors */
     --buy-btn-bg: #000000;
     --buy-btn-text: #ffffff;
     --buy-btn-border: #000000;
@@ -44,7 +44,7 @@
     --accent: #ffffff;
     --btn-hover: #1a1a1a;
     
-    /* UPDATED: Dark Mode Button Flip */
+    /* Dark Mode Button Flip */
     --buy-btn-bg: #ffffff;
     --buy-btn-text: #000000;
     --buy-btn-border: #ffffff;
@@ -62,7 +62,7 @@
   }
   body.spotlight-mode .nav-arrow,
   body.spotlight-mode .visualizer-controls,
-  body.spotlight-mode .print-filter-container { /* Hides filter in spotlight mode */
+  body.spotlight-mode .print-filter-container { 
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.5s ease;
@@ -170,23 +170,28 @@
   .insta-link:hover { opacity: 0.6; }
   [data-theme="dark"] .insta-link img { filter: invert(1); }
 
-  /* --- BACK BUTTON --- */
+  /* --- BACK BUTTON (UPDATED: MINIMALIST GHOST STYLE) --- */
   #back-btn {
     display: none;
-    margin: 20px auto 0;
+    margin: 15px auto 30px; /* More vertical space */
     padding: 10px 20px;
     background: transparent;
-    border: 1px solid var(--text);
+    border: none; /* NO BORDER */
     color: var(--text);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    font-weight: 600;
     font-family: inherit;
     cursor: pointer;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: background 0.2s;
+    letter-spacing: 2px; /* Elegant spacing */
+    opacity: 0.5; /* Fade it out slightly so it's less obtrusive */
+    transition: opacity 0.3s ease, letter-spacing 0.3s ease;
   }
+  
   #back-btn:hover {
-    background: var(--btn-hover);
+    opacity: 1; /* Full visibility on hover */
+    letter-spacing: 3px; /* Subtle expansion effect */
+    background: transparent;
   }
 
   /* --- MENU VIEW --- */
@@ -535,7 +540,7 @@
     position: relative;
   }
   
-  /* --- NEW: TRIP FILTER STYLES --- */
+  /* --- TRIP FILTER STYLES --- */
   .print-filter-container {
       margin-bottom: 20px;
       z-index: 50;
@@ -798,25 +803,24 @@
   
   .photo-id { font-size: 0.8rem; margin-bottom: 10px; display: block; font-weight: bold; }
   
-  /* --- REDESIGNED BUY BUTTON (MONOCHROME COOL) --- */
+  /* --- MONOCHROME COOL BUY BUTTON --- */
   .buy-btn {
     display: inline-block;
     background-color: var(--buy-btn-bg);
     color: var(--buy-btn-text);
     border: 2px solid var(--buy-btn-border);
-    padding: 12px 40px; /* Wider for better look */
+    padding: 12px 40px; 
     text-decoration: none;
-    font-weight: 800; /* Bolder text */
+    font-weight: 800; 
     border-radius: 4px;
     text-transform: uppercase;
-    letter-spacing: 2px; /* Spaced out text */
+    letter-spacing: 2px; 
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     cursor: pointer;
     position: relative;
     overflow: hidden;
   }
   
-  /* Invert colors on hover */
   .buy-btn:hover { 
       background-color: var(--bg); 
       color: var(--text);
