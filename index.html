@@ -174,7 +174,7 @@
   /* --- BACK BUTTON (MINIMALIST GHOST STYLE) --- */
   #back-btn {
     display: none;
-    margin: 15px auto 30px; 
+    margin: 15px auto 10px; /* REDUCED BOTTOM MARGIN */
     padding: 10px 20px;
     background: transparent;
     border: none; 
@@ -311,11 +311,12 @@
     margin-bottom: 40px;
   }
 
+  /* REDUCED MARGINS FOR GALLERY HEADERS */
   .gallery-header {
       grid-column: 1 / -1; 
       display: flex;
       align-items: center;
-      margin: 80px 0 40px 0;
+      margin: 30px 0 20px 0; /* Tightened up */
       color: var(--text);
       break-inside: avoid;
       font-family: 'Courier New', Courier, monospace; 
@@ -540,52 +541,6 @@
     padding: 20px;
     position: relative;
   }
-  
-  /* --- TRIP FILTER STYLES (UPDATED: COOLER LOOK) --- */
-  .print-filter-container {
-      margin-bottom: 20px;
-      z-index: 50;
-      position: relative;
-      text-align: center;
-  }
-  
-  .print-filter-label {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-right: 10px;
-      font-weight: bold;
-      display: inline-block;
-  }
-  
-  #print-filter {
-      padding: 10px 15px;
-      font-family: inherit;
-      font-size: 0.8rem; 
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 700;
-      background-color: transparent;
-      color: var(--text);
-      border: 1px solid var(--text);
-      border-radius: 0; /* Sharp edges for coolness */
-      cursor: pointer;
-      outline: none;
-      min-width: 200px;
-      text-align: center;
-      transition: all 0.3s ease;
-  }
-  
-  /* The "Cool" Hover Effect */
-  #print-filter:hover {
-      background: var(--text);
-      color: var(--bg);
-  }
-  
-  #print-filter option {
-      background-color: var(--bg);
-      color: var(--text);
-  }
 
   .visualizer-main-wrapper {
     display: flex;
@@ -595,6 +550,7 @@
     width: 100%;
     position: relative;
     z-index: 5;
+    margin-bottom: 20px;
   }
 
   .vertical-center-column {
@@ -763,7 +719,6 @@
   }
 
   .visualizer-controls {
-    margin-top: 20px;
     text-align: center;
     font-size: 0.9rem;
     opacity: 0.7;
@@ -771,49 +726,90 @@
     transition: opacity 0.5s;
     z-index: 20;
     position: relative;
+    margin-bottom: 20px;
   }
   
-  .visualizer-controls h4 { margin: 0 0 10px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem; }
-  .visualizer-controls span { display: inline-block; margin: 0 5px; opacity: 0.8; font-size: 0.8rem; }
+  .visualizer-controls h4 { margin: 0 0 5px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; }
   
-  /* --- CLEANER BUY SECTION --- */
+  /* --- REORGANIZED BUY SECTION --- */
   .buy-section {
-    margin-top: 25px;
     width: 100%;
-    max-width: 450px;
+    max-width: 500px;
     transition: opacity 0.5s;
     z-index: 20;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 20px;
+    border-top: 1px solid rgba(128,128,128, 0.2);
+    padding-top: 25px;
   }
   
+  /* Common Style for ALL Dropdowns (Filter + Size) */
+  .cool-dropdown {
+      padding: 12px 15px;
+      font-family: inherit;
+      font-size: 0.85rem; 
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      background-color: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--text);
+      border-radius: 0; /* Sharp edges */
+      cursor: pointer;
+      outline: none;
+      text-align: center;
+      transition: all 0.3s ease;
+  }
+  .cool-dropdown:hover {
+      background: var(--text);
+      color: var(--bg);
+  }
+  
+  /* Filter specific */
+  #print-filter {
+      min-width: 100%; /* Full width for the trip filter */
+  }
+
+  /* Reference ID Styling - PROMINENT */
+  .photo-id-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+  }
+  .photo-id-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.6;
+  }
+  .photo-id { 
+      font-size: 1.2rem; /* Larger */
+      font-weight: 800;
+      font-family: monospace; 
+      letter-spacing: 0.05em; 
+      padding: 8px 15px;
+      border: 2px dashed var(--text); /* Ticket stub look */
+      background: rgba(128,128,128, 0.05);
+      user-select: all; /* Easy copy */
+      cursor: pointer;
+  }
+
   /* Container for Dropdown and Button in one row */
   .buy-row {
       display: flex;
       flex-direction: row;
       align-items: stretch; /* Makes them same height */
       justify-content: center;
-      gap: 10px;
+      gap: 15px;
       width: 100%;
   }
 
   #size-select {
-    padding: 12px 15px;
-    font-family: inherit;
-    font-size: 0.8rem;
-    background-color: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--text);
-    border-radius: 0;
-    cursor: pointer;
-    outline: none;
-    min-width: 120px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 700;
+    min-width: 140px;
   }
   
   /* --- MONOCHROME COOL BUY BUTTON --- */
@@ -833,6 +829,8 @@
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     cursor: pointer;
     white-space: nowrap;
+    flex-grow: 1;
+    text-align: center;
   }
   
   .buy-btn:hover { 
@@ -842,8 +840,7 @@
       box-shadow: 0 5px 15px rgba(0,0,0,0.15);
   }
   
-  .buy-note { font-size: 0.7rem; margin-top: 5px; opacity: 0.5; max-width: 300px; text-align: center; }
-  .photo-id { font-size: 0.65rem; opacity: 0.4; margin-top: 0; font-family: monospace; letter-spacing: 0.05em; }
+  .buy-note { font-size: 0.7rem; margin-top: 0; opacity: 0.5; max-width: 300px; text-align: center; }
 
   /* --- FRAMES CSS --- */
   .frame-black { border: 15px solid #1a1a1a; box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
@@ -1052,6 +1049,8 @@
     .buy-row {
         flex-direction: column; /* Stack button below size on mobile */
     }
+    
+    #print-filter { width: 100%; }
   } 
 </style>
 </head>
@@ -1122,13 +1121,7 @@
   </div>
 
   <div id="prints-view" style="display: none;">
-    <div class="print-filter-container">
-        <label for="print-filter" class="print-filter-label">Filter:</label>
-        <select id="print-filter" onchange="filterPrints()">
-            <option value="all">All Photos</option>
-            </select>
-    </div>
-
+    
     <div class="light-switch-container" id="spotlight-switch">
         <div class="click-me-text">Click me! &#8595;</div>
         <div class="light-switch-plate">
@@ -1153,8 +1146,18 @@
     </div>
 
     <div class="buy-section">
+      
+      <select id="print-filter" class="cool-dropdown" onchange="filterPrints()">
+          <option value="all">All Photos</option>
+          </select>
+      
+      <div class="photo-id-container">
+          <span class="photo-id-label">Reference ID (Copy for Checkout)</span>
+          <div class="photo-id" id="photo-id-display" onclick="copyIdToClipboard()">...</div>
+      </div>
+
       <div class="buy-row">
-          <select id="size-select" onchange="updateBuyLink()">
+          <select id="size-select" class="cool-dropdown" onchange="updateBuyLink()">
               <option value="https://buy.stripe.com/3cI3co7qEbGT6cpglPfnO03">12 x 18</option>
               <option value="https://buy.stripe.com/aFa8wIfXa5iv44h0mRfnO02">20 x 30</option>
           </select>
@@ -1163,7 +1166,6 @@
       </div>
 
       <p class="buy-note">Prices include shipping. Frames not included.</p>
-      <span class="photo-id" id="photo-id-display">Reference ID: ...</span>
     </div>
 
   </div>
@@ -1732,6 +1734,21 @@ function filterPrints() {
     updateVisualizer();
 }
 
+// Copy to clipboard helper
+function copyIdToClipboard() {
+    const text = photoIdDisplay.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        const originalText = photoIdDisplay.innerText;
+        photoIdDisplay.innerText = "COPIED!";
+        photoIdDisplay.style.borderColor = "#00ff00";
+        setTimeout(() => {
+            photoIdDisplay.innerText = originalText;
+            photoIdDisplay.style.borderColor = "var(--text)";
+        }, 1000);
+    });
+}
+window.copyIdToClipboard = copyIdToClipboard;
+
 function showMenu() {
   galleryView.style.display = "none";
   printsView.style.display = "none";
@@ -1790,7 +1807,7 @@ function updateVisualizer() {
   frames.forEach(f => visualizerImg.classList.remove(f.class));
   visualizerImg.classList.add(frames[currentFrameIndex].class);
   frameNameDisplay.innerText = `Current Frame: ${frames[currentFrameIndex].name}`;
-  photoIdDisplay.innerText = `Reference ID: ${currentSrc}`;
+  photoIdDisplay.innerText = currentSrc;
 }
 
 // ================================
